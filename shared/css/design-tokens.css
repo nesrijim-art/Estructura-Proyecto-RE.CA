@@ -1,0 +1,55 @@
+/*
+ * RE.CA Platform — Hugging Face Design System Tokens
+ * Fuente de verdad visual. Importar en todos los módulos.
+ * NO modificar sin actualizar todos los módulos.
+ */
+
+:root {
+  /* ── Color Palette ─────────────────────────────────────────── */
+  --bg:           #fafafa;
+  --surface:      #ffffff;
+  --fg:           #0d1117;
+  --fg-2:         #374151;
+  --muted:        #6b7280;
+  --border:       #e5e7eb;
+  --border-soft:  #f3f4f6;
+
+  --accent:       #ffd21e;
+  --accent-on:    #0d1117;
+  --accent-hover: #f59e0b;
+
+  --success:      #16a34a;
+  --warn:         #f59e0b;
+  --danger:       #dc2626;
+
+  /* ── Typography ─────────────────────────────────────────────── */
+  --font-display: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-body:    "Source Sans Pro", Inter, system-ui, -apple-system, sans-serif;
+
+  /* ── Spacing (4px base) ─────────────────────────────────────── */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* ── Border Radius ──────────────────────────────────────────── */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 12px;
+
+  /* ── Layout ─────────────────────────────────────────────────── */
+  --sidebar-width: 260px;
+  --header-height: 64px;
+
+  /* ── Shadows ────────────────────────────────────────────────── */
+  --shadow-sm: 0 1px 3px rgba(13,17,23,.08);
+  --shadow-md: 0 2px 8px rgba(13,17,23,.08);
+  --shadow-lg: 0 4px 16px rgba(13,17,23,.12);
+
+  /* ── Transitions ────────────────────────────────────────────── */
+  --transition: 120ms ease-out;
+}

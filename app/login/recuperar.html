@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Recuperar Contraseña · RE.CA</title>
+<link rel="manifest" href="/manifest.json" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Source+Sans+Pro:wght@400;600&display=swap" />
+<link rel="stylesheet" href="/shared/css/design-tokens.css" />
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-body); background: var(--bg); color: var(--fg); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: var(--space-6); line-height: 1.6; }
+
+  .container { width: 100%; max-width: 420px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 48px 40px; box-shadow: var(--shadow-md); }
+
+  .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--fg-2); text-decoration: none; margin-bottom: 32px; transition: color var(--transition); }
+  .back-link:hover { color: var(--fg); }
+  .back-link svg { width: 16px; height: 16px; }
+
+  .icon-area { text-align: center; margin-bottom: 24px; }
+  .icon-circle { width: 64px; height: 64px; background: var(--border-soft); border-radius: 50%; margin: 0 auto; display: flex; align-items: center; justify-content: center; }
+  .icon-circle svg { width: 28px; height: 28px; color: var(--muted); }
+
+  .page-title { font-family: var(--font-display); font-size: 22px; font-weight: 600; color: var(--fg); text-align: center; margin-bottom: 8px; }
+  .page-desc { font-size: 14px; color: var(--muted); text-align: center; margin-bottom: 32px; line-height: 1.6; }
+
+  .form { display: flex; flex-direction: column; gap: var(--space-4); }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label { font-family: var(--font-display); font-size: 12px; font-weight: 500; color: var(--fg); letter-spacing: .02em; }
+  .field input { width: 100%; height: 48px; padding: 0 var(--space-4); border: 1px solid var(--border); border-radius: var(--radius-md); font-size: 15px; font-family: var(--font-body); color: var(--fg); background: var(--surface); transition: border-color var(--transition); }
+  .field input:focus { outline: none; border-color: var(--fg); box-shadow: 0 0 0 3px rgba(13,17,23,.1); }
+  .field.has-error input { border-color: var(--danger); }
+  .error-msg { font-size: 12px; color: var(--danger); display: none; }
+  .field.has-error .error-msg { display: block; }
+
+  .btn-primary { width: 100%; height: 52px; background: var(--fg); color: var(--surface); border: none; border-radius: var(--radius-md); font-size: 15px; font-weight: 600; font-family: var(--font-display); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: var(--space-2); transition: background-color var(--transition); }
+  .btn-primary:hover:not(:disabled) { background: var(--fg-2); }
+  .btn-primary:disabled { background: var(--muted); cursor: not-allowed; }
+
+  .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.3); border-top-color: white; border-radius: 50%; animation: spin .8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .message { padding: var(--space-3); border-radius: var(--radius-sm); font-size: 14px; display: none; align-items: center; gap: var(--space-2); }
+  .message.show { display: flex; }
+  .message.success { background: color-mix(in oklab,var(--success),transparent 90%); color: var(--success); border: 1px solid color-mix(in oklab,var(--success),transparent 70%); }
+  .message.error { background: color-mix(in oklab,var(--danger),transparent 90%); color: var(--danger); border: 1px solid color-mix(in oklab,var(--danger),transparent 70%); }
+
+  /* Success state (replaces the form) */
+  .success-state { display: none; text-align: center; }
+  .success-state.show { display: block; }
+  .success-icon { width: 72px; height: 72px; background: color-mix(in oklab,var(--success),transparent 85%); border-radius: 50%; margin: 0 auto 24px; display: flex; align-items: center; justify-content: center; }
+  .success-icon svg { width: 32px; height: 32px; color: var(--success); }
+  .success-title { font-family: var(--font-display); font-size: 20px; font-weight: 600; margin-bottom: 12px; }
+  .success-desc { font-size: 14px; color: var(--muted); line-height: 1.6; margin-bottom: 24px; }
+  .success-note { font-size: 12px; color: var(--muted); padding: var(--space-3); background: var(--border-soft); border-radius: var(--radius-sm); margin-bottom: 24px; }
+  .btn-back { display: inline-flex; align-items: center; gap: 6px; background: var(--fg); color: var(--surface); padding: 12px 24px; border-radius: var(--radius-md); font-family: var(--font-display); font-size: 14px; font-weight: 600; text-decoration: none; transition: background var(--transition); }
+  .btn-back:hover { background: var(--fg-2); }
+
+  @media (max-width: 480px) { .container { padding: 32px 24px; } }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <a href="index.html" class="back-link">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polyline points="15 18 9 12 15 6"/>
+    </svg>
+    Volver al inicio de sesión
+  </a>
+
+  <!-- Form state -->
+  <div id="formState">
+    <div class="icon-area">
+      <div class="icon-circle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+      </div>
+    </div>
+
+    <h1 class="page-title">Recuperar Contraseña</h1>
+    <p class="page-desc">Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña. El enlace es válido por 1 hora.</p>
+
+    <div id="messageArea"></div>
+
+    <form class="form" id="recoveryForm" novalidate>
+      <div class="field" id="emailField">
+        <label for="email">CORREO ELECTRÓNICO</label>
+        <input type="email" id="email" name="email"
+               placeholder="tu@email.com" autocomplete="email" required />
+        <span class="error-msg">Ingresa un correo electrónico válido</span>
+      </div>
+
+      <button type="submit" class="btn-primary" id="submitButton">
+        <span id="buttonText">Enviar enlace de recuperación</span>
+      </button>
+    </form>
+  </div>
+
+  <!-- Success state -->
+  <div class="success-state" id="successState">
+    <div class="success-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+      </svg>
+    </div>
+    <h2 class="success-title">¡Correo enviado!</h2>
+    <p class="success-desc">Si el correo está registrado en nuestra plataforma, recibirás un enlace de recuperación en breve.</p>
+    <p class="success-note">⏱ El enlace es válido por <strong>1 hora</strong>. Revisa también tu carpeta de spam.</p>
+    <a href="index.html" class="btn-back">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+      Volver al inicio de sesión
+    </a>
+  </div>
+</div>
+
+<script type="module">
+import { api } from '/shared/js/api.js';
+
+function setLoading(on) {
+  const btn = document.getElementById('submitButton');
+  btn.disabled = on;
+  document.getElementById('buttonText').innerHTML = on
+    ? '<div class="spinner"></div><span>Enviando...</span>'
+    : 'Enviar enlace de recuperación';
+}
+
+function showMessage(text, type) {
+  const icon = type === 'success'
+    ? '<path d="M20 6L9 17l-5-5"/>'
+    : '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>';
+  document.getElementById('messageArea').innerHTML =
+    `<div class="message ${type} show"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${icon}</svg><span>${text}</span></div>`;
+}
+
+document.getElementById('recoveryForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const emailField = document.getElementById('emailField');
+  emailField.classList.remove('has-error');
+  document.getElementById('messageArea').innerHTML = '';
+
+  const email = document.getElementById('email').value.trim();
+
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    emailField.classList.add('has-error');
+    showMessage('Ingresa un correo electrónico válido', 'error');
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    await api.auth.forgotPassword({ email });
+    // Always show success to avoid email enumeration
+    document.getElementById('formState').style.display = 'none';
+    document.getElementById('successState').classList.add('show');
+  } catch (err) {
+    setLoading(false);
+    showMessage(err.message || 'Error al enviar el correo', 'error');
+  }
+});
+</script>
+</body>
+</html>

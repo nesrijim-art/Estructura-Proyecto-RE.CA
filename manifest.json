@@ -1,0 +1,25 @@
+{
+  "name": "RE.CA · Menús Digitales",
+  "short_name": "RE.CA",
+  "description": "Plataforma SaaS para gestión de menús digitales multiempresa",
+  "start_url": "/app/login/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#fafafa",
+  "theme_color": "#ffd21e",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/shared/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/shared/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
