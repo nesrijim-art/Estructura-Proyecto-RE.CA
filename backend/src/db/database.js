@@ -27,9 +27,22 @@ const tableMigrations = {
     `ALTER TABLE empresas ADD COLUMN fecha_activacion_plan DATETIME`,
     `ALTER TABLE empresas ADD COLUMN fecha_renovacion_plan DATETIME`,
     `ALTER TABLE empresas ADD COLUMN estado_suscripcion TEXT DEFAULT 'activa'`,
-    // M03: geographic field + trial state
+    // M03
     `ALTER TABLE empresas ADD COLUMN ciudad TEXT`,
     `ALTER TABLE empresas ADD COLUMN notas_soporte TEXT`,
+    // M04: visual identity
+    `ALTER TABLE empresas ADD COLUMN logo_url TEXT`,
+    `ALTER TABLE empresas ADD COLUMN color_principal TEXT DEFAULT '#ffd21e'`,
+    `ALTER TABLE empresas ADD COLUMN color_secundario TEXT DEFAULT '#0d1117'`,
+    `ALTER TABLE empresas ADD COLUMN color_fondo TEXT DEFAULT '#fafafa'`,
+    `ALTER TABLE empresas ADD COLUMN color_texto TEXT DEFAULT '#0d1117'`,
+    `ALTER TABLE empresas ADD COLUMN color_botones TEXT DEFAULT '#ffd21e'`,
+    `ALTER TABLE empresas ADD COLUMN color_promociones TEXT DEFAULT '#dc2626'`,
+    `ALTER TABLE empresas ADD COLUMN identidad_updated_at DATETIME`,
+  ],
+  users: [
+    // M04: intra-empresa role (dueno|admin|editor|visualizador)
+    `ALTER TABLE users ADD COLUMN rol_empresa TEXT DEFAULT 'visualizador'`,
   ],
 };
 
@@ -84,6 +97,29 @@ db.exec(`
 
   CREATE INDEX IF NOT EXISTS idx_historial_empresa ON historial_pagos(empresa_id);
 `);
+
+// M04: create tokens_invitacion table
+db.exec(`
+  CREATE TABLE IF NOT EXISTS tokens_invitacion (
+    id          TEXT PRIMARY KEY,
+    token_hash  TEXT NOT NULL UNIQUE,
+    empresa_id  TEXT NOT NULL REFERENCES empresas(id),
+    rol         TEXT NOT NULL CHECK(rol IN ('admin','editor','visualizador')),
+    contacto    TEXT NOT NULL,
+    metodo      TEXT NOT NULL DEFAULT 'email' CHECK(metodo IN ('email','whatsapp','enlace')),
+    usado       INTEGER NOT NULL DEFAULT 0,
+    expira_at   DATETIME NOT NULL,
+    created_at  DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+  CREATE INDEX IF NOT EXISTS idx_tokens_inv_empresa ON tokens_invitacion(empresa_id);
+`);
+
+// M04: back-fill rol_empresa for existing users
+// admin_negocio → dueno; colaborador defaults stay as 'visualizador'
+db.prepare(`
+  UPDATE users SET rol_empresa = 'dueno'
+  WHERE role = 'admin_negocio' AND (rol_empresa IS NULL OR rol_empresa = 'visualizador')
+`).run();
 
 // Seed base plans
 const seedPlanes = db.prepare(`

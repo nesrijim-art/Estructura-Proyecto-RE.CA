@@ -1,0 +1,714 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Usuarios y Permisos · RE.CA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #fafafa; --surface: #ffffff; --surface-warm: #fff4cc;
+      --fg: #0d1117; --fg-2: #374151; --muted: #6b7280; --meta: #6b7280;
+      --border: #e5e7eb; --border-soft: #f3f4f6;
+      --accent: #ffd21e; --accent-on: #0d1117; --accent-hover: #f59e0b;
+      --success: #16a34a; --warn: #f59e0b; --danger: #dc2626;
+      --font-display: "IBM Plex Mono", ui-monospace, monospace;
+      --font-body: "Source Sans Pro", system-ui, sans-serif;
+      --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+      --text-xs: 12px; --text-sm: 13px; --text-base: 15px;
+      --text-lg: 18px; --text-xl: 24px; --text-2xl: 32px;
+      --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
+      --space-5: 20px; --space-6: 24px; --space-8: 32px;
+      --radius-sm: 4px; --radius-md: 6px; --radius-lg: 8px; --radius-pill: 9999px;
+      --motion-fast: 120ms; --motion-base: 200ms;
+      --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+      --container-max: 1280px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; }
+    html { -webkit-text-size-adjust: 100%; font-family: var(--font-body); }
+    body { background: var(--bg); color: var(--fg); line-height: 1.55; font-size: var(--text-base); }
+    h1, h2, h3 { font-family: var(--font-display); font-weight: 600; line-height: 1.2; }
+    h1 { font-size: var(--text-2xl); margin-bottom: var(--space-6); }
+    h2 { font-size: var(--text-xl); margin-bottom: var(--space-4); }
+    h3 { font-size: var(--text-lg); margin-bottom: var(--space-3); }
+
+    /* Layout */
+    .layout { display: flex; min-height: 100vh; }
+    .sidebar { width: 260px; background: var(--surface); border-right: 1px solid var(--border); padding: var(--space-6); flex-shrink: 0; display: flex; flex-direction: column; gap: var(--space-8); }
+    .sidebar-brand { font-family: var(--font-display); font-size: var(--text-lg); font-weight: 600; color: var(--fg); text-decoration: none; display: flex; align-items: center; gap: var(--space-2); }
+    .sidebar-nav { display: flex; flex-direction: column; gap: var(--space-1); }
+    .sidebar-nav a { padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); text-decoration: none; color: var(--fg-2); font-size: var(--text-sm); font-family: var(--font-mono); transition: all var(--motion-fast) var(--ease-standard); display: flex; align-items: center; gap: var(--space-2); }
+    .sidebar-nav a:hover { background: var(--border-soft); color: var(--fg); }
+    .sidebar-nav a.active { background: var(--accent); color: var(--accent-on); font-weight: 600; }
+    .main-content { flex: 1; padding: var(--space-8); max-width: var(--container-max); }
+
+    /* Header */
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-8); flex-wrap: wrap; gap: var(--space-4); }
+    .header h1 { margin: 0; }
+    .header-actions { display: flex; gap: var(--space-3); }
+
+    /* Buttons */
+    .btn { padding: var(--space-2) var(--space-4); border-radius: var(--radius-md); font-family: var(--font-display); font-size: var(--text-sm); font-weight: 600; cursor: pointer; border: 1px solid transparent; transition: all var(--motion-fast) var(--ease-standard); text-decoration: none; display: inline-flex; align-items: center; gap: var(--space-2); }
+    .btn-primary { background: var(--fg); color: var(--surface); border-color: var(--fg); }
+    .btn-primary:hover { background: var(--fg-2); }
+    .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-secondary { background: var(--accent); color: var(--accent-on); border-color: var(--accent); }
+    .btn-secondary:hover { background: var(--accent-hover); }
+    .btn-outline { background: transparent; color: var(--fg); border-color: var(--border); }
+    .btn-outline:hover { background: var(--border-soft); }
+    .btn-danger { background: var(--danger); color: white; border-color: var(--danger); }
+    .btn-danger:hover { background: color-mix(in oklab, var(--danger), black 20%); }
+    .btn-sm { padding: 4px 10px; font-size: var(--text-xs); }
+
+    /* Tabs */
+    .tabs { display: flex; gap: var(--space-6); border-bottom: 1px solid var(--border); margin-bottom: var(--space-6); }
+    .tab { padding: var(--space-3) var(--space-1); font-family: var(--font-display); font-size: var(--text-base); font-weight: 500; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all var(--motion-fast) var(--ease-standard); background: none; border-top: none; border-left: none; border-right: none; }
+    .tab:hover { color: var(--fg); }
+    .tab.active { color: var(--fg); border-bottom-color: var(--accent); font-weight: 600; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* User table */
+    .plan-bar { display: flex; align-items: center; gap: var(--space-4); background: var(--surface-warm); border: 1px solid #fcd34d; border-radius: var(--radius-md); padding: 12px 16px; margin-bottom: var(--space-6); font-size: var(--text-sm); }
+    .plan-bar strong { font-family: var(--font-display); }
+    .users-table { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; }
+    .users-table table { width: 100%; border-collapse: collapse; }
+    .users-table thead { background: var(--bg); border-bottom: 1px solid var(--border); }
+    .users-table th { padding: var(--space-3) var(--space-4); text-align: left; font-family: var(--font-display); font-size: var(--text-xs); font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+    .users-table td { padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--border-soft); font-size: var(--text-sm); }
+    .users-table tr:last-child td { border-bottom: none; }
+    .users-table tr:hover { background: var(--border-soft); }
+    .user-name { font-weight: 600; font-family: var(--font-display); font-size: var(--text-sm); }
+    .user-email { color: var(--muted); font-size: var(--text-xs); }
+    .actions-cell { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+
+    /* Badges */
+    .badge { display: inline-flex; align-items: center; padding: 2px var(--space-2); border-radius: var(--radius-pill); font-family: var(--font-mono); font-size: var(--text-xs); font-weight: 500; }
+    .badge-dueno { background: #fff4cc; color: #92400e; }
+    .badge-admin { background: #dbeafe; color: #1e40af; }
+    .badge-editor { background: #dcfce7; color: #166534; }
+    .badge-visualizador { background: #f3f4f6; color: #374151; }
+    .badge-activo { background: #dcfce7; color: #166534; }
+    .badge-suspendido { background: #fee2e2; color: #991b1b; }
+
+    /* Invitations */
+    .section-title { font-family: var(--font-display); font-size: var(--text-lg); font-weight: 600; margin: var(--space-8) 0 var(--space-4); border-top: 1px solid var(--border); padding-top: var(--space-6); }
+    .invite-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-4); display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; margin-bottom: var(--space-3); font-size: var(--text-sm); }
+    .invite-meta { color: var(--muted); font-size: var(--text-xs); font-family: var(--font-mono); margin-top: 2px; }
+
+    /* Identidad visual */
+    .visual-identity { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-8); }
+    @media (max-width: 900px) { .visual-identity { grid-template-columns: 1fr; } .layout { flex-direction: column; } .sidebar { width: 100%; } }
+    .upload-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-6); }
+    .upload-area { border: 2px dashed var(--border); border-radius: var(--radius-md); padding: var(--space-8); text-align: center; cursor: pointer; transition: all var(--motion-fast) var(--ease-standard); margin-bottom: var(--space-4); position: relative; }
+    .upload-area:hover { border-color: var(--accent); background: var(--surface-warm); }
+    .upload-area input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+    .logo-preview { max-width: 200px; max-height: 120px; margin: var(--space-4) auto; display: block; border-radius: var(--radius-md); border: 1px solid var(--border); object-fit: contain; }
+    .color-palette { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-4); margin-top: var(--space-4); }
+    .color-field { display: flex; flex-direction: column; gap: var(--space-2); }
+    .color-field label { font-family: var(--font-display); font-size: var(--text-sm); font-weight: 600; color: var(--fg); }
+    .color-input-group { display: flex; gap: var(--space-2); align-items: center; }
+    .color-input-group input[type="color"] { width: 48px; height: 40px; border: 1px solid var(--border); border-radius: var(--radius-md); cursor: pointer; padding: 2px; }
+    .color-input-group input[type="text"] { flex: 1; padding: var(--space-2) var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-md); font-family: var(--font-mono); font-size: var(--text-sm); }
+    .preview-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-6); }
+    .menu-preview { border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; margin-top: var(--space-4); }
+    .preview-header { padding: var(--space-6); text-align: center; }
+    .preview-logo { width: 72px; height: 72px; margin: 0 auto var(--space-3); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 36px; overflow: hidden; }
+    .preview-logo img { width: 100%; height: 100%; object-fit: contain; }
+    .preview-title { font-family: var(--font-display); font-size: var(--text-xl); font-weight: 600; margin-bottom: var(--space-2); }
+    .preview-subtitle { font-size: var(--text-sm); opacity: .7; }
+    .preview-body { padding: var(--space-4); display: flex; gap: var(--space-3); }
+    .preview-item { flex: 1; border: 1px solid rgba(0,0,0,.1); border-radius: var(--radius-md); padding: var(--space-4); }
+    .preview-item-name { font-family: var(--font-display); font-size: var(--text-sm); font-weight: 600; margin-bottom: var(--space-1); }
+    .preview-item-price { font-size: var(--text-xs); }
+    .preview-btn { display: block; margin: var(--space-2) auto 0; padding: 6px 16px; border-radius: var(--radius-pill); font-family: var(--font-display); font-size: var(--text-xs); font-weight: 600; border: none; cursor: pointer; }
+
+    /* Modals */
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.4); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 16px; }
+    .modal-backdrop.hidden { display: none; }
+    .modal { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--space-8); width: 100%; max-width: 440px; }
+    .modal h3 { margin-bottom: var(--space-6); }
+    .form-group { margin-bottom: var(--space-4); }
+    .form-group label { display: block; font-family: var(--font-display); font-size: var(--text-sm); font-weight: 600; margin-bottom: var(--space-2); }
+    .form-group input, .form-group select { width: 100%; padding: var(--space-2) var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-md); font-family: var(--font-body); font-size: var(--text-base); outline: none; }
+    .form-group input:focus, .form-group select:focus { border-color: var(--accent); }
+    .modal-actions { display: flex; justify-content: flex-end; gap: var(--space-3); margin-top: var(--space-6); }
+    .invite-link-box { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-3) var(--space-4); font-family: var(--font-mono); font-size: var(--text-xs); word-break: break-all; margin-top: var(--space-4); }
+    .alert { padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); font-size: var(--text-sm); margin-bottom: var(--space-4); }
+    .alert-error { background: #fee2e2; border: 1px solid #fca5a5; color: #991b1b; }
+    .alert-success { background: #dcfce7; border: 1px solid #86efac; color: #14532d; }
+    .empty-state { text-align: center; padding: var(--space-12) var(--space-8); color: var(--muted); }
+    .save-bar { display: flex; justify-content: flex-end; gap: var(--space-3); margin-top: var(--space-6); padding-top: var(--space-6); border-top: 1px solid var(--border); }
+  </style>
+</head>
+<body>
+<div class="layout">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <a href="/app/dashboard/" class="sidebar-brand">RE.CA</a>
+    <nav class="sidebar-nav">
+      <a href="/app/dashboard/">📊 Dashboard</a>
+      <a href="/app/catalogo/">🍽️ Catálogo</a>
+      <a href="/app/usuarios/" class="active">👥 Usuarios</a>
+      <a href="/app/planes/">💳 Mi Plan</a>
+      <a href="/app/marketing/">📣 Marketing</a>
+      <a href="/app/estadisticas/">📈 Estadísticas</a>
+    </nav>
+  </aside>
+
+  <!-- Main -->
+  <main class="main-content">
+    <div class="header">
+      <h1>Usuarios y Permisos</h1>
+      <div class="header-actions" id="headerActions"></div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="usuarios">Usuarios</button>
+      <button class="tab" data-tab="identidad">Identidad Visual</button>
+    </div>
+
+    <!-- ─── Tab: Usuarios ───────────────────────────────────────────────── -->
+    <div class="tab-panel active" id="tab-usuarios">
+      <div id="planBar" class="plan-bar" style="display:none"></div>
+      <div id="alertUsuarios"></div>
+      <div class="users-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Usuario</th>
+              <th>Rol</th>
+              <th>Estado</th>
+              <th>Último acceso</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="usersBody">
+            <tr><td colspan="5" style="text-align:center;padding:32px;color:var(--muted)">Cargando…</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div id="invitacionesSection" style="display:none">
+        <div class="section-title">Invitaciones pendientes</div>
+        <div id="invitacionesList"></div>
+      </div>
+    </div>
+
+    <!-- ─── Tab: Identidad Visual ──────────────────────────────────────── -->
+    <div class="tab-panel" id="tab-identidad">
+      <div id="alertIdentidad"></div>
+      <div class="visual-identity">
+        <!-- Logo + Colores -->
+        <div>
+          <div class="upload-section">
+            <h3>Logotipo del negocio</h3>
+            <div class="upload-area" id="uploadArea">
+              <input type="file" id="logoInput" accept="image/jpeg,image/png,image/webp,image/svg+xml">
+              <div id="uploadPrompt">
+                <div style="font-size:32px;margin-bottom:8px">📷</div>
+                <div style="font-family:var(--font-display);font-size:var(--text-sm);font-weight:600">Arrastra tu logo aquí</div>
+                <div style="font-size:var(--text-xs);color:var(--muted);margin-top:4px">JPG, PNG, WebP o SVG · máx. 2 MB</div>
+              </div>
+              <img id="logoPreview" class="logo-preview" style="display:none" alt="Logo actual">
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-outline btn-sm" id="clearLogoBtn" style="display:none">Eliminar logo</button>
+              <span id="uploadStatus" style="font-size:var(--text-xs);color:var(--muted);align-self:center"></span>
+            </div>
+          </div>
+
+          <div class="upload-section" style="margin-top:var(--space-6)">
+            <h3>Paleta de colores</h3>
+            <div class="color-palette" id="colorPalette">
+              <!-- Generated by JS -->
+            </div>
+            <div class="save-bar">
+              <button class="btn btn-outline" id="resetColorsBtn">Restaurar predeterminados</button>
+              <button class="btn btn-primary" id="saveColorsBtn">Guardar paleta</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live preview -->
+        <div class="preview-section">
+          <h3>Vista previa del menú</h3>
+          <p style="font-size:var(--text-sm);color:var(--muted);margin-bottom:var(--space-4)">Así verán tu menú los clientes con los colores seleccionados.</p>
+          <div class="menu-preview" id="menuPreview">
+            <div class="preview-header" id="prevHeader">
+              <div class="preview-logo" id="prevLogo">🍽️</div>
+              <div class="preview-title" id="prevTitle">Mi Restaurante</div>
+              <div class="preview-subtitle" id="prevSubtitle">Menú del día</div>
+            </div>
+            <div class="preview-body" id="prevBody">
+              <div class="preview-item" id="prevItem1">
+                <div class="preview-item-name">Plato especial</div>
+                <div class="preview-item-price" id="prevPrice1">$12.00</div>
+                <button class="preview-btn" id="prevBtn1">Ordenar</button>
+              </div>
+              <div class="preview-item" id="prevItem2">
+                <div class="preview-item-name">Bebida del día</div>
+                <div class="preview-item-price" id="prevPrice2">$4.00</div>
+                <button class="preview-btn" id="prevBtn2">Ordenar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ── Modal: Invitar colaborador ──────────────────────────────────────────── -->
+<div class="modal-backdrop hidden" id="inviteModal">
+  <div class="modal">
+    <h3>Invitar colaborador</h3>
+    <div id="inviteAlert"></div>
+    <div id="inviteFormWrap">
+      <div class="form-group">
+        <label for="inviteContacto">Email o teléfono</label>
+        <input type="text" id="inviteContacto" placeholder="correo@ejemplo.com o +52 555 123 4567">
+      </div>
+      <div class="form-group">
+        <label for="inviteRol">Rol en el negocio</label>
+        <select id="inviteRol">
+          <option value="admin">Admin — gestión completa</option>
+          <option value="editor" selected>Editor — gestión de contenido</option>
+          <option value="visualizador">Visualizador — solo lectura</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="inviteMetodo">Método de envío</label>
+        <select id="inviteMetodo">
+          <option value="enlace">Enlace directo</option>
+          <option value="email">Email</option>
+          <option value="whatsapp">WhatsApp</option>
+        </select>
+      </div>
+    </div>
+    <div id="inviteResult" style="display:none">
+      <div class="alert alert-success" id="inviteSuccessMsg"></div>
+      <div class="invite-link-box" id="inviteLinkBox" style="display:none"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" id="inviteCancel">Cerrar</button>
+      <button class="btn btn-primary" id="inviteSubmit">Generar invitación</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal: Cambiar rol ──────────────────────────────────────────────────── -->
+<div class="modal-backdrop hidden" id="rolModal">
+  <div class="modal">
+    <h3>Cambiar rol de <span id="rolUserName"></span></h3>
+    <div class="form-group">
+      <label for="rolSelect">Nuevo rol</label>
+      <select id="rolSelect">
+        <option value="admin">Admin</option>
+        <option value="editor">Editor</option>
+        <option value="visualizador">Visualizador</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" id="rolCancel">Cancelar</button>
+      <button class="btn btn-primary" id="rolSubmit">Guardar cambio</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { api } from '/shared/js/api.js';
+  import { requireAuth, getUser } from '/shared/js/auth.js';
+
+  requireAuth();
+  const me = getUser();
+
+  // ── Helpers ────────────────────────────────────────────────────────────────
+
+  function rolBadge(rol) {
+    const cls = { dueno: 'badge-dueno', admin: 'badge-admin', editor: 'badge-editor', visualizador: 'badge-visualizador' };
+    const lbl = { dueno: 'Dueño', admin: 'Admin', editor: 'Editor', visualizador: 'Visualizador' };
+    return `<span class="badge ${cls[rol] || ''}">${lbl[rol] || rol}</span>`;
+  }
+
+  function fmtDate(iso) {
+    if (!iso) return '<span style="color:var(--muted)">—</span>';
+    try {
+      return new Date(iso).toLocaleDateString('es-MX', { year:'numeric', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
+    } catch { return iso; }
+  }
+
+  function showAlert(container, msg, type = 'error') {
+    container.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+  }
+
+  // Resolved after loadUsers() — initial values are false until data loads
+  let canManage = false;
+  let isDueno   = false;
+
+  // ── Tab switching ──────────────────────────────────────────────────────────
+
+  document.querySelectorAll('.tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  // ── Load users ─────────────────────────────────────────────────────────────
+
+  let allUsers = [];
+  let myRolEmpresa = null;
+
+  async function loadUsers() {
+    try {
+      const data = await api.usuarios.listar();
+      allUsers = data.usuarios;
+      // Resolve current user's intra-empresa role from list
+      const self = allUsers.find(u => u.id === me?.id);
+      myRolEmpresa = self?.rol_empresa || null;
+      canManage = ['dueno','admin'].includes(myRolEmpresa);
+      isDueno   = myRolEmpresa === 'dueno';
+      renderUsers(data.usuarios, data.limite);
+      if (canManage) loadInvitations();
+    } catch (err) {
+      document.getElementById('usersBody').innerHTML =
+        `<tr><td colspan="5" style="text-align:center;color:var(--danger);padding:32px">${err.message}</td></tr>`;
+    }
+  }
+
+  function renderUsers(users, limite) {
+    // Plan bar
+    if (limite) {
+      const bar = document.getElementById('planBar');
+      bar.style.display = 'flex';
+      const unlimited = limite.max === 0;
+      bar.innerHTML = unlimited
+        ? `<strong>Usuarios:</strong> ${limite.actual} — Sin límite (plan Premium)`
+        : `<strong>Usuarios:</strong> ${limite.actual} / ${limite.max} — ${limite.max - limite.actual > 0 ? `${limite.max - limite.actual} disponibles` : '<span style="color:var(--danger)">Límite alcanzado</span>'}`;
+    }
+
+    // Header actions
+    if (canManage) {
+      document.getElementById('headerActions').innerHTML =
+        `<button class="btn btn-primary" id="openInviteBtn">+ Invitar colaborador</button>`;
+      document.getElementById('openInviteBtn').addEventListener('click', openInviteModal);
+    }
+
+    const tbody = document.getElementById('usersBody');
+    if (!users.length) {
+      tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state">No hay usuarios registrados.</div></td></tr>`;
+      return;
+    }
+    tbody.innerHTML = users.map(u => {
+      const isSelf  = u.id === me?.sub;
+      const isOwner = u.rol_empresa === 'dueno';
+      let actions = '';
+      if (!isOwner && !isSelf && isDueno) {
+        actions += `<button class="btn btn-outline btn-sm" onclick="openRolModal('${u.id}','${u.nombre}','${u.rol_empresa}')">Cambiar rol</button>`;
+      }
+      if (!isOwner && !isSelf && canManage) {
+        const nextActivo = !u.activo;
+        actions += `<button class="btn ${nextActivo ? 'btn-outline' : 'btn-outline'} btn-sm" onclick="toggleEstado('${u.id}',${nextActivo})">${nextActivo ? 'Activar' : 'Suspender'}</button>`;
+      }
+      if (!isOwner && !isSelf && isDueno) {
+        actions += `<button class="btn btn-danger btn-sm" onclick="confirmDelete('${u.id}','${u.nombre}')">Eliminar</button>`;
+      }
+      return `
+        <tr>
+          <td>
+            <div class="user-name">${u.nombre}${isSelf ? ' <span style="color:var(--muted);font-size:11px">(tú)</span>' : ''}</div>
+            <div class="user-email">${u.email}</div>
+          </td>
+          <td>${rolBadge(u.rol_empresa)}</td>
+          <td><span class="badge badge-${u.activo ? 'activo' : 'suspendido'}">${u.activo ? 'Activo' : 'Suspendido'}</span></td>
+          <td style="color:var(--muted);font-size:var(--text-xs)">${fmtDate(u.last_access)}</td>
+          <td><div class="actions-cell">${actions || '<span style="color:var(--muted);font-size:var(--text-xs)">—</span>'}</div></td>
+        </tr>`;
+    }).join('');
+  }
+
+  // expose to inline onclick
+  window.openRolModal = openRolModal;
+  window.toggleEstado = toggleEstado;
+  window.confirmDelete = confirmDelete;
+
+  async function toggleEstado(id, activo) {
+    try {
+      await api.usuarios.cambiarEstado(id, activo);
+      await loadUsers();
+    } catch (err) {
+      showAlert(document.getElementById('alertUsuarios'), err.message);
+    }
+  }
+
+  async function confirmDelete(id, nombre) {
+    if (!confirm(`¿Eliminar a "${nombre}"? Esta acción no se puede deshacer.`)) return;
+    try {
+      await api.usuarios.eliminar(id);
+      await loadUsers();
+    } catch (err) {
+      showAlert(document.getElementById('alertUsuarios'), err.message);
+    }
+  }
+
+  // ── Rol modal ──────────────────────────────────────────────────────────────
+
+  let rolTargetId = null;
+
+  function openRolModal(id, nombre, currentRol) {
+    rolTargetId = id;
+    document.getElementById('rolUserName').textContent = nombre;
+    document.getElementById('rolSelect').value = currentRol;
+    document.getElementById('rolModal').classList.remove('hidden');
+  }
+
+  document.getElementById('rolCancel').addEventListener('click', () => {
+    document.getElementById('rolModal').classList.add('hidden');
+  });
+
+  document.getElementById('rolSubmit').addEventListener('click', async () => {
+    const rol = document.getElementById('rolSelect').value;
+    try {
+      await api.usuarios.cambiarRol(rolTargetId, rol);
+      document.getElementById('rolModal').classList.add('hidden');
+      await loadUsers();
+    } catch (err) {
+      alert(err.message);
+    }
+  });
+
+  // ── Invite modal ───────────────────────────────────────────────────────────
+
+  function openInviteModal() {
+    document.getElementById('inviteAlert').innerHTML = '';
+    document.getElementById('inviteFormWrap').style.display = 'block';
+    document.getElementById('inviteResult').style.display = 'none';
+    document.getElementById('inviteSubmit').style.display = '';
+    document.getElementById('inviteContacto').value = '';
+    document.getElementById('inviteModal').classList.remove('hidden');
+  }
+
+  document.getElementById('inviteCancel').addEventListener('click', () => {
+    document.getElementById('inviteModal').classList.add('hidden');
+    loadUsers();
+  });
+
+  document.getElementById('inviteSubmit').addEventListener('click', async () => {
+    const contacto = document.getElementById('inviteContacto').value.trim();
+    const rol      = document.getElementById('inviteRol').value;
+    const metodo   = document.getElementById('inviteMetodo').value;
+    const alertEl  = document.getElementById('inviteAlert');
+
+    if (!contacto) { showAlert(alertEl, 'Ingresa un email o teléfono.'); return; }
+
+    document.getElementById('inviteSubmit').disabled = true;
+    document.getElementById('inviteSubmit').textContent = 'Generando…';
+    try {
+      const data = await api.usuarios.invitar({ contacto, rol, metodo });
+      alertEl.innerHTML = '';
+      document.getElementById('inviteFormWrap').style.display = 'none';
+      document.getElementById('inviteSubmit').style.display = 'none';
+      const result = document.getElementById('inviteResult');
+      result.style.display = 'block';
+      document.getElementById('inviteSuccessMsg').textContent = data.message;
+      if (data._dev_invite_url) {
+        const linkBox = document.getElementById('inviteLinkBox');
+        linkBox.style.display = 'block';
+        linkBox.innerHTML = `<strong>URL de invitación (desarrollo):</strong><br>${location.origin}${data._dev_invite_url}`;
+      }
+    } catch (err) {
+      showAlert(alertEl, err.message);
+    } finally {
+      document.getElementById('inviteSubmit').disabled = false;
+      document.getElementById('inviteSubmit').textContent = 'Generar invitación';
+    }
+  });
+
+  // ── Invitations ────────────────────────────────────────────────────────────
+
+  async function loadInvitations() {
+    try {
+      const rows = await api.usuarios.invitaciones();
+      const section = document.getElementById('invitacionesSection');
+      if (!rows.length) { section.style.display = 'none'; return; }
+      section.style.display = 'block';
+      document.getElementById('invitacionesList').innerHTML = rows.map(inv => `
+        <div class="invite-card">
+          <div>
+            <div style="font-family:var(--font-display);font-size:var(--text-sm);font-weight:600">${inv.contacto}</div>
+            <div class="invite-meta">Rol: ${inv.rol} · Método: ${inv.metodo} · Expira: ${fmtDate(inv.expira_at)}</div>
+          </div>
+          ${rolBadge(inv.rol)}
+        </div>`).join('');
+    } catch (_) {}
+  }
+
+  // ── Identidad visual ───────────────────────────────────────────────────────
+
+  const COLOR_FIELDS = [
+    { key: 'color_principal',   label: 'Color principal' },
+    { key: 'color_secundario',  label: 'Color secundario' },
+    { key: 'color_fondo',       label: 'Fondo' },
+    { key: 'color_texto',       label: 'Texto' },
+    { key: 'color_botones',     label: 'Botones' },
+    { key: 'color_promociones', label: 'Promociones' },
+  ];
+
+  const DEFAULTS = {
+    color_principal: '#ffd21e', color_secundario: '#0d1117',
+    color_fondo: '#fafafa', color_texto: '#0d1117',
+    color_botones: '#ffd21e', color_promociones: '#dc2626',
+  };
+
+  let currentColors = { ...DEFAULTS };
+  let currentLogoUrl = null;
+
+  function buildColorPalette() {
+    const el = document.getElementById('colorPalette');
+    el.innerHTML = COLOR_FIELDS.map(f => `
+      <div class="color-field">
+        <label>${f.label}</label>
+        <div class="color-input-group">
+          <input type="color" id="cp_${f.key}" value="${currentColors[f.key] || DEFAULTS[f.key]}">
+          <input type="text" id="ct_${f.key}" value="${currentColors[f.key] || DEFAULTS[f.key]}" maxlength="7" placeholder="#rrggbb">
+        </div>
+      </div>`).join('');
+
+    COLOR_FIELDS.forEach(f => {
+      const cp = document.getElementById(`cp_${f.key}`);
+      const ct = document.getElementById(`ct_${f.key}`);
+      cp.addEventListener('input', () => { ct.value = cp.value; updatePreview(); });
+      ct.addEventListener('input', () => {
+        if (/^#[0-9a-fA-F]{6}$/.test(ct.value)) { cp.value = ct.value; updatePreview(); }
+      });
+    });
+  }
+
+  function getColorValues() {
+    const out = {};
+    COLOR_FIELDS.forEach(f => { out[f.key] = document.getElementById(`ct_${f.key}`)?.value || DEFAULTS[f.key]; });
+    return out;
+  }
+
+  function updatePreview() {
+    const c = getColorValues();
+    const preview = document.getElementById('menuPreview');
+    document.getElementById('prevHeader').style.cssText = `background:${c.color_principal};color:${c.color_texto};padding:24px;text-align:center;`;
+    document.getElementById('prevTitle').style.color = c.color_texto;
+    document.getElementById('prevSubtitle').style.color = c.color_texto;
+    document.getElementById('prevBody').style.background = c.color_fondo;
+    [document.getElementById('prevItem1'), document.getElementById('prevItem2')].forEach(el => {
+      el.style.background = c.color_fondo;
+      el.style.color = c.color_texto;
+    });
+    [document.getElementById('prevPrice1'), document.getElementById('prevPrice2')].forEach(el => {
+      el.style.color = c.color_secundario;
+    });
+    [document.getElementById('prevBtn1'), document.getElementById('prevBtn2')].forEach(el => {
+      el.style.background = c.color_botones;
+      el.style.color = c.color_secundario;
+    });
+    // Logo preview in preview panel
+    const pl = document.getElementById('prevLogo');
+    if (currentLogoUrl) {
+      pl.innerHTML = `<img src="${currentLogoUrl}" alt="Logo">`;
+    } else {
+      pl.innerHTML = '🍽️';
+    }
+    pl.style.background = c.color_fondo;
+  }
+
+  async function loadIdentidad() {
+    try {
+      const data = await api.identidad.obtener();
+      currentLogoUrl = data.logo_url;
+      COLOR_FIELDS.forEach(f => { currentColors[f.key] = data[f.key] || DEFAULTS[f.key]; });
+      buildColorPalette();
+      updatePreview();
+      if (data.logo_url) {
+        document.getElementById('logoPreview').src = data.logo_url;
+        document.getElementById('logoPreview').style.display = 'block';
+        document.getElementById('uploadPrompt').style.display = 'none';
+        document.getElementById('clearLogoBtn').style.display = '';
+      }
+    } catch (_) {
+      buildColorPalette();
+      updatePreview();
+    }
+  }
+
+  // Logo upload
+  document.getElementById('logoInput').addEventListener('change', async e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const form = new FormData();
+    form.append('logo', file);
+    const statusEl = document.getElementById('uploadStatus');
+    statusEl.textContent = 'Subiendo…';
+    try {
+      const data = await api.identidad.subirLogo(form);
+      currentLogoUrl = data.logo_url;
+      document.getElementById('logoPreview').src = data.logo_url;
+      document.getElementById('logoPreview').style.display = 'block';
+      document.getElementById('uploadPrompt').style.display = 'none';
+      document.getElementById('clearLogoBtn').style.display = '';
+      statusEl.textContent = 'Logo actualizado.';
+      updatePreview();
+    } catch (err) {
+      statusEl.textContent = '';
+      showAlert(document.getElementById('alertIdentidad'), err.message);
+    }
+  });
+
+  document.getElementById('clearLogoBtn').addEventListener('click', async () => {
+    if (!confirm('¿Eliminar el logo actual?')) return;
+    try {
+      await api.identidad.eliminarLogo();
+      currentLogoUrl = null;
+      document.getElementById('logoPreview').style.display = 'none';
+      document.getElementById('uploadPrompt').style.display = 'block';
+      document.getElementById('clearLogoBtn').style.display = 'none';
+      document.getElementById('logoInput').value = '';
+      updatePreview();
+    } catch (err) {
+      showAlert(document.getElementById('alertIdentidad'), err.message);
+    }
+  });
+
+  document.getElementById('saveColorsBtn').addEventListener('click', async () => {
+    const colors = getColorValues();
+    const btn = document.getElementById('saveColorsBtn');
+    btn.disabled = true;
+    btn.textContent = 'Guardando…';
+    try {
+      await api.identidad.actualizarColores(colors);
+      showAlert(document.getElementById('alertIdentidad'), 'Paleta guardada correctamente.', 'success');
+    } catch (err) {
+      showAlert(document.getElementById('alertIdentidad'), err.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Guardar paleta';
+    }
+  });
+
+  document.getElementById('resetColorsBtn').addEventListener('click', () => {
+    COLOR_FIELDS.forEach(f => {
+      const cp = document.getElementById(`cp_${f.key}`);
+      const ct = document.getElementById(`ct_${f.key}`);
+      if (cp) cp.value = DEFAULTS[f.key];
+      if (ct) ct.value = DEFAULTS[f.key];
+    });
+    updatePreview();
+  });
+
+  // ── Init ───────────────────────────────────────────────────────────────────
+  loadUsers();
+  loadIdentidad();
+</script>
+</body>
+</html>

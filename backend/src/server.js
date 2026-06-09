@@ -21,9 +21,11 @@ const helmet     = require('helmet');
 const cors       = require('cors');
 const cookieParser = require('cookie-parser');
 
-const authRouter        = require('./routes/auth');
-const planesRouter      = require('./routes/planes');
-const multiempresaRouter = require('./routes/multiempresa');
+const authRouter           = require('./routes/auth');
+const planesRouter         = require('./routes/planes');
+const multiempresaRouter   = require('./routes/multiempresa');
+const usuariosRouter       = require('./routes/usuarios');
+const identidadVisualRouter = require('./routes/identidad-visual');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -55,22 +57,24 @@ app.use(express.json({ limit: '256kb' }));
 app.use(express.urlencoded({ extended: false }));
 
 // ─── API routes ───────────────────────────────────────────────────────────────
-app.use('/api/auth',         authRouter);
-app.use('/api/planes',       planesRouter);
-app.use('/api/multiempresa', multiempresaRouter);
+app.use('/api/auth',             authRouter);
+app.use('/api/planes',           planesRouter);
+app.use('/api/multiempresa',     multiempresaRouter);
+app.use('/api/usuarios',         usuariosRouter);
+app.use('/api/identidad-visual', identidadVisualRouter);
 
 // Placeholder for future module routes — each module adds its own router here
-// app.use('/api/usuarios',     require('./routes/usuarios'));
-// app.use('/api/catalogo',     require('./routes/catalogo'));
-// app.use('/api/multimedia',   require('./routes/multimedia'));
-// app.use('/api/marketing',    require('./routes/marketing'));
-// app.use('/api/ia',           require('./routes/ia'));
-// app.use('/api/estadisticas', require('./routes/estadisticas'));
+// app.use('/api/catalogo',         require('./routes/catalogo'));
+// app.use('/api/multimedia',       require('./routes/multimedia'));
+// app.use('/api/marketing',        require('./routes/marketing'));
+// app.use('/api/ia',               require('./routes/ia'));
+// app.use('/api/estadisticas',     require('./routes/estadisticas'));
 // app.use('/api/automatizaciones', require('./routes/automatizaciones'));
 
 // ─── Static files ─────────────────────────────────────────────────────────────
-app.use('/shared', express.static(path.join(ROOT, 'shared')));
-app.use('/app',    express.static(path.join(ROOT, 'app')));
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+app.use('/shared',  express.static(path.join(ROOT, 'shared')));
+app.use('/app',     express.static(path.join(ROOT, 'app')));
 
 // PWA root files
 app.get('/manifest.json', (req, res) => res.sendFile(path.join(ROOT, 'manifest.json')));

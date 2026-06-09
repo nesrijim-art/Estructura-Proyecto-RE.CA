@@ -61,6 +61,34 @@ export const api = {
     crearPlan:   (body)          => request('/planes',    { method: 'POST', body: JSON.stringify(body) }),
     editarPlan:  (id, body)      => request(`/planes/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
   },
+  usuarios: {
+    listar:               ()              => request('/usuarios'),
+    invitaciones:         ()              => request('/usuarios/invitaciones'),
+    invitar:              (body)          => request('/usuarios/invitar',                  { method: 'POST', body: JSON.stringify(body) }),
+    validarToken:         (token)         => request(`/usuarios/invitacion/${token}`),
+    registroColaborador:  (body)          => request('/usuarios/registro-colaborador',     { method: 'POST', body: JSON.stringify(body) }),
+    cambiarRol:           (id, rol)       => request(`/usuarios/${id}/rol`,                { method: 'PUT',  body: JSON.stringify({ rol_empresa: rol }) }),
+    cambiarEstado:        (id, activo)    => request(`/usuarios/${id}/estado`,             { method: 'PUT',  body: JSON.stringify({ activo }) }),
+    eliminar:             (id)            => request(`/usuarios/${id}`,                    { method: 'DELETE' }),
+  },
+  identidad: {
+    obtener:        ()      => request('/identidad-visual'),
+    subirLogo: (form) => {
+      const token = getAccessToken();
+      return fetch('/api/identidad-visual/logo', {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        credentials: 'include',
+        body: form,
+      }).then(async r => {
+        const d = await r.json().catch(() => ({}));
+        if (!r.ok) throw Object.assign(new Error(d.message || `Error ${r.status}`), { status: r.status, data: d });
+        return d;
+      });
+    },
+    actualizarColores: (body) => request('/identidad-visual/colores', { method: 'PUT', body: JSON.stringify(body) }),
+    eliminarLogo:      ()     => request('/identidad-visual/logo',    { method: 'DELETE' }),
+  },
   auth: {
     login:           (body) => request('/auth/login',           { method: 'POST', body: JSON.stringify(body) }),
     register:        (body) => request('/auth/register',        { method: 'POST', body: JSON.stringify(body) }),
