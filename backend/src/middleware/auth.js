@@ -11,7 +11,13 @@ function requireAuth(req, res, next) {
   }
 
   try {
-    req.user = jwt.verify(token, process.env.JWT_SECRET);
+    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    // Normalize impersonation fields so all routes can rely on them
+    req.user = {
+      ...payload,
+      impersonating:              payload.impersonating              ?? false,
+      impersonating_empresa_id:   payload.impersonating_empresa_id   ?? null,
+    };
     next();
   } catch (err) {
     const msg = err.name === 'TokenExpiredError'

@@ -36,17 +36,19 @@ CREATE INDEX IF NOT EXISTS idx_users_empresa_id ON users(empresa_id);
 
 -- ─── Sessions (refresh-token store + audit) ───────────────────────────────────
 CREATE TABLE IF NOT EXISTS sesiones (
-  id                  TEXT PRIMARY KEY,
-  user_id             TEXT NOT NULL REFERENCES users(id),
-  empresa_id          TEXT,
-  refresh_token_hash  TEXT NOT NULL,
-  ip_address          TEXT,
-  user_agent          TEXT,
-  created_at          DATETIME DEFAULT CURRENT_TIMESTAMP,
-  expires_at          DATETIME NOT NULL,
-  ultimo_acceso       DATETIME,
-  estado              TEXT NOT NULL DEFAULT 'activo'
-                        CHECK(estado IN ('activo','cerrado','expirado'))
+  id                       TEXT PRIMARY KEY,
+  user_id                  TEXT NOT NULL REFERENCES users(id),
+  empresa_id               TEXT,
+  refresh_token_hash       TEXT NOT NULL,
+  ip_address               TEXT,
+  user_agent               TEXT,
+  created_at               DATETIME DEFAULT CURRENT_TIMESTAMP,
+  expires_at               DATETIME NOT NULL,
+  ultimo_acceso            DATETIME,
+  estado                   TEXT NOT NULL DEFAULT 'activo'
+                             CHECK(estado IN ('activo','cerrado','expirado')),
+  -- Impersonation audit: set when super_admin accesses a tenant context
+  impersonating_empresa_id TEXT
 );
 
 CREATE INDEX IF NOT EXISTS idx_sesiones_user_id ON sesiones(user_id);

@@ -282,6 +282,12 @@ import { api } from '/shared/js/api.js';
 // Redirect if already authenticated
 requireGuest();
 
+// Check if initial setup is needed → redirect to setup page
+fetch('/api/auth/setup/status')
+  .then(r => r.json())
+  .then(data => { if (data.needs_setup) window.location.href = 'setup.html'; })
+  .catch(() => {});
+
 // ── CAPTCHA ──────────────────────────────────────────────────────────────────
 let captchaAnswer = 0;
 

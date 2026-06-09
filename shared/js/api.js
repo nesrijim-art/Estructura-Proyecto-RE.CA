@@ -45,8 +45,10 @@ export const api = {
     register:        (body) => request('/auth/register',        { method: 'POST', body: JSON.stringify(body) }),
     logout:          ()     => request('/auth/logout',          { method: 'POST' }),
     forgotPassword:  (body) => request('/auth/forgot-password', { method: 'POST', body: JSON.stringify(body) }),
-    resetPassword:   (body) => request('/auth/reset-password',  { method: 'POST', body: JSON.stringify(body) }),
-    refresh:         ()     => request('/auth/refresh',         { method: 'POST' }),
-    me:              ()     => request('/auth/me'),
+    resetPassword:     (body)       => request('/auth/reset-password',          { method: 'POST', body: JSON.stringify(body) }),
+    refresh:           ()           => request('/auth/refresh',                 { method: 'POST' }),
+    me:                ()           => request('/auth/me'),
+    impersonate:       (empresaId)  => request(`/auth/impersonate/${empresaId}`, { method: 'POST' }),
+    stopImpersonating: ()           => request('/auth/stop-impersonating',      { method: 'POST' }),
   },
 };
