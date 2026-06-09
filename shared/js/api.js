@@ -61,6 +61,28 @@ export const api = {
     crearPlan:   (body)          => request('/planes',    { method: 'POST', body: JSON.stringify(body) }),
     editarPlan:  (id, body)      => request(`/planes/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
   },
+  catalogo: {
+    stats:             ()              => request('/catalogo/stats'),
+    // Categorías
+    listarCategorias:  ()              => request('/catalogo/categorias'),
+    crearCategoria:    (body)          => request('/catalogo/categorias',          { method: 'POST',   body: JSON.stringify(body) }),
+    editarCategoria:   (id, body)      => request(`/catalogo/categorias/${id}`,    { method: 'PUT',    body: JSON.stringify(body) }),
+    reordenarCats:     (orden)         => request('/catalogo/categorias/reordenar',{ method: 'PUT',    body: JSON.stringify({ orden }) }),
+    eliminarCategoria: (id)            => request(`/catalogo/categorias/${id}`,    { method: 'DELETE' }),
+    // Productos
+    listarProductos:   (params = {})   => {
+      const qs = new URLSearchParams(
+        Object.entries(params).filter(([, v]) => v !== '' && v != null)
+      ).toString();
+      return request('/catalogo/productos' + (qs ? '?' + qs : ''));
+    },
+    crearProducto:     (body)          => request('/catalogo/productos',            { method: 'POST',   body: JSON.stringify(body) }),
+    obtenerProducto:   (id)            => request(`/catalogo/productos/${id}`),
+    editarProducto:    (id, body)      => request(`/catalogo/productos/${id}`,      { method: 'PUT',    body: JSON.stringify(body) }),
+    cambiarEstado:     (id, estado)    => request(`/catalogo/productos/${id}/estado`, { method: 'PUT',  body: JSON.stringify({ estado }) }),
+    reordenarProds:    (orden)         => request('/catalogo/productos/reordenar',  { method: 'PUT',    body: JSON.stringify({ orden }) }),
+    eliminarProducto:  (id)            => request(`/catalogo/productos/${id}`,      { method: 'DELETE' }),
+  },
   multimedia: {
     stats:        ()              => request('/multimedia/stats'),
     listar:       (params = {})   => {

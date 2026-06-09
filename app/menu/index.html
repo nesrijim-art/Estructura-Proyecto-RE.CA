@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Menú Digital · RE.CA</title>
+  <meta name="theme-color" content="#ffd21e">
+  <style>
+    :root {
+      --bg: #fafafa; --surface: #ffffff; --fg: #0d1117; --muted: #6b7280; --border: #e5e7eb;
+      --accent: #ffd21e; --accent-soft: color-mix(in oklch, #ffd21e 14%, transparent);
+      --danger: #dc2626;
+      --font-display: "IBM Plex Mono", ui-monospace, monospace;
+      --font-body: "Source Sans Pro", system-ui, sans-serif;
+      --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; }
+    html { -webkit-text-size-adjust: 100%; }
+    body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.55; padding-bottom: 32px; }
+    img { display: block; max-width: 100%; }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; cursor: pointer; border: 0; }
+
+    /* Header sticky */
+    .menu-header {
+      position: sticky; top: 0; z-index: 100;
+      background: color-mix(in oklch, var(--surface) 92%, transparent);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 16px;
+    }
+    .header-content { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .brand-logo { width: 44px; height: 44px; border-radius: 8px; object-fit: contain; }
+    .brand-logo-placeholder { width: 44px; height: 44px; border-radius: 8px; background: var(--accent-soft); display: grid; place-items: center; font-size: 22px; flex-shrink: 0; }
+    .brand-name { font-family: var(--font-display); font-size: 18px; font-weight: 600; flex: 1; }
+    .lang-selector { display: flex; align-items: center; gap: 4px; padding: 6px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); font-family: var(--font-mono); font-size: 12px; color: var(--muted); cursor: pointer; }
+
+    /* Category nav */
+    .category-nav { position: sticky; top: 73px; z-index: 90; background: var(--surface); border-bottom: 1px solid var(--border); overflow-x: auto; scrollbar-width: none; }
+    .category-nav::-webkit-scrollbar { display: none; }
+    .category-list { display: flex; gap: 6px; padding: 10px 14px; white-space: nowrap; }
+    .cat-pill { padding: 7px 14px; border-radius: 999px; font-size: 13px; font-weight: 500; color: var(--muted); background: var(--bg); border: 1px solid transparent; transition: all .15s; cursor: pointer; }
+    .cat-pill.active { background: var(--accent); color: var(--fg); font-weight: 600; }
+
+    /* Search */
+    .search-bar { padding: 12px 14px; background: var(--surface); border-bottom: 1px solid var(--border); }
+    .search-inner { position: relative; }
+    .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+    .search-input { width: 100%; padding: 10px 14px 10px 40px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--fg); font-size: 14px; }
+    .search-input:focus { outline: none; border-color: var(--accent); }
+
+    /* Hero */
+    .menu-hero { padding: 28px 16px 20px; text-align: center; }
+    .menu-hero h1 { font-family: var(--font-display); font-size: clamp(24px, 6vw, 36px); font-weight: 600; margin-bottom: 6px; }
+    .menu-hero p  { color: var(--muted); font-size: 14px; }
+
+    /* Products */
+    .products-container { padding: 0 14px; }
+    .category-section { margin-bottom: 32px; scroll-margin-top: 140px; }
+    .cat-section-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 2px solid var(--fg); }
+    .cat-section-title { font-family: var(--font-display); font-size: 22px; font-weight: 600; }
+    .cat-section-count { font-family: var(--font-mono); font-size: 13px; color: var(--muted); }
+    .products-grid { display: grid; gap: 14px; }
+    .product-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+    .product-image-wrapper { position: relative; aspect-ratio: 16/10; background: linear-gradient(135deg, var(--accent-soft), color-mix(in oklch, var(--fg) 6%, transparent)); display: grid; place-items: center; color: var(--muted); font-size: 36px; overflow: hidden; }
+    .product-image-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+    .product-badges { position: absolute; top: 8px; left: 8px; display: flex; gap: 5px; flex-wrap: wrap; }
+    .badge { padding: 3px 7px; border-radius: 6px; font-family: var(--font-mono); font-size: 10px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; backdrop-filter: blur(6px); }
+    .badge-nuevo    { background: rgba(255,210,30,.9);  color: #78350f; }
+    .badge-promo    { background: rgba(22,163,74,.85);  color: #fff; }
+    .badge-hot      { background: rgba(220,38,38,.85);  color: #fff; }
+    .badge-limitado { background: rgba(147,51,234,.85); color: #fff; }
+    .product-content { padding: 14px; }
+    .product-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 6px; }
+    .product-name { font-size: 17px; font-weight: 600; line-height: 1.3; flex: 1; }
+    .product-price { font-family: var(--font-mono); font-size: 16px; font-weight: 600; white-space: nowrap; padding: 4px 10px; border-radius: 8px; background: var(--accent-soft); }
+    .product-price-orig { font-family: var(--font-mono); font-size: 12px; color: var(--muted); text-decoration: line-through; }
+    .product-description { color: var(--muted); font-size: 14px; margin-top: 6px; }
+    .product-meta { display: flex; align-items: center; gap: 10px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+    .product-alerg { background: #fff7ed; border: 1px solid #fed7aa; border-radius: 8px; padding: 8px 10px; margin-top: 8px; font-size: 13px; color: #9a3412; }
+
+    /* Empty/Loading */
+    .empty-state { text-align: center; padding: 64px 24px; color: var(--muted); }
+    .empty-icon { font-size: 56px; opacity: .2; margin-bottom: 12px; }
+    .empty-title { font-size: 20px; font-weight: 600; color: var(--fg); margin-bottom: 8px; }
+
+    /* Lang modal */
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.4); display: flex; align-items: flex-end; justify-content: center; z-index: 500; }
+    .modal-backdrop.hidden { display: none; }
+    .lang-modal { background: var(--surface); border-radius: 14px 14px 0 0; padding: 20px; width: 100%; max-width: 480px; }
+    .lang-modal h3 { font-family: var(--font-display); font-size: 16px; margin-bottom: 14px; }
+    .lang-option { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 10px; cursor: pointer; transition: background .12s; font-size: 15px; }
+    .lang-option:hover { background: var(--bg); }
+    .lang-option.active { background: var(--accent-soft); font-weight: 600; }
+  </style>
+</head>
+<body>
+
+<div id="loadingState" class="empty-state">
+  <div class="empty-icon">🍽️</div>
+  <div class="empty-title">Cargando menú…</div>
+</div>
+
+<div id="menuApp" style="display:none">
+  <!-- Header -->
+  <header class="menu-header">
+    <div class="header-content">
+      <div id="headerLogo"></div>
+      <span class="brand-name" id="headerNombre"></span>
+      <button class="lang-selector" id="langBtn">
+        <span id="langCurrent">🇪🇸 ES</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Category nav -->
+  <nav class="category-nav"><div class="category-list" id="categoryList"></div></nav>
+
+  <!-- Search -->
+  <div class="search-bar">
+    <div class="search-inner">
+      <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <input type="search" class="search-input" id="searchInput" placeholder="Buscar en el menú…">
+    </div>
+  </div>
+
+  <!-- Products -->
+  <div class="products-container" id="productsContainer"></div>
+</div>
+
+<!-- Lang modal -->
+<div class="modal-backdrop hidden" id="langModal">
+  <div class="lang-modal">
+    <h3>Seleccionar idioma</h3>
+    <div id="langOptions"></div>
+  </div>
+</div>
+
+<script type="module">
+const LANG_META = {
+  es: { flag: '🇪🇸', label: 'Español' },
+  en: { flag: '🇬🇧', label: 'English' },
+  pt: { flag: '🇧🇷', label: 'Português' },
+  fr: { flag: '🇫🇷', label: 'Français' },
+};
+
+// Get empresa slug from URL path: /menu/:slug
+const slug = location.pathname.replace(/^\/menu\//, '').replace(/\/$/, '');
+if (!slug) {
+  document.getElementById('loadingState').innerHTML = '<div class="empty-icon">⚠️</div><div class="empty-title">Menú no especificado</div>';
+}
+
+let menuData = null;
+let currentLang = localStorage.getItem('reca_lang') || 'es';
+let searchQ = '';
+
+async function loadMenu() {
+  try {
+    const res = await fetch(`/api/menu/${encodeURIComponent(slug)}?lang=${currentLang}`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Error al cargar el menú');
+    menuData = data;
+    applyIdentidad(data.identidad);
+    render();
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('menuApp').style.display = '';
+  } catch (err) {
+    document.getElementById('loadingState').innerHTML = `<div class="empty-icon">⚠️</div><div class="empty-title">Menú no disponible</div><p style="margin-top:8px">${err.message}</p>`;
+  }
+}
+
+function applyIdentidad(id) {
+  if (!id) return;
+  const root = document.documentElement;
+  root.style.setProperty('--accent',   id.color_principal   || '#ffd21e');
+  root.style.setProperty('--fg',       id.color_texto       || '#0d1117');
+  root.style.setProperty('--bg',       id.color_fondo       || '#fafafa');
+  root.style.setProperty('--surface',  '#ffffff');
+  root.style.setProperty('--danger',   id.color_promociones || '#dc2626');
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', id.color_principal || '#ffd21e');
+}
+
+function render() {
+  if (!menuData) return;
+  // Nombre & logo
+  document.title = `${menuData.empresa.nombre} · Menú`;
+  document.getElementById('headerNombre').textContent = menuData.empresa.nombre;
+  const logoEl = document.getElementById('headerLogo');
+  if (menuData.identidad?.logo_url) {
+    logoEl.innerHTML = `<img src="${menuData.identidad.logo_url}" class="brand-logo" alt="${menuData.empresa.nombre}">`;
+  } else {
+    logoEl.innerHTML = `<div class="brand-logo-placeholder">🍽️</div>`;
+  }
+
+  // Lang button
+  const lm = LANG_META[currentLang] || LANG_META.es;
+  document.getElementById('langCurrent').textContent = `${lm.flag} ${currentLang.toUpperCase()}`;
+
+  // Category nav
+  const catList = document.getElementById('categoryList');
+  catList.innerHTML = menuData.menu.map(cat =>
+    `<button class="cat-pill" data-cat="${cat.id}">${cat.emoji || ''} ${cat.nombre}</button>`
+  ).join('');
+  catList.querySelectorAll('.cat-pill').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById(`cat-${btn.dataset.cat}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  // Products
+  renderProducts();
+}
+
+function fmtPrice(p) { return p != null ? `$${parseFloat(p).toFixed(2)}` : ''; }
+
+function renderProducts() {
+  const container = document.getElementById('productsContainer');
+  if (!menuData) return;
+
+  const q = searchQ.toLowerCase();
+  let hasAny = false;
+  container.innerHTML = menuData.menu.map(cat => {
+    let prods = cat.productos;
+    if (q) prods = prods.filter(p => (p.nombre || '').toLowerCase().includes(q) || (p.descripcion || '').toLowerCase().includes(q));
+    if (!prods.length) return '';
+    hasAny = true;
+
+    const cards = prods.map(p => {
+      const badgeCls = { nuevo: 'badge-nuevo', promo: 'badge-promo', hot: 'badge-hot', limitado: 'badge-limitado' };
+      const badges = p.etiquetas.map(t => `<span class="badge ${badgeCls[t] || ''}">${t}</span>`).join('');
+      const imgHtml = p.imagen_url
+        ? `<img src="${p.imagen_url}" alt="${p.nombre}" loading="lazy">`
+        : '🍽️';
+      const metaItems = [];
+      if (p.tiempo_prep_min) metaItems.push(`⏱ ${p.tiempo_prep_min} min`);
+      if (p.calorias)        metaItems.push(`🔥 ${p.calorias} kcal`);
+
+      return `
+        <div class="product-card">
+          <div class="product-image-wrapper">${imgHtml}<div class="product-badges">${badges}</div></div>
+          <div class="product-content">
+            <div class="product-header">
+              <div class="product-name">${p.nombre}</div>
+              <div>
+                <div class="product-price">${fmtPrice(p.precio)}</div>
+                ${p.precio_original ? `<div class="product-price-orig">${fmtPrice(p.precio_original)}</div>` : ''}
+              </div>
+            </div>
+            ${p.descripcion ? `<p class="product-description">${p.descripcion}</p>` : ''}
+            ${metaItems.length ? `<div class="product-meta">${metaItems.join('<span>·</span>')}</div>` : ''}
+            ${p.alergenos ? `<div class="product-alerg">⚠️ Alérgenos: ${p.alergenos}</div>` : ''}
+          </div>
+        </div>`;
+    }).join('');
+
+    return `
+      <section class="category-section" id="cat-${cat.id}">
+        <div class="cat-section-header">
+          <span class="cat-section-title">${cat.emoji || ''} ${cat.nombre}</span>
+          <span class="cat-section-count">${prods.length} plato${prods.length !== 1 ? 's' : ''}</span>
+        </div>
+        <div class="products-grid">${cards}</div>
+      </section>`;
+  }).join('');
+
+  if (!hasAny) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-title">Sin resultados</div><p>No encontramos "${searchQ}" en el menú.</p></div>`;
+  }
+}
+
+// Search
+let searchTimer;
+document.getElementById('searchInput').addEventListener('input', e => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => { searchQ = e.target.value.trim(); renderProducts(); }, 250);
+});
+
+// Language selector
+document.getElementById('langBtn').addEventListener('click', () => {
+  if (!menuData) return;
+  const opts = document.getElementById('langOptions');
+  opts.innerHTML = menuData.idiomas_disponibles.map(lang => {
+    const m = LANG_META[lang] || { flag: '🌐', label: lang };
+    return `<div class="lang-option ${lang === currentLang ? 'active' : ''}" data-lang="${lang}">${m.flag} ${m.label}</div>`;
+  }).join('');
+  opts.querySelectorAll('[data-lang]').forEach(el => {
+    el.addEventListener('click', async () => {
+      currentLang = el.dataset.lang;
+      localStorage.setItem('reca_lang', currentLang);
+      document.getElementById('langModal').classList.add('hidden');
+      const res = await fetch(`/api/menu/${encodeURIComponent(slug)}?lang=${currentLang}`);
+      const data = await res.json();
+      if (res.ok) { menuData = data; render(); }
+    });
+  });
+  document.getElementById('langModal').classList.remove('hidden');
+});
+document.getElementById('langModal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) document.getElementById('langModal').classList.add('hidden');
+});
+
+// Intersection observer for active category pill
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const id = entry.target.id.replace('cat-', '');
+      document.querySelectorAll('.cat-pill').forEach(b => b.classList.toggle('active', b.dataset.cat === id));
+    }
+  });
+}, { rootMargin: '-30% 0px -60% 0px' });
+
+// Init
+loadMenu().then(() => {
+  document.querySelectorAll('.category-section').forEach(el => observer.observe(el));
+});
+</script>
+</body>
+</html>

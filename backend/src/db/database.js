@@ -137,6 +137,54 @@ db.transaction(() => {
   seedPlanes.run('premium',  'Premium',  600, 0,  0,   5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
 })();
 
+// M06: product catalog
+db.exec(`
+  CREATE TABLE IF NOT EXISTS categorias (
+    id          TEXT PRIMARY KEY,
+    empresa_id  TEXT NOT NULL REFERENCES empresas(id),
+    nombre      TEXT NOT NULL,
+    emoji       TEXT,
+    descripcion TEXT,
+    orden       INTEGER NOT NULL DEFAULT 0,
+    activo      INTEGER NOT NULL DEFAULT 1,
+    created_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at  DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+  CREATE INDEX IF NOT EXISTS idx_categorias_empresa ON categorias(empresa_id);
+
+  CREATE TABLE IF NOT EXISTS productos (
+    id              TEXT PRIMARY KEY,
+    empresa_id      TEXT NOT NULL REFERENCES empresas(id),
+    categoria_id    TEXT REFERENCES categorias(id),
+    multimedia_id   TEXT REFERENCES multimedia(id),
+    precio          REAL NOT NULL DEFAULT 0,
+    precio_original REAL,
+    estado          TEXT NOT NULL DEFAULT 'activo' CHECK(estado IN ('activo','pausado')),
+    destacado       INTEGER NOT NULL DEFAULT 0,
+    orden           INTEGER NOT NULL DEFAULT 0,
+    etiquetas       TEXT NOT NULL DEFAULT '[]',
+    alergenos       TEXT,
+    tiempo_prep_min INTEGER,
+    calorias        INTEGER,
+    created_at      DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at      DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+  CREATE INDEX IF NOT EXISTS idx_productos_empresa    ON productos(empresa_id);
+  CREATE INDEX IF NOT EXISTS idx_productos_categoria  ON productos(categoria_id);
+
+  CREATE TABLE IF NOT EXISTS producto_traducciones (
+    id          TEXT PRIMARY KEY,
+    producto_id TEXT NOT NULL REFERENCES productos(id) ON DELETE CASCADE,
+    idioma      TEXT NOT NULL,
+    nombre      TEXT NOT NULL,
+    descripcion TEXT,
+    created_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at  DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+  CREATE UNIQUE INDEX IF NOT EXISTS idx_prod_trad_unique ON producto_traducciones(producto_id, idioma);
+  CREATE INDEX IF NOT EXISTS idx_prod_trad_producto ON producto_traducciones(producto_id);
+`);
+
 // M07: multimedia library
 db.exec(`
   CREATE TABLE IF NOT EXISTS multimedia (

@@ -27,6 +27,8 @@ const multiempresaRouter   = require('./routes/multiempresa');
 const usuariosRouter        = require('./routes/usuarios');
 const identidadVisualRouter = require('./routes/identidad-visual');
 const multimediaRouter      = require('./routes/multimedia');
+const catalogoRouter        = require('./routes/catalogo');
+const menuPublicoRouter     = require('./routes/menu-publico');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -64,9 +66,10 @@ app.use('/api/multiempresa',     multiempresaRouter);
 app.use('/api/usuarios',         usuariosRouter);
 app.use('/api/identidad-visual', identidadVisualRouter);
 app.use('/api/multimedia',       multimediaRouter);
+app.use('/api/catalogo',         catalogoRouter);
+app.use('/api/menu',             menuPublicoRouter);   // public — no auth
 
 // Placeholder for future module routes — each module adds its own router here
-// app.use('/api/catalogo',         require('./routes/catalogo'));
 // app.use('/api/multimedia',       require('./routes/multimedia'));
 // app.use('/api/marketing',        require('./routes/marketing'));
 // app.use('/api/ia',               require('./routes/ia'));
@@ -88,6 +91,9 @@ app.get('/sw.js', (req, res) => {
   res.setHeader('Service-Worker-Allowed', '/');
   res.sendFile(path.join(ROOT, 'sw.js'));
 });
+
+// Public digital menu — serves the SPA shell for any /menu/:slug URL
+app.get('/menu/:slug', (_req, res) => res.sendFile(path.join(ROOT, 'app/menu/index.html')));
 
 // Root → redirect to login
 app.get('/', (req, res) => res.redirect('/app/login/'));

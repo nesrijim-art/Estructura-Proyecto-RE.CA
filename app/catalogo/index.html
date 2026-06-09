@@ -1,0 +1,807 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Catálogo · RE.CA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #fafafa; --surface: #ffffff;
+      --fg: #0d1117; --fg-2: #374151; --muted: #6b7280;
+      --border: #e5e7eb; --border-soft: #f3f4f6;
+      --accent: #ffd21e; --accent-on: #0d1117; --accent-hover: #f59e0b;
+      --accent-soft: color-mix(in oklch, #ffd21e 14%, transparent);
+      --fg-soft: color-mix(in oklch, #0d1117 6%, transparent);
+      --success: #16a34a; --warn: #f59e0b; --danger: #dc2626;
+      --font-display: "IBM Plex Mono", ui-monospace, monospace;
+      --font-body: "Source Sans Pro", system-ui, sans-serif;
+      --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; }
+    html { -webkit-text-size-adjust: 100%; }
+    body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.55; }
+    h1,h2,h3 { font-family: var(--font-display); font-weight: 600; line-height: 1.2; }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; cursor: pointer; border: 0; }
+    input,select,textarea { font: inherit; }
+
+    /* Layout */
+    .app-layout { display: grid; grid-template-columns: 240px 1fr; height: 100vh; }
+    .sidebar { background: var(--surface); border-right: 1px solid var(--border); padding: 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
+    .sidebar-brand { font-family: var(--font-display); font-size: 18px; font-weight: 600; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 2px solid var(--fg); }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 14px; border-radius: 8px; color: var(--muted); font-size: 14px; transition: all .15s; }
+    .nav-item:hover { background: var(--bg); color: var(--fg); }
+    .nav-item.active { background: var(--accent); color: var(--fg); font-weight: 600; }
+    .main-content { display: flex; flex-direction: column; overflow: hidden; }
+
+    /* Header */
+    .content-header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-shrink: 0; }
+    .header-left { display: flex; align-items: baseline; gap: 14px; }
+    .page-title { font-size: 26px; }
+    .count-badge { font-family: var(--font-mono); font-size: 12px; color: var(--muted); background: var(--bg); padding: 3px 9px; border-radius: 6px; }
+    .header-actions { display: flex; gap: 8px; }
+    .btn { padding: 9px 16px; border-radius: 8px; font-size: 14px; font-weight: 500; border: 1px solid var(--border); background: var(--surface); color: var(--fg); transition: all .15s; display: inline-flex; align-items: center; gap: 7px; cursor: pointer; }
+    .btn:hover { background: var(--bg); border-color: var(--fg); }
+    .btn-primary { background: var(--accent); border-color: var(--accent); color: var(--fg); font-weight: 600; }
+    .btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+    .btn-danger { background: var(--danger); border-color: var(--danger); color: #fff; }
+    .btn-danger:hover { background: color-mix(in oklch, var(--danger), black 15%); }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* Toolbar */
+    .toolbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 12px 24px; display: flex; align-items: center; gap: 14px; flex-shrink: 0; flex-wrap: wrap; }
+    .search-box { flex: 1; max-width: 380px; position: relative; }
+    .search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+    .search-input { width: 100%; padding: 9px 14px 9px 38px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--fg); transition: border-color .15s; }
+    .search-input:focus { outline: none; border-color: var(--accent); background: var(--surface); }
+    .filter-group { display: flex; gap: 7px; }
+    .chip { padding: 7px 13px; border: 1px solid var(--border); border-radius: 999px; font-size: 13px; font-weight: 500; color: var(--muted); background: var(--surface); transition: all .15s; cursor: pointer; }
+    .chip:hover { border-color: var(--fg); color: var(--fg); }
+    .chip.active { background: var(--accent); border-color: var(--accent); color: var(--fg); font-weight: 600; }
+    .plan-info { margin-left: auto; font-size: 12px; font-family: var(--font-mono); color: var(--muted); }
+
+    /* Products area */
+    .products-area { flex: 1; overflow-y: auto; padding: 24px; }
+    .category-block { margin-bottom: 32px; }
+    .category-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 2px solid var(--fg); }
+    .category-name { font-size: 20px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+    .category-actions { display: flex; gap: 6px; }
+    .icon-btn { padding: 6px; border: 1px solid var(--border); background: var(--surface); border-radius: 6px; color: var(--muted); transition: all .15s; display: grid; place-items: center; cursor: pointer; }
+    .icon-btn:hover { color: var(--fg); border-color: var(--fg); }
+
+    /* Product table */
+    .products-table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    .products-table thead { background: var(--bg); border-bottom: 1px solid var(--border); }
+    .products-table th { padding: 12px 14px; text-align: left; font-family: var(--font-mono); font-size: 11px; font-weight: 600; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; }
+    .products-table td { padding: 12px 14px; border-top: 1px solid var(--border); font-size: 14px; }
+    .products-table tbody tr { transition: background .15s; cursor: pointer; }
+    .products-table tbody tr:hover { background: var(--bg); }
+    .product-mini { display: flex; align-items: center; gap: 12px; }
+    .product-thumb { width: 56px; height: 56px; border-radius: 8px; background: linear-gradient(135deg, var(--accent-soft), var(--fg-soft)); border: 1px solid var(--border); display: grid; place-items: center; flex-shrink: 0; overflow: hidden; }
+    .product-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
+    .product-name-cell { font-weight: 600; margin-bottom: 3px; }
+    .product-desc-cell { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 260px; }
+    .price-cell { font-family: var(--font-mono); font-weight: 600; font-size: 15px; white-space: nowrap; }
+    .price-original { font-family: var(--font-mono); font-size: 12px; color: var(--muted); text-decoration: line-through; }
+    .actions-cell { display: flex; gap: 5px; }
+
+    /* Badges */
+    .status-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px; border-radius: 6px; font-family: var(--font-mono); font-size: 11px; font-weight: 600; }
+    .status-active   { background: #dcfce7; color: #14532d; }
+    .status-paused   { background: var(--border-soft); color: var(--muted); }
+    .status-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+    .tag-badge { display: inline-flex; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 600; font-family: var(--font-mono); text-transform: uppercase; margin-right: 3px; }
+    .tag-nuevo    { background: color-mix(in oklch, var(--accent) 90%, transparent); color: #78350f; }
+    .tag-promo    { background: #dcfce7; color: #14532d; }
+    .tag-hot      { background: #fee2e2; color: #7f1d1d; }
+    .tag-limitado { background: #ede9fe; color: #4c1d95; }
+    .lang-flag { display: inline-block; font-size: 16px; opacity: .3; }
+    .lang-flag.active { opacity: 1; }
+
+    /* Completeness */
+    .completeness { min-width: 80px; }
+    .completeness-label { font-family: var(--font-mono); font-size: 11px; margin-bottom: 3px; }
+    .completeness-bar { height: 4px; background: var(--border); border-radius: 99px; overflow: hidden; }
+    .completeness-fill { height: 100%; background: var(--success); border-radius: 99px; transition: width .3s; }
+    .completeness-fill.mid { background: var(--warn); }
+    .completeness-fill.low { background: var(--danger); }
+
+    /* Empty/uncategorized */
+    .uncategorized-section { margin-bottom: 32px; padding: 20px; background: var(--surface); border: 1px dashed var(--border); border-radius: 10px; }
+    .empty-state { text-align: center; padding: 48px 24px; color: var(--muted); }
+    .empty-icon { font-size: 48px; opacity: .2; margin-bottom: 12px; }
+    .empty-title { font-size: 18px; font-weight: 600; color: var(--fg); margin-bottom: 6px; }
+
+    /* Modals */
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.4); display: flex; align-items: center; justify-content: center; z-index: 300; padding: 16px; overflow-y: auto; }
+    .modal-backdrop.hidden { display: none; }
+    .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 28px; width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; }
+    .modal h3 { font-family: var(--font-display); font-size: 18px; margin-bottom: 20px; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-family: var(--font-display); font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--fg); transition: border-color .15s; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--accent); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
+    .alert { padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 14px; }
+    .alert-error { background: #fee2e2; border: 1px solid #fca5a5; color: #991b1b; }
+    .alert-success { background: #dcfce7; border: 1px solid #86efac; color: #14532d; }
+    .trad-tab-bar { display: flex; gap: 6px; margin-bottom: 14px; border-bottom: 1px solid var(--border); padding-bottom: 10px; flex-wrap: wrap; }
+    .trad-tab { padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; background: var(--bg); border: 1px solid var(--border); color: var(--muted); cursor: pointer; transition: all .15s; }
+    .trad-tab.active { background: var(--fg); color: var(--surface); border-color: var(--fg); }
+    .trad-panel { display: none; }
+    .trad-panel.active { display: block; }
+    .media-picker { display: grid; gap: 8px; }
+    .media-picker-thumb { width: 80px; height: 60px; border-radius: 8px; border: 1px solid var(--border); object-fit: cover; }
+    .tag-checkboxes { display: flex; gap: 8px; flex-wrap: wrap; }
+    .tag-checkbox { display: flex; align-items: center; gap: 5px; font-size: 13px; cursor: pointer; }
+    .section-label { font-family: var(--font-display); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-bottom: 10px; margin-top: 18px; }
+    .hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
+    @media (max-width: 900px) { .app-layout { grid-template-columns: 1fr; } .sidebar { display: none; } }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">RE.CA</div>
+    <a href="/app/dashboard/" class="nav-item">📊 Dashboard</a>
+    <a href="/app/catalogo/" class="nav-item active">🍽️ Catálogo</a>
+    <a href="/app/multimedia/" class="nav-item">🖼️ Multimedia</a>
+    <a href="/app/usuarios/" class="nav-item">👥 Usuarios</a>
+    <a href="/app/planes/" class="nav-item">💳 Mi Plan</a>
+    <a href="/app/marketing/" class="nav-item">📣 Marketing</a>
+    <a href="/app/estadisticas/" class="nav-item">📈 Estadísticas</a>
+  </aside>
+
+  <!-- Main -->
+  <main class="main-content">
+    <header class="content-header">
+      <div class="header-left">
+        <h1 class="page-title">Catálogo</h1>
+        <span class="count-badge" id="countBadge">cargando…</span>
+      </div>
+      <div class="header-actions">
+        <button class="btn" id="menuPublicBtn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          Ver menú público
+        </button>
+        <button class="btn btn-primary" id="newCatBtn">+ Categoría</button>
+        <button class="btn btn-primary" id="newProdBtn">+ Producto</button>
+      </div>
+    </header>
+
+    <div class="toolbar">
+      <div class="search-box">
+        <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input type="search" class="search-input" id="searchInput" placeholder="Buscar productos…">
+      </div>
+      <div class="filter-group" id="filterGroup">
+        <button class="chip active" data-filter="">Todos</button>
+        <button class="chip" data-filter="activo">Activos</button>
+        <button class="chip" data-filter="pausado">Pausados</button>
+        <button class="chip" data-filter="destacado">Destacados</button>
+      </div>
+      <span class="plan-info" id="planInfo"></span>
+    </div>
+
+    <div id="alertMain" style="padding:0 24px 0"></div>
+    <div class="products-area" id="productsArea">
+      <div class="empty-state"><div class="empty-icon">🍽️</div><div class="empty-title">Cargando catálogo…</div></div>
+    </div>
+  </main>
+</div>
+
+<!-- ── Modal: Nueva / Editar Categoría ── -->
+<div class="modal-backdrop hidden" id="catModal">
+  <div class="modal">
+    <h3 id="catModalTitle">Nueva categoría</h3>
+    <div id="catAlert"></div>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="catEmoji">Emoji</label>
+        <input type="text" id="catEmoji" placeholder="🍕" maxlength="4">
+      </div>
+      <div class="form-group" style="flex:2">
+        <label for="catNombre">Nombre *</label>
+        <input type="text" id="catNombre" placeholder="Ej. Pizzas" required>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="catDesc">Descripción (opcional)</label>
+      <textarea id="catDesc" rows="2" placeholder="Descripción breve de la categoría"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" id="catCancel">Cancelar</button>
+      <button class="btn btn-primary" id="catSave">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal: Nuevo / Editar Producto ── -->
+<div class="modal-backdrop hidden" id="prodModal">
+  <div class="modal" style="max-width:640px">
+    <h3 id="prodModalTitle">Nuevo producto</h3>
+    <div id="prodAlert"></div>
+
+    <!-- Translations tabs -->
+    <div class="section-label">Nombre y descripción</div>
+    <div class="trad-tab-bar" id="tradTabBar"></div>
+    <div id="tradPanels"></div>
+
+    <div class="section-label">Datos generales</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="prodPrecio">Precio *</label>
+        <input type="number" id="prodPrecio" min="0" step="0.01" placeholder="0.00">
+      </div>
+      <div class="form-group">
+        <label for="prodPrecioOrig">Precio anterior (tachado)</label>
+        <input type="number" id="prodPrecioOrig" min="0" step="0.01" placeholder="—">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="prodCategoria">Categoría</label>
+        <select id="prodCategoria">
+          <option value="">Sin categoría</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="prodEstado">Estado</label>
+        <select id="prodEstado">
+          <option value="activo">Activo</option>
+          <option value="pausado">Pausado</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Etiquetas</label>
+      <div class="tag-checkboxes">
+        <label class="tag-checkbox"><input type="checkbox" name="etiqueta" value="nuevo"> <span class="tag-badge tag-nuevo">nuevo</span></label>
+        <label class="tag-checkbox"><input type="checkbox" name="etiqueta" value="promo"> <span class="tag-badge tag-promo">promo</span></label>
+        <label class="tag-checkbox"><input type="checkbox" name="etiqueta" value="hot">   <span class="tag-badge tag-hot">hot</span></label>
+        <label class="tag-checkbox"><input type="checkbox" name="etiqueta" value="limitado"><span class="tag-badge tag-limitado">limitado</span></label>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="prodDestacado"><input type="checkbox" id="prodDestacado" style="margin-right:6px">Producto destacado</label>
+    </div>
+
+    <div class="section-label">Imagen</div>
+    <div class="media-picker" id="mediaPicker">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div id="mediaThumbWrap" style="width:80px;height:60px;border-radius:8px;border:1px solid var(--border);background:var(--bg);display:grid;place-items:center;font-size:24px;overflow:hidden">🖼️</div>
+        <div>
+          <button class="btn" id="selectMediaBtn" type="button">Seleccionar imagen</button>
+          <button class="btn" id="clearMediaBtn" type="button" style="display:none">Quitar imagen</button>
+          <p class="hint">Elige desde tu galería multimedia</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label">Extras opcionales</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="prodPrep">Tiempo de preparación (min)</label>
+        <input type="number" id="prodPrep" min="0" placeholder="—">
+      </div>
+      <div class="form-group">
+        <label for="prodCal">Calorías</label>
+        <input type="number" id="prodCal" min="0" placeholder="—">
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="prodAlerg">Alérgenos</label>
+      <input type="text" id="prodAlerg" placeholder="Ej. Gluten, lácteos, nueces">
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn" id="prodCancel">Cancelar</button>
+      <button class="btn btn-primary" id="prodSave">Guardar producto</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal: Seleccionar imagen desde Multimedia ── -->
+<div class="modal-backdrop hidden" id="mediaModal">
+  <div class="modal" style="max-width:720px">
+    <h3>Seleccionar imagen</h3>
+    <input type="search" class="search-input" id="mediaSearch" placeholder="Buscar…" style="width:100%;margin-bottom:14px">
+    <div id="mediaGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;max-height:420px;overflow-y:auto"></div>
+    <div class="modal-actions">
+      <button class="btn" id="mediaModalClose">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { api } from '/shared/js/api.js';
+import { requireAuth, getUser } from '/shared/js/auth.js';
+
+requireAuth();
+const me = getUser();
+
+// ── State ──────────────────────────────────────────────────────────────────────
+let categorias = [];
+let productos  = [];
+let myRol      = null;
+let canEdit    = false;
+let maxIdiomas = 1;
+let empresaSlug = null;
+let editCatId   = null;
+let editProdId  = null;
+let selectedMediaId = null;
+let activeFilter = '';
+let searchQ = '';
+
+const IDIOMAS = [
+  { code: 'es', flag: '🇪🇸', label: 'Español' },
+  { code: 'en', flag: '🇬🇧', label: 'Inglés'  },
+  { code: 'pt', flag: '🇧🇷', label: 'Portugués' },
+  { code: 'fr', flag: '🇫🇷', label: 'Francés'  },
+];
+
+// ── Helpers ────────────────────────────────────────────────────────────────────
+
+function showAlert(el, msg, type = 'error') {
+  el.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+}
+
+function fmtPrice(p) {
+  return p != null ? `$${parseFloat(p).toFixed(2)}` : '—';
+}
+
+function completenessClass(c) {
+  if (c >= 80) return '';
+  if (c >= 50) return 'mid';
+  return 'low';
+}
+
+function tagBadges(etiquetas) {
+  const cls = { nuevo: 'tag-nuevo', promo: 'tag-promo', hot: 'tag-hot', limitado: 'tag-limitado' };
+  return etiquetas.map(t => `<span class="tag-badge ${cls[t] || ''}">${t}</span>`).join('');
+}
+
+function langFlags(traducciones) {
+  return IDIOMAS.map(l => {
+    const has = traducciones.some(t => t.idioma === l.code);
+    return `<span class="lang-flag ${has ? 'active' : ''}" title="${l.label}">${l.flag}</span>`;
+  }).join('');
+}
+
+// ── Load & render ──────────────────────────────────────────────────────────────
+
+async function loadAll() {
+  try {
+    // Resolve role
+    const usersData = await api.usuarios.listar();
+    const self = usersData.usuarios.find(u => u.id === me?.id);
+    myRol   = self?.rol_empresa;
+    canEdit = ['dueno','admin','editor'].includes(myRol);
+
+    const planData = await api.planes.miPlan().catch(() => null);
+    maxIdiomas  = planData?.plan?.idiomas_max ?? 1;
+    empresaSlug = planData?.empresa?.slug || me?.empresa_id;
+
+    const [catData, prodData] = await Promise.all([
+      api.catalogo.listarCategorias(),
+      api.catalogo.listarProductos(),
+    ]);
+    categorias = catData.categorias;
+    productos  = prodData.productos;
+
+    const limite = prodData.limite;
+    document.getElementById('countBadge').textContent = `${produtos.length || productos.length} productos`;
+    if (limite?.max > 0) {
+      document.getElementById('planInfo').textContent = `${limite.actual} / ${limite.max} productos`;
+    }
+
+    if (canEdit) {
+      document.getElementById('newCatBtn').style.display  = '';
+      document.getElementById('newProdBtn').style.display = '';
+    } else {
+      document.getElementById('newCatBtn').style.display  = 'none';
+      document.getElementById('newProdBtn').style.display = 'none';
+    }
+
+    populateCatSelect();
+    renderProducts();
+  } catch (err) {
+    showAlert(document.getElementById('alertMain'), err.message);
+  }
+}
+
+function getFilteredProducts() {
+  let list = [...productos];
+  if (activeFilter === 'activo')   list = list.filter(p => p.estado === 'activo');
+  if (activeFilter === 'pausado')  list = list.filter(p => p.estado === 'pausado');
+  if (activeFilter === 'destacado') list = list.filter(p => p.destacado);
+  if (searchQ) {
+    const q = searchQ.toLowerCase();
+    list = list.filter(p => p.traducciones.some(t => t.nombre.toLowerCase().includes(q)));
+  }
+  return list;
+}
+
+function renderProducts() {
+  const area = document.getElementById('productsArea');
+  const list = getFilteredProducts();
+  document.getElementById('countBadge').textContent = `${list.length} producto${list.length !== 1 ? 's' : ''}`;
+
+  if (!list.length) {
+    area.innerHTML = `<div class="empty-state"><div class="empty-icon">🍽️</div><div class="empty-title">${searchQ || activeFilter ? 'Sin resultados' : 'Sin productos'}</div><p style="margin-top:8px;color:var(--muted)">${canEdit ? 'Crea tu primer producto.' : ''}</p></div>`;
+    return;
+  }
+
+  // Group by category
+  const byCategory = {};
+  for (const p of list) {
+    const key = p.categoria_id || '__none__';
+    if (!byCategory[key]) byCategory[key] = [];
+    byCategory[key].push(p);
+  }
+
+  let html = '';
+  // Render each category
+  for (const cat of categorias) {
+    const prods = byCategory[cat.id];
+    if (!prods?.length) continue;
+    html += renderCategoryBlock(cat, prods);
+  }
+  // Uncategorized
+  if (byCategory['__none__']?.length) {
+    html += renderCategoryBlock({ id: '__none__', nombre: 'Sin categoría', emoji: '📦' }, byCategory['__none__']);
+  }
+
+  area.innerHTML = html;
+  attachTableEvents();
+}
+
+function renderCategoryBlock(cat, prods) {
+  const editBtn = cat.id !== '__none__' && canEdit
+    ? `<button class="icon-btn" data-action="editcat" data-id="${cat.id}" title="Editar categoría"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4z"/></svg></button>
+     <button class="icon-btn" data-action="deletecat" data-id="${cat.id}" title="Eliminar categoría"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button>`
+    : '';
+
+  const rows = prods.map(p => {
+    const trad = p.traducciones.find(t => t.idioma === 'es') || p.traducciones[0] || {};
+    const cc   = completenessClass(p.completitud);
+    const actBtn = canEdit
+      ? `<button class="icon-btn" data-action="toggle" data-id="${p.id}" data-estado="${p.estado}" title="${p.estado === 'activo' ? 'Pausar' : 'Activar'}">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${p.estado === 'activo' ? '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>' : '<polygon points="5 3 19 12 5 21 5 3"/>'}
+          </svg></button>`
+      : '';
+    const editBtn2 = canEdit
+      ? `<button class="icon-btn" data-action="editprod" data-id="${p.id}" title="Editar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4z"/></svg></button>`
+      : '';
+    const delBtn = ['dueno','admin'].includes(myRol)
+      ? `<button class="icon-btn" data-action="deleteprod" data-id="${p.id}" title="Eliminar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button>`
+      : '';
+    return `
+      <tr>
+        <td><div class="product-mini">
+          <div class="product-thumb">${p.imagen_url ? `<img src="${p.imagen_url}" alt="${trad.nombre}" loading="lazy">` : '🖼️'}</div>
+          <div class="product-info">
+            <div class="product-name-cell">${trad.nombre || '—'}</div>
+            <div class="product-desc-cell">${trad.descripcion || ''}</div>
+            <div style="margin-top:3px">${tagBadges(p.etiquetas)}</div>
+          </div>
+        </div></td>
+        <td class="price-cell">${fmtPrice(p.precio)}${p.precio_original ? `<br><span class="price-original">${fmtPrice(p.precio_original)}</span>` : ''}</td>
+        <td><span class="status-badge ${p.estado === 'activo' ? 'status-active' : 'status-paused'}"><span class="status-dot"></span>${p.estado === 'activo' ? 'Activo' : 'Pausado'}</span></td>
+        <td><div class="completeness"><div class="completeness-label">${p.completitud}%</div><div class="completeness-bar"><div class="completeness-fill ${cc}" style="width:${p.completitud}%"></div></div></div></td>
+        <td>${langFlags(p.traducciones)}</td>
+        <td><div class="actions-cell">${editBtn2}${actBtn}${delBtn}</div></td>
+      </tr>`;
+  }).join('');
+
+  return `
+    <section class="category-block">
+      <div class="category-header">
+        <h2 class="category-name">${cat.emoji || ''} ${cat.nombre} <span class="count-badge">${prods.length}</span></h2>
+        <div class="category-actions">${editBtn}</div>
+      </div>
+      <table class="products-table">
+        <thead><tr><th>Producto</th><th>Precio</th><th>Estado</th><th>Completitud</th><th>Idiomas</th><th style="width:110px">Acciones</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </section>`;
+}
+
+function attachTableEvents() {
+  document.getElementById('productsArea').querySelectorAll('[data-action]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const { action, id, estado } = btn.dataset;
+      if (action === 'editcat')   openCatModal(id);
+      if (action === 'deletecat') deleteCat(id);
+      if (action === 'editprod')  openProdModal(id);
+      if (action === 'deleteprod') deleteProd(id);
+      if (action === 'toggle')    toggleEstado(id, estado);
+    });
+  });
+}
+
+// ── Filters ────────────────────────────────────────────────────────────────────
+
+document.getElementById('filterGroup').addEventListener('click', e => {
+  const chip = e.target.closest('.chip');
+  if (!chip) return;
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  chip.classList.add('active');
+  activeFilter = chip.dataset.filter;
+  renderProducts();
+});
+
+let searchTimer;
+document.getElementById('searchInput').addEventListener('input', e => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => { searchQ = e.target.value.trim(); renderProducts(); }, 250);
+});
+
+// ── Menu público link ──────────────────────────────────────────────────────────
+document.getElementById('menuPublicBtn').addEventListener('click', () => {
+  if (empresaSlug) window.open(`/menu/${empresaSlug}`, '_blank');
+});
+
+// ── Category modal ─────────────────────────────────────────────────────────────
+
+function openCatModal(id = null) {
+  editCatId = id;
+  document.getElementById('catModalTitle').textContent = id ? 'Editar categoría' : 'Nueva categoría';
+  document.getElementById('catAlert').innerHTML = '';
+  if (id) {
+    const cat = categorias.find(c => c.id === id);
+    document.getElementById('catEmoji').value  = cat?.emoji  || '';
+    document.getElementById('catNombre').value = cat?.nombre || '';
+    document.getElementById('catDesc').value   = cat?.descripcion || '';
+  } else {
+    document.getElementById('catEmoji').value  = '';
+    document.getElementById('catNombre').value = '';
+    document.getElementById('catDesc').value   = '';
+  }
+  document.getElementById('catModal').classList.remove('hidden');
+}
+
+async function deleteCat(id) {
+  const cat = categorias.find(c => c.id === id);
+  if (!confirm(`¿Eliminar la categoría "${cat?.nombre}"?`)) return;
+  try {
+    await api.catalogo.eliminarCategoria(id);
+    await loadAll();
+  } catch (err) {
+    showAlert(document.getElementById('alertMain'), err.message);
+  }
+}
+
+document.getElementById('newCatBtn').addEventListener('click', () => openCatModal());
+document.getElementById('catCancel').addEventListener('click', () => document.getElementById('catModal').classList.add('hidden'));
+document.getElementById('catSave').addEventListener('click', async () => {
+  const nombre = document.getElementById('catNombre').value.trim();
+  if (!nombre) return showAlert(document.getElementById('catAlert'), 'El nombre es requerido.');
+  const body = { nombre, emoji: document.getElementById('catEmoji').value.trim() || null, descripcion: document.getElementById('catDesc').value.trim() || null };
+  try {
+    if (editCatId) await api.catalogo.editarCategoria(editCatId, body);
+    else           await api.catalogo.crearCategoria(body);
+    document.getElementById('catModal').classList.add('hidden');
+    await loadAll();
+  } catch (err) {
+    showAlert(document.getElementById('catAlert'), err.message);
+  }
+});
+
+// ── Product modal ──────────────────────────────────────────────────────────────
+
+function populateCatSelect() {
+  const sel = document.getElementById('prodCategoria');
+  sel.innerHTML = `<option value="">Sin categoría</option>` +
+    categorias.map(c => `<option value="${c.id}">${c.emoji || ''} ${c.nombre}</option>`).join('');
+}
+
+function buildTradTabs() {
+  const langs = IDIOMAS.slice(0, maxIdiomas);
+  const tabBar   = document.getElementById('tradTabBar');
+  const panels   = document.getElementById('tradPanels');
+  tabBar.innerHTML  = langs.map((l, i) =>
+    `<button class="trad-tab ${i===0?'active':''}" data-lang="${l.code}">${l.flag} ${l.label}${l.code==='es'?' *':''}</button>`
+  ).join('');
+  panels.innerHTML = langs.map((l, i) => `
+    <div class="trad-panel ${i===0?'active':''}" id="trad-${l.code}">
+      <div class="form-group"><label>Nombre (${l.label})${l.code==='es'?' *':''}</label><input type="text" id="trad-nombre-${l.code}" placeholder="Nombre del producto"></div>
+      <div class="form-group"><label>Descripción (${l.label})</label><textarea id="trad-desc-${l.code}" rows="2" placeholder="Descripción breve"></textarea></div>
+    </div>`).join('');
+
+  tabBar.querySelectorAll('.trad-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      tabBar.querySelectorAll('.trad-tab').forEach(b => b.classList.remove('active'));
+      panels.querySelectorAll('.trad-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(`trad-${btn.dataset.lang}`).classList.add('active');
+    });
+  });
+}
+
+function resetProdForm() {
+  buildTradTabs();
+  document.getElementById('prodPrecio').value    = '';
+  document.getElementById('prodPrecioOrig').value = '';
+  document.getElementById('prodCategoria').value  = '';
+  document.getElementById('prodEstado').value     = 'activo';
+  document.getElementById('prodDestacado').checked = false;
+  document.getElementById('prodPrep').value  = '';
+  document.getElementById('prodCal').value   = '';
+  document.getElementById('prodAlerg').value = '';
+  document.querySelectorAll('[name="etiqueta"]').forEach(cb => cb.checked = false);
+  selectedMediaId = null;
+  updateMediaThumb(null);
+}
+
+function updateMediaThumb(url) {
+  const wrap = document.getElementById('mediaThumbWrap');
+  const clearBtn = document.getElementById('clearMediaBtn');
+  if (url) {
+    wrap.innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:cover;border-radius:8px">`;
+    clearBtn.style.display = '';
+  } else {
+    wrap.innerHTML = '🖼️';
+    clearBtn.style.display = 'none';
+  }
+}
+
+async function openProdModal(id = null) {
+  editProdId = id;
+  document.getElementById('prodModalTitle').textContent = id ? 'Editar producto' : 'Nuevo producto';
+  document.getElementById('prodAlert').innerHTML = '';
+  resetProdForm();
+
+  if (id) {
+    try {
+      const p = await api.catalogo.obtenerProducto(id);
+      IDIOMAS.slice(0, maxIdiomas).forEach(l => {
+        const t = p.traducciones.find(x => x.idioma === l.code) || {};
+        const n = document.getElementById(`trad-nombre-${l.code}`);
+        const d = document.getElementById(`trad-desc-${l.code}`);
+        if (n) n.value = t.nombre || '';
+        if (d) d.value = t.descripcion || '';
+      });
+      document.getElementById('prodPrecio').value     = p.precio ?? '';
+      document.getElementById('prodPrecioOrig').value  = p.precio_original ?? '';
+      document.getElementById('prodCategoria').value   = p.categoria_id || '';
+      document.getElementById('prodEstado').value      = p.estado;
+      document.getElementById('prodDestacado').checked = p.destacado;
+      document.getElementById('prodPrep').value  = p.tiempo_prep_min || '';
+      document.getElementById('prodCal').value   = p.calorias || '';
+      document.getElementById('prodAlerg').value = p.alergenos || '';
+      p.etiquetas.forEach(tag => {
+        const cb = document.querySelector(`[name="etiqueta"][value="${tag}"]`);
+        if (cb) cb.checked = true;
+      });
+      if (p.multimedia_id) {
+        selectedMediaId = p.multimedia_id;
+        updateMediaThumb(p.imagen_url);
+      }
+    } catch (err) {
+      showAlert(document.getElementById('prodAlert'), err.message);
+    }
+  }
+
+  document.getElementById('prodModal').classList.remove('hidden');
+}
+
+document.getElementById('newProdBtn').addEventListener('click', () => openProdModal());
+document.getElementById('prodCancel').addEventListener('click', () => document.getElementById('prodModal').classList.add('hidden'));
+document.getElementById('clearMediaBtn').addEventListener('click', () => { selectedMediaId = null; updateMediaThumb(null); });
+
+document.getElementById('prodSave').addEventListener('click', async () => {
+  const traducciones = IDIOMAS.slice(0, maxIdiomas).flatMap(l => {
+    const nombre = document.getElementById(`trad-nombre-${l.code}`)?.value?.trim();
+    const desc   = document.getElementById(`trad-desc-${l.code}`)?.value?.trim();
+    return nombre ? [{ idioma: l.code, nombre, descripcion: desc || null }] : [];
+  });
+
+  if (!traducciones.find(t => t.idioma === 'es')) {
+    return showAlert(document.getElementById('prodAlert'), 'El nombre en español es obligatorio.');
+  }
+
+  const etiquetas = [...document.querySelectorAll('[name="etiqueta"]:checked')].map(cb => cb.value);
+
+  const body = {
+    traducciones,
+    precio:         parseFloat(document.getElementById('prodPrecio').value) || 0,
+    precio_original: parseFloat(document.getElementById('prodPrecioOrig').value) || null,
+    categoria_id:   document.getElementById('prodCategoria').value || null,
+    estado:         document.getElementById('prodEstado').value,
+    destacado:      document.getElementById('prodDestacado').checked,
+    etiquetas,
+    tiempo_prep_min: parseInt(document.getElementById('prodPrep').value) || null,
+    calorias:        parseInt(document.getElementById('prodCal').value)  || null,
+    alergenos:       document.getElementById('prodAlerg').value.trim()   || null,
+    multimedia_id:   selectedMediaId || null,
+  };
+
+  const btn = document.getElementById('prodSave');
+  btn.disabled = true;
+  try {
+    if (editProdId) await api.catalogo.editarProducto(editProdId, body);
+    else            await api.catalogo.crearProducto(body);
+    document.getElementById('prodModal').classList.add('hidden');
+    await loadAll();
+  } catch (err) {
+    showAlert(document.getElementById('prodAlert'), err.message);
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+// ── Media picker ───────────────────────────────────────────────────────────────
+
+let allMedia = [];
+
+document.getElementById('selectMediaBtn').addEventListener('click', async () => {
+  try {
+    const data = await api.multimedia.listar({ tipo: 'imagen' });
+    allMedia = data.archivos;
+    renderMediaGrid(allMedia);
+    document.getElementById('mediaModal').classList.remove('hidden');
+  } catch (err) {
+    showAlert(document.getElementById('prodAlert'), 'Error al cargar galería: ' + err.message);
+  }
+});
+
+document.getElementById('mediaSearch').addEventListener('input', e => {
+  const q = e.target.value.toLowerCase();
+  renderMediaGrid(allMedia.filter(f => f.nombre.toLowerCase().includes(q)));
+});
+
+function renderMediaGrid(list) {
+  document.getElementById('mediaGrid').innerHTML = list.map(f => `
+    <div style="cursor:pointer;border-radius:8px;overflow:hidden;border:2px solid var(--border);transition:border-color .15s"
+         data-mediaid="${f.id}" data-url="${f.url}"
+         onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+      <img src="${f.url}" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block" loading="lazy">
+      <div style="padding:5px 7px;font-size:11px;font-family:var(--font-mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${f.nombre}</div>
+    </div>`).join('');
+  document.getElementById('mediaGrid').querySelectorAll('[data-mediaid]').forEach(el => {
+    el.addEventListener('click', () => {
+      selectedMediaId = el.dataset.mediaid;
+      updateMediaThumb(el.dataset.url);
+      document.getElementById('mediaModal').classList.add('hidden');
+    });
+  });
+}
+
+document.getElementById('mediaModalClose').addEventListener('click', () => document.getElementById('mediaModal').classList.add('hidden'));
+
+// ── Quick actions ──────────────────────────────────────────────────────────────
+
+async function toggleEstado(id, estadoActual) {
+  const nuevo = estadoActual === 'activo' ? 'pausado' : 'activo';
+  try {
+    await api.catalogo.cambiarEstado(id, nuevo);
+    await loadAll();
+  } catch (err) {
+    showAlert(document.getElementById('alertMain'), err.message);
+  }
+}
+
+async function deleteProd(id) {
+  const p = productos.find(x => x.id === id);
+  const n = p?.traducciones?.find(t => t.idioma === 'es')?.nombre || 'este producto';
+  if (!confirm(`¿Eliminar "${n}"? Esta acción no se puede deshacer.`)) return;
+  try {
+    await api.catalogo.eliminarProducto(id);
+    await loadAll();
+  } catch (err) {
+    showAlert(document.getElementById('alertMain'), err.message);
+  }
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────────
+loadAll();
+</script>
+</body>
+</html>
