@@ -1,0 +1,1359 @@
+
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Estadísticas e Inteligencia Comercial · SaaS Menús Digitales</title>
+  <style>
+    :root {
+      --bg:      #fafafa;
+      --surface: #ffffff;
+      --fg:      #0d1117;
+      --muted:   #6b7280;
+      --border:  #e5e7eb;
+      --accent:  #ffd21e;
+
+      --accent-soft: color-mix(in oklch, var(--accent) 14%, transparent);
+      --fg-soft:     color-mix(in oklch, var(--fg) 6%, transparent);
+      --success:     #16a34a;
+      --success-soft: color-mix(in oklch, var(--success) 12%, transparent);
+      --warn:        #f59e0b;
+      --warn-soft:   color-mix(in oklch, var(--warn) 12%, transparent);
+      --danger:      #dc2626;
+      --danger-soft: color-mix(in oklch, var(--danger) 12%, transparent);
+      --info:        #2563eb;
+      --info-soft:   color-mix(in oklch, var(--info) 12%, transparent);
+
+      --font-display: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      --font-body:    "Source Sans Pro", Inter, system-ui, -apple-system, sans-serif;
+
+      --fs-xs: 12px;
+      --fs-sm: 13px;
+      --fs-base: 15px;
+      --fs-lg: 17px;
+      --fs-xl: 20px;
+      --fs-2xl: 24px;
+      --fs-3xl: 32px;
+
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 16px;
+      --space-lg: 24px;
+      --space-xl: 32px;
+      --space-2xl: 48px;
+
+      --radius: 6px;
+      --radius-lg: 10px;
+      --radius-xl: 16px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--font-body);
+      font-size: var(--fs-base);
+      line-height: 1.5;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+    }
+    img, svg { display: block; max-width: 100%; }
+    button { font: inherit; cursor: pointer; border: none; background: none; padding: 0; }
+    p { text-wrap: pretty; margin: 0; }
+    h1, h2, h3 { text-wrap: balance; margin: 0; font-weight: 600; }
+
+    /* ──────────────────────────────────────────────────────────────
+     * 🧭 Layout global — sidebar + main content
+     * ────────────────────────────────────────────────────────── */
+    .app-container {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: var(--space-lg);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xl);
+    }
+    .brand {
+      font-family: var(--font-display);
+      font-size: 19px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      padding-bottom: var(--space-md);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-section {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+    }
+    .nav-label {
+      font-size: var(--fs-xs);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      margin-bottom: var(--space-sm);
+    }
+    .nav-item {
+      padding: var(--space-sm) var(--space-md);
+      border-radius: var(--radius);
+      font-size: var(--fs-base);
+      font-weight: 500;
+      color: var(--muted);
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      text-decoration: none;
+    }
+    .nav-item:hover {
+      background: var(--bg);
+      color: var(--fg);
+    }
+    .nav-item.active {
+      background: var(--accent-soft);
+      color: var(--fg);
+      font-weight: 600;
+    }
+    .nav-icon {
+      width: 18px;
+      height: 18px;
+      opacity: 0.6;
+    }
+    .nav-item.active .nav-icon { opacity: 1; }
+
+    /* Main content area */
+    .main-content {
+      padding: var(--space-xl);
+      max-width: 1440px;
+    }
+
+    /* Header con filtros */
+    .page-header {
+      margin-bottom: var(--space-xl);
+    }
+    .page-title {
+      font-size: var(--fs-3xl);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: var(--space-sm);
+    }
+    .page-subtitle {
+      color: var(--muted);
+      font-size: var(--fs-lg);
+      margin-bottom: var(--space-lg);
+    }
+    .filters-row {
+      display: flex;
+      gap: var(--space-md);
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+    }
+    .filter-label {
+      font-size: var(--fs-sm);
+      font-weight: 600;
+      color: var(--muted);
+    }
+    .filter-select {
+      padding: var(--space-sm) var(--space-md);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--fg);
+      font-size: var(--fs-base);
+      font-family: var(--font-body);
+      min-width: 180px;
+    }
+    .filter-select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+     * 📊 Resumen General — KPI Cards
+     * ────────────────────────────────────────────────────────── */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: var(--space-md);
+      margin-bottom: var(--space-2xl);
+    }
+    .kpi-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+    .kpi-label {
+      font-size: var(--fs-sm);
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .kpi-value {
+      font-family: var(--font-display);
+      font-size: 36px;
+      font-weight: 700;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+    .kpi-change {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+      font-size: var(--fs-sm);
+      font-weight: 600;
+    }
+    .kpi-change.positive { color: var(--success); }
+    .kpi-change.negative { color: var(--danger); }
+    .kpi-change.neutral { color: var(--muted); }
+    .kpi-icon {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+     * 💡 Insights / Recomendaciones
+     * ────────────────────────────────────────────────────────── */
+    .insights-section {
+      margin-bottom: var(--space-2xl);
+    }
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--space-lg);
+    }
+    .section-title {
+      font-size: var(--fs-2xl);
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+    .insights-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+    .insight-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg);
+      display: flex;
+      gap: var(--space-md);
+    }
+    .insight-card.opportunity { border-left: 4px solid var(--accent); }
+    .insight-card.optimization { border-left: 4px solid var(--info); }
+    .insight-card.growth { border-left: 4px solid var(--success); }
+    .insight-card.warning { border-left: 4px solid var(--warn); }
+
+    .insight-icon {
+      width: 48px;
+      height: 48px;
+      flex-shrink: 0;
+      border-radius: var(--radius);
+      display: grid;
+      place-items: center;
+      font-size: 24px;
+    }
+    .insight-card.opportunity .insight-icon { background: var(--accent-soft); }
+    .insight-card.optimization .insight-icon { background: var(--info-soft); }
+    .insight-card.growth .insight-icon { background: var(--success-soft); }
+    .insight-card.warning .insight-icon { background: var(--warn-soft); }
+
+    .insight-content {
+      flex: 1;
+    }
+    .insight-title {
+      font-size: var(--fs-lg);
+      font-weight: 600;
+      margin-bottom: var(--space-xs);
+    }
+    .insight-desc {
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: var(--space-md);
+    }
+    .insight-action {
+      padding: var(--space-sm) var(--space-md);
+      background: var(--fg);
+      color: var(--surface);
+      border-radius: var(--radius);
+      font-size: var(--fs-sm);
+      font-weight: 600;
+      transition: opacity 0.15s ease;
+      display: inline-block;
+    }
+    .insight-action:hover { opacity: 0.85; }
+
+    /* ──────────────────────────────────────────────────────────────
+     * 📈 Gráficos y visualizaciones
+     * ────────────────────────────────────────────────────────── */
+    .charts-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: var(--space-md);
+      margin-bottom: var(--space-2xl);
+    }
+    .chart-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg);
+    }
+    .chart-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--space-lg);
+    }
+    .chart-title {
+      font-size: var(--fs-xl);
+      font-weight: 600;
+    }
+    .chart-legend {
+      display: flex;
+      gap: var(--space-md);
+      font-size: var(--fs-sm);
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+      color: var(--muted);
+    }
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+    }
+
+    /* Placeholder para gráficos (serían reemplazados por Chart.js / D3 en producción) */
+    .chart-placeholder {
+      background: var(--bg);
+      border-radius: var(--radius);
+      height: 280px;
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      font-family: var(--font-display);
+      font-size: var(--fs-sm);
+      position: relative;
+      overflow: hidden;
+    }
+    .line-chart {
+      background: 
+        repeating-linear-gradient(
+          to right,
+          transparent,
+          transparent 10%,
+          var(--border) 10%,
+          var(--border) 10.5%
+        ),
+        repeating-linear-gradient(
+          to bottom,
+          transparent,
+          transparent 20%,
+          var(--border) 20%,
+          var(--border) 20.5%
+        );
+    }
+    .chart-line {
+      position: absolute;
+      bottom: 20%;
+      left: 5%;
+      width: 90%;
+      height: 60%;
+      stroke: var(--accent);
+      stroke-width: 3;
+      fill: none;
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+     * 🏆 Rankings y listas
+     * ────────────────────────────────────────────────────────── */
+    .ranking-section {
+      margin-bottom: var(--space-2xl);
+    }
+    .ranking-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-md);
+    }
+    .ranking-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg);
+    }
+    .ranking-header {
+      margin-bottom: var(--space-lg);
+      padding-bottom: var(--space-md);
+      border-bottom: 1px solid var(--border);
+    }
+    .ranking-title {
+      font-size: var(--fs-xl);
+      font-weight: 600;
+      margin-bottom: var(--space-xs);
+    }
+    .ranking-subtitle {
+      font-size: var(--fs-sm);
+      color: var(--muted);
+    }
+    .ranking-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+    .ranking-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      padding: var(--space-md);
+      background: var(--bg);
+      border-radius: var(--radius);
+      transition: transform 0.15s ease;
+    }
+    .ranking-item:hover { transform: translateX(4px); }
+
+    .ranking-position {
+      width: 32px;
+      height: 32px;
+      flex-shrink: 0;
+      background: var(--fg);
+      color: var(--surface);
+      border-radius: var(--radius);
+      display: grid;
+      place-items: center;
+      font-family: var(--font-display);
+      font-size: var(--fs-base);
+      font-weight: 700;
+    }
+    .ranking-position.top-1 { background: linear-gradient(135deg, #ffd21e, #f59e0b); color: var(--fg); }
+    .ranking-position.top-2 { background: var(--muted); }
+    .ranking-position.top-3 { background: color-mix(in oklch, var(--muted) 60%, transparent); }
+
+    .ranking-thumb {
+      width: 48px;
+      height: 48px;
+      flex-shrink: 0;
+      background: linear-gradient(135deg, var(--accent-soft), var(--fg-soft));
+      border-radius: var(--radius);
+      display: grid;
+      place-items: center;
+      font-size: 20px;
+    }
+    .ranking-info {
+      flex: 1;
+    }
+    .ranking-name {
+      font-size: var(--fs-base);
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    .ranking-meta {
+      font-size: var(--fs-sm);
+      color: var(--muted);
+    }
+    .ranking-value {
+      font-family: var(--font-display);
+      font-size: var(--fs-lg);
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+    }
+    .ranking-trend {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+      font-size: var(--fs-sm);
+      font-weight: 600;
+      margin-top: var(--space-xs);
+      justify-content: flex-end;
+    }
+    .ranking-trend.up { color: var(--success); }
+    .ranking-trend.down { color: var(--danger); }
+    .ranking-trend.stable { color: var(--muted); }
+
+    /* ──────────────────────────────────────────────────────────────
+     * 🕐 Heatmap de tráfico
+     * ────────────────────────────────────────────────────────── */
+    .heatmap-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg);
+      margin-bottom: var(--space-2xl);
+    }
+    .heatmap-grid {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: var(--space-sm);
+      margin-top: var(--space-lg);
+    }
+    .heatmap-hours {
+      display: grid;
+      grid-template-rows: repeat(24, 1fr);
+      gap: 2px;
+      font-size: var(--fs-xs);
+      font-family: var(--font-display);
+      color: var(--muted);
+      padding-right: var(--space-sm);
+    }
+    .heatmap-hour {
+      display: grid;
+      place-items: center;
+      height: 24px;
+    }
+    .heatmap-days {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 2px;
+    }
+    .heatmap-day {
+      display: grid;
+      grid-template-rows: repeat(24, 1fr);
+      gap: 2px;
+    }
+    .heatmap-cell {
+      background: var(--bg);
+      border-radius: 2px;
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+    .heatmap-cell:hover { transform: scale(1.2); z-index: 10; }
+    .heatmap-cell[data-intensity="0"] { background: var(--bg); }
+    .heatmap-cell[data-intensity="1"] { background: color-mix(in oklch, var(--accent) 20%, var(--bg)); }
+    .heatmap-cell[data-intensity="2"] { background: color-mix(in oklch, var(--accent) 40%, var(--bg)); }
+    .heatmap-cell[data-intensity="3"] { background: color-mix(in oklch, var(--accent) 60%, var(--bg)); }
+    .heatmap-cell[data-intensity="4"] { background: color-mix(in oklch, var(--accent) 80%, var(--bg)); }
+    .heatmap-cell[data-intensity="5"] { background: var(--accent); }
+
+    /* ──────────────────────────────────────────────────────────────
+     * 🌍 Idiomas y distribución geográfica
+     * ────────────────────────────────────────────────────────── */
+    .distribution-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-md);
+      margin-bottom: var(--space-2xl);
+    }
+    .language-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+    .language-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+    }
+    .language-flag {
+      width: 32px;
+      height: 24px;
+      background: var(--bg);
+      border-radius: 4px;
+      display: grid;
+      place-items: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .language-info {
+      flex: 1;
+    }
+    .language-name {
+      font-size: var(--fs-base);
+      font-weight: 600;
+    }
+    .language-bar {
+      height: 6px;
+      background: var(--bg);
+      border-radius: 999px;
+      margin-top: var(--space-xs);
+      overflow: hidden;
+    }
+    .language-bar-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 999px;
+      transition: width 0.5s ease;
+    }
+    .language-percent {
+      font-family: var(--font-display);
+      font-size: var(--fs-base);
+      font-weight: 700;
+      color: var(--fg);
+      flex-shrink: 0;
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+     * 📱 Responsive
+     * ────────────────────────────────────────────────────────── */
+    @media (max-width: 1024px) {
+      .app-container {
+        grid-template-columns: 1fr;
+      }
+      .sidebar {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+      }
+      .charts-row,
+      .ranking-grid,
+      .distribution-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .main-content {
+        padding: var(--space-md);
+      }
+      .kpi-grid {
+        grid-template-columns: 1fr;
+      }
+      .filters-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .filter-select {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="brand">📊 Analytics</div>
+
+      <nav class="nav-section">
+        <div class="nav-label">Principal</div>
+        <a href="#resumen" class="nav-item active">
+          <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          </svg>
+          Resumen General
+        </a>
+        <a href="#trafico" class="nav-item">
+          <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Análisis de Tráfico
+        </a>
+        <a href="#productos" class="nav-item">
+          <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+          </svg>
+          Productos
+        </a>
+        <a href="#promociones" class="nav-item">
+          <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Promociones
+        </a>
+        <a href="#interacciones" class="nav-item">
+          <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+          </svg>
+          Interacciones
+        </a>
+      </nav>
+
+      <nav class="nav-section">
+        <div class="nav-label">Análisis</div>
+        <a href="#idiomas" class="nav-item">
+          <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+          </svg>
+          Idiomas
+        </a>
+        <a href="#tendencias" class="nav-item">
+          <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+          </svg>
+          Tendencias
+        </a>
+      </nav>
+
+      <nav class="nav-section">
+        <div class="nav-label">Configuración</div>
+        <a href="#exportar" class="nav-item">
+          <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          Exportar Reportes
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Page Header -->
+      <header class="page-header">
+        <h1 class="page-title">Estadísticas e Inteligencia Comercial</h1>
+        <p class="page-subtitle">Transformando datos en decisiones comerciales accionables</p>
+
+        <div class="filters-row">
+          <div class="filter-group">
+            <label class="filter-label">Negocio</label>
+            <select class="filter-select">
+              <option>La Piazza Restaurante</option>
+              <option>Todos los negocios (Super Admin)</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Período</label>
+            <select class="filter-select">
+              <option>Últimos 7 días</option>
+              <option>Últimos 30 días</option>
+              <option>Últimos 90 días</option>
+              <option>Este año</option>
+              <option>Personalizado</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Comparar con</label>
+            <select class="filter-select">
+              <option>Período anterior</option>
+              <option>Mismo período año pasado</option>
+              <option>Sin comparación</option>
+            </select>
+          </div>
+        </div>
+      </header>
+
+      <!-- 1. Resumen General — KPIs -->
+      <section class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-label">Visitas Totales</div>
+          <div class="kpi-value">142,340</div>
+          <div class="kpi-change positive">
+            <svg class="kpi-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+            </svg>
+            +23% vs mes anterior
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-label">Visitas del Día</div>
+          <div class="kpi-value">1,248</div>
+          <div class="kpi-change positive">
+            <svg class="kpi-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+            </svg>
+            +12% vs ayer
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-label">Visitas de la Semana</div>
+          <div class="kpi-value">8,942</div>
+          <div class="kpi-change positive">
+            <svg class="kpi-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+            </svg>
+            +18% vs semana anterior
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-label">Visitas del Mes</div>
+          <div class="kpi-value">34,120</div>
+          <div class="kpi-change negative">
+            <svg class="kpi-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
+            </svg>
+            -5% vs mes anterior
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-label">Tendencia 90 días</div>
+          <div class="kpi-value">+34%</div>
+          <div class="kpi-change positive">
+            <svg class="kpi-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+            </svg>
+            Crecimiento sostenido
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-label">Última Actividad</div>
+          <div class="kpi-value" style="font-size: 18px; margin-top: 8px;">Hace 2 minutos</div>
+          <div class="kpi-change neutral">
+            <svg class="kpi-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Hoy 14:23
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. Insights / Recomendaciones -->
+      <section class="insights-section">
+        <div class="section-header">
+          <h2 class="section-title">💡 Recomendaciones Inteligentes</h2>
+        </div>
+
+        <div class="insights-list">
+          <div class="insight-card opportunity">
+            <div class="insight-icon">🎯</div>
+            <div class="insight-content">
+              <h3 class="insight-title">Oportunidad de Conversión Detectada</h3>
+              <p class="insight-desc">
+                Tu "Pizza Rúcula" recibe 420 visitas al mes pero solo 8 clics en WhatsApp (1.9% de conversión). 
+                Este producto genera mucho interés visual pero poca intención de compra directa.
+              </p>
+              <button class="insight-action">Crear Promoción Especial</button>
+            </div>
+          </div>
+
+          <div class="insight-card growth">
+            <div class="insight-icon">📈</div>
+            <div class="insight-content">
+              <h3 class="insight-title">Producto en Crecimiento Acelerado</h3>
+              <p class="insight-desc">
+                Tus "Cervezas Artesanales" crecen 12% cada semana de forma sostenida. 
+                Es el momento ideal para ampliar la variedad o crear una categoría dedicada de bebidas premium.
+              </p>
+              <button class="insight-action">Ampliar Catálogo</button>
+            </div>
+          </div>
+
+          <div class="insight-card optimization">
+            <div class="insight-icon">⚡</div>
+            <div class="insight-content">
+              <h3 class="insight-title">Optimiza tus Horarios de Promoción</h3>
+              <p class="insight-desc">
+                El 68% de tus visitas ocurren entre 18:00 y 21:00, pero tu promoción de almuerzo no está generando tráfico. 
+                Considera cambiarla a un happy hour nocturno para capitalizar el horario de mayor actividad.
+              </p>
+              <button class="insight-action">Ajustar Promoción</button>
+            </div>
+          </div>
+
+          <div class="insight-card warning">
+            <div class="insight-icon">⚠️</div>
+            <div class="insight-content">
+              <h3 class="insight-title">Producto con Bajo Rendimiento</h3>
+              <p class="insight-desc">
+                Tu "Carpaccio de Res" recibe solo 12 visitas al mes (87% por debajo del promedio de la categoría). 
+                Considera mejorar la foto del producto o lanzar una promoción temporal para aumentar su visibilidad.
+              </p>
+              <button class="insight-action">Revisar Producto</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. Gráficos de Tendencia -->
+      <div class="charts-row">
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3 class="chart-title">Evolución de Visitas (30 días)</h3>
+            <div class="chart-legend">
+              <span class="legend-item">
+                <span class="legend-dot" style="background: var(--accent);"></span>
+                Visitas
+              </span>
+              <span class="legend-item">
+                <span class="legend-dot" style="background: var(--info);"></span>
+                Interacciones
+              </span>
+            </div>
+          </div>
+          <div class="chart-placeholder line-chart">
+            <svg width="100%" height="100%" preserveAspectRatio="none">
+              <polyline 
+                class="chart-line" 
+                points="5,80 15,75 25,70 35,72 45,65 55,60 65,55 75,52 85,45 95,40"
+                vector-effect="non-scaling-stroke"
+              />
+            </svg>
+            Gráfico de línea temporal — Chart.js
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3 class="chart-title">Distribución por Día</h3>
+          </div>
+          <div class="chart-placeholder">
+            Gráfico de columnas — Chart.js
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Rankings de Productos -->
+      <section class="ranking-section">
+        <div class="section-header">
+          <h2 class="section-title">🏆 Productos Más Consultados</h2>
+        </div>
+
+        <div class="ranking-grid">
+          <!-- Top productos -->
+          <div class="ranking-card">
+            <div class="ranking-header">
+              <h3 class="ranking-title">Top 10 Más Vistos</h3>
+              <p class="ranking-subtitle">Últimos 30 días</p>
+            </div>
+            <div class="ranking-list">
+              <div class="ranking-item">
+                <div class="ranking-position top-1">1</div>
+                <div class="ranking-thumb">🍕</div>
+                <div class="ranking-info">
+                  <div class="ranking-name">Pizza Rúcula</div>
+                  <div class="ranking-meta">Pizzas · R$ 48,00</div>
+                </div>
+                <div>
+                  <div class="ranking-value">1,420</div>
+                  <div class="ranking-trend up">
+                    ↑ +34%
+                  </div>
+                </div>
+              </div>
+
+              <div class="ranking-item">
+                <div class="ranking-position top-2">2</div>
+                <div class="ranking-thumb">🍖</div>
+                <div class="ranking-info">
+                  <div class="ranking-name">Polvo na Brasa</div>
+                  <div class="ranking-meta">Frutos do Mar · R$ 78,00</div>
+                </div>
+                <div>
+                  <div class="ranking-value">1,124</div>
+                  <div class="ranking-trend up">
+                    ↑ +18%
+                  </div>
+                </div>
+              </div>
+
+              <div class="ranking-item">
+                <div class="ranking-position top-3">3</div>
+                <div class="ranking-thumb">🥩</div>
+                <div class="ranking-info">
+                  <div class="ranking-name">Carpaccio</div>
+                  <div class="ranking-meta">Entradas · R$ 42,00</div>
+                </div>
+                <div>
+                  <div class="ranking-value">892</div>
+                  <div class="ranking-trend stable">
+                    → +2%
+                  </div>
+                </div>
+              </div>
+
+              <div class="ranking-item">
+                <div class="ranking-position">4</div>
+                <div class="ranking-thumb">🍺</div>
+                <div class="ranking-info">
+                  <div class="ranking-name">Cerveja Artesanal</div>
+                  <div class="ranking-meta">Bebidas · R$ 18,00</div>
+                </div>
+                <div>
+                  <div class="ranking-value">745</div>
+                  <div class="ranking-trend up">
+                    ↑ +45%
+                  </div>
+                </div>
+              </div>
+
+              <div class="ranking-item">
+                <div class="ranking-position">5</div>
+                <div class="ranking-thumb">🍰</div>
+                <div class="ranking-info">
+                  <div class="ranking-name">Tiramisu</div>
+                  <div class="ranking-meta">Sobremesas · R$ 22,00</div>
+                </div>
+                <div>
+                  <div class="ranking-value">634</div>
+                  <div class="ranking-trend down">
+                    ↓ -8%
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Productos con bajo rendimiento -->
+          <div class="ranking-card">
+            <div class="ranking-header">
+              <h3 class="ranking-title">⚠️ Productos con Bajo Rendimiento</h3>
+              <p class="ranking-subtitle">Requieren atención</p>
+            </div>
+            <div class="ranking-list">
+              <div class="ranking-item" style="border-left: 3px solid var(--danger);">
+                <div class="ranking-thumb">🥗</div>
+                <div class="ranking-info">
+                  <div class="ranking-name">Salada Caesar</div>
+                  <div class="ranking-meta">Entradas · R$ 32,00</div>
+                </div>
+                <div>
+                  <div class="ranking-value" style="font-size: var(--fs-base); color: var(--danger);">12 visitas</div>
+                  <div class="ranking-trend down">
+                    ↓ -42%
+                  </div>
+                </div>
+              </div>
+
+              <div class="ranking-item" style="border-left: 3px solid var(--warn);">
+                <div class="ranking-thumb">🍜</div>
+                <div class="ranking-info">
+                  <div class="ranking-name">Risoto de Cogumelos</div>
+                  <div class="ranking-meta">Pratos Principais · R$ 54,00</div>
+                </div>
+                <div>
+                  <div class="ranking-value" style="font-size: var(--fs-base); color: var(--warn);">34 visitas</div>
+                  <div class="ranking-trend down">
+                    ↓ -28%
+                  </div>
+                </div>
+              </div>
+
+              <div class="ranking-item" style="border-left: 3px solid var(--warn);">
+                <div class="ranking-thumb">🥤</div>
+                <div class="ranking-info">
+                  <div class="ranking-name">Suco Natural</div>
+                  <div class="ranking-meta">Bebidas · R$ 12,00</div>
+                </div>
+                <div>
+                  <div class="ranking-value" style="font-size: var(--fs-base); color: var(--warn);">48 visitas</div>
+                  <div class="ranking-trend stable">
+                    → -3%
+                  </div>
+                </div>
+              </div>
+
+              <div style="margin-top: var(--space-md); padding: var(--space-md); background: var(--warn-soft); border-radius: var(--radius); font-size: var(--fs-sm);">
+                <strong>💡 Diagnóstico automático:</strong><br>
+                Productos sin imagen atractiva o en categorías poco visitadas. Considera mejorar fotos y crear promociones temporales.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. Heatmap de Tráfico -->
+      <div class="heatmap-card">
+        <div class="chart-header">
+          <h3 class="chart-title">🕐 Mapa de Calor de Visitas (Última Semana)</h3>
+          <p style="font-size: var(--fs-sm); color: var(--muted);">
+            Intensidad de visitas por día y hora — cuanto más amarillo, mayor tráfico
+          </p>
+        </div>
+        <div class="heatmap-grid">
+          <div class="heatmap-hours">
+            <div class="heatmap-hour">00</div>
+            <div class="heatmap-hour">02</div>
+            <div class="heatmap-hour">04</div>
+            <div class="heatmap-hour">06</div>
+            <div class="heatmap-hour">08</div>
+            <div class="heatmap-hour">10</div>
+            <div class="heatmap-hour">12</div>
+            <div class="heatmap-hour">14</div>
+            <div class="heatmap-hour">16</div>
+            <div class="heatmap-hour">18</div>
+            <div class="heatmap-hour">20</div>
+            <div class="heatmap-hour">22</div>
+          </div>
+          <div class="heatmap-days">
+            <!-- Lun -->
+            <div class="heatmap-day">
+              <div class="heatmap-cell" data-intensity="0"></div>
+              <div class="heatmap-cell" data-intensity="0"></div>
+              <div class="heatmap-cell" data-intensity="1"></div>
+              <div class="heatmap-cell" data-intensity="1"></div>
+              <div class="heatmap-cell" data-intensity="2"></div>
+              <div class="heatmap-cell" data-intensity="3"></div>
+              <div class="heatmap-cell" data-intensity="4"></div>
+              <div class="heatmap-cell" data-intensity="3"></div>
+              <div class="heatmap-cell" data-intensity="2"></div>
+              <div class="heatmap-cell" data-intensity="5"></div>
+              <div class="heatmap-cell" data-intensity="4"></div>
+              <div class="heatmap-cell" data-intensity="2"></div>
+            </div>
+            <!-- Mar -->
+            <div class="heatmap-day">
+              <div class="heatmap-cell" data-intensity="0"></div>
+              <div class="heatmap-cell" data-intensity="0"></div>
+              <div class="heatmap-cell" data-intensity="1"></div>
+              <div class="heatmap-cell" data-intensity="1"></div>
+              <div class="heatmap-cell" data-intensity="2"></div>
+              <div class="heatmap-cell" data-intensity="3"></div>
+              <div class="heatmap-cell" data-intensity="3"></div>
+              <div class="heatmap-cell" data-intensity="2"></div>
+              <div class="heatmap-cell" data-intensity="3"></div>
+              <div class="heatmap-cell" data-intensity="4"></div>
+              <div class="heatmap-cell" data-intensity="5"></div>
+              <div class="heatmap-cell" data-intensity="3"></div>
+            </div>
+            <!-- Mie -->
+            <div class="heatmap-day">
+              <div class="heatmap-cell" data-intensity="0"></div>
+              <div class="heatmap-cell" data-intensity="1"></div>
+              <div class="heatmap-cell" data-intensity="1"></div>
+              <div class="heatmap-cell" data-intensity="2"></div>
+              <div class="heatmap-cell" data-intensity="2"></div>
+              <div class="heatmap-cell" data-intensity="3"></div>
+              <div class="heatmap-cell" data-intensity="4"></div>
+              <div class="heatmap-cell" data-intensity="3"></div>
+              <div class="heatmap-cell" data-intensity="2"></div>
+              <div class="heatmap-cell" data-intensity="4"></div>
+              <div class="heatmap-cell" data-intensity="4"></div>
+              <div class="heatmap-cell" data-intensity="2"></div>
+            </div>
+            <!-- Jue -->
+            <div class="heatmap-day">
+              <div class="heatmap-cell" data-intensity="0"></div>
+              <div class="heatmap-cell" data-intensity="0"></div>
+              <div class="heatmap-cell" data-intensity="1"></div>
+              <div class="heatmap-cell" data-intensity="2"></div>
+              <div class="heatmap-cell" data-intensity="2"></div>
+              <div class="heatmap-cell" data-intensity="3"></div>
+              <div class="heatmap-cell" data-intensity="3"></div>
+              <div class="heatmap-cell" data-intensity="2"></div>
+              <div class="heatmap-cell" data-intensity="3"></div>
+              <div class="heatmap-cell" data-intensity="5"></div>
+              <div class="heatmap-cell" data-intensity="5"></div>
+              <div class="heatmap-cell" data-intensity="3"></div>
+            </div>
+            <!-- Vie -->
+            <div class="heatmap-day">
+              <div class="heatmap-cell" data-intensity="1"></div>
+              <div class="heatmap-cell" data-intensity="0"></div>
+              <div class="heatmap-cell" data-intensity="1"></div>
+              <div class="heatmap-cell" data-intensity="2"></div>
+              <div class="heatmap-cell" data-intensity="3"></div>
+              <div class="heatmap-cell" data-intensity="4"></div>
+              <div class="heatmap-cell" data-intensity="4"></div>
+              <div class="heatmap-cell" data-intensity="3"></div>
+              <div class="heatmap-cell" data-intensity="4"></div>
+              <div class="heatmap-cell" data-intensity="5"></div>
+              <div class="heatmap-cell" data-intensity="5"></div>
+              <div class="heatmap-cell" data-intensity="4"></div>
+            </div>
+            <!-- Sab -->
+            <div class="heatmap-day">
+              <div class="heatmap-cell" data-intensity="2"></div>
+              <div class="heatmap-cell" data-intensity="1"></div>
+              <div class="heatmap-cell" data-intensity="1"></div>
+              <div class="heatmap-cell" data-intensity="2"></div>
+              <div class="heatmap-cell" data-intensity="3"></div>
+              <div class="heatmap-cell" data-intensity="4"></div>
+              <div class="heatmap-cell" data-intensity="5"></div>
+              <div class="heatmap-cell" data-intensity="4"></div>
+              <div class="heatmap-cell" data-intensity="4"></div>
+              <div class="heatmap-cell" data-intensity="5"></div>
+              <div class="heatmap-cell" data-intensity="5"></div>
+              <div class="heatmap-cell" data-intensity="4"></div>
+            </div>
+            <!-- Dom -->
+            <div class="heatmap-day">
+              <div class="heatmap-cell" data-intensity="1"></div>
+              <div class="heatmap-cell" data-intensity="1"></div>
+              <div class="heatmap-cell" data-intensity="1"></div>
+              <div class="heatmap-cell" data-intensity="2"></div>
+              <div class="heatmap-cell" data-intensity="3"></div>
+              <div class="heatmap-cell" data-intensity="4"></div>
+              <div class="heatmap-cell" data-intensity="4"></div>
+              <div class="heatmap-cell" data-intensity="3"></div>
+              <div class="heatmap-cell" data-intensity="3"></div>
+              <div class="heatmap-cell" data-intensity="4"></div>
+              <div class="heatmap-cell" data-intensity="4"></div>
+              <div class="heatmap-cell" data-intensity="3"></div>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top: var(--space-lg); padding: var(--space-md); background: var(--accent-soft); border-radius: var(--radius); font-size: var(--fs-sm);">
+          <strong>💡 Insight automático:</strong> El 68% de tus visitas ocurren entre 18:00 y 21:00, con picos en viernes y sábado. 
+          Considera programar promociones de happy hour en ese rango horario para capitalizar el tráfico.
+        </div>
+      </div>
+
+      <!-- 6. Idiomas y Distribución -->
+      <div class="distribution-row">
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3 class="chart-title">🌍 Idiomas Utilizados</h3>
+            <p style="font-size: var(--fs-sm); color: var(--muted);">Últimos 30 días</p>
+          </div>
+          <div class="language-list">
+            <div class="language-item">
+              <div class="language-flag">🇧🇷</div>
+              <div class="language-info">
+                <div class="language-name">Portugués (Brasil)</div>
+                <div class="language-bar">
+                  <div class="language-bar-fill" style="width: 58%;"></div>
+                </div>
+              </div>
+              <div class="language-percent">58%</div>
+            </div>
+
+            <div class="language-item">
+              <div class="language-flag">🇺🇸</div>
+              <div class="language-info">
+                <div class="language-name">Inglés (EE.UU.)</div>
+                <div class="language-bar">
+                  <div class="language-bar-fill" style="width: 24%;"></div>
+                </div>
+              </div>
+              <div class="language-percent">24%</div>
+            </div>
+
+            <div class="language-item">
+              <div class="language-flag">🇪🇸</div>
+              <div class="language-info">
+                <div class="language-name">Español</div>
+                <div class="language-bar">
+                  <div class="language-bar-fill" style="width: 12%;"></div>
+                </div>
+              </div>
+              <div class="language-percent">12%</div>
+            </div>
+
+            <div class="language-item">
+              <div class="language-flag">🇫🇷</div>
+              <div class="language-info">
+                <div class="language-name">Francés</div>
+                <div class="language-bar">
+                  <div class="language-bar-fill" style="width: 4%;"></div>
+                </div>
+              </div>
+              <div class="language-percent">4%</div>
+            </div>
+
+            <div class="language-item">
+              <div class="language-flag">🇩🇪</div>
+              <div class="language-info">
+                <div class="language-name">Alemán</div>
+                <div class="language-bar">
+                  <div class="language-bar-fill" style="width: 2%;"></div>
+                </div>
+              </div>
+              <div class="language-percent">2%</div>
+            </div>
+          </div>
+          <div style="margin-top: var(--space-lg); padding: var(--space-md); background: var(--info-soft); border-radius: var(--radius); font-size: var(--fs-sm);">
+            <strong>💡 Acción sugerida:</strong> El 24% de tus visitas son en Inglés (4.120 visitantes). 
+            Considera revisar las traducciones de tus productos top para mejorar la experiencia de turistas internacionales.
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3 class="chart-title">📱 Interacciones de Contacto</h3>
+            <p style="font-size: var(--fs-sm); color: var(--muted);">Últimos 30 días</p>
+          </div>
+          <div class="language-list">
+            <div class="language-item">
+              <div class="language-flag" style="background: var(--success-soft);">
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+              </div>
+              <div class="language-info">
+                <div class="language-name">Clic en WhatsApp</div>
+                <div class="language-bar">
+                  <div class="language-bar-fill" style="width: 42%; background: var(--success);"></div>
+                </div>
+              </div>
+              <div class="language-percent">42%</div>
+            </div>
+
+            <div class="language-item">
+              <div class="language-flag" style="background: var(--info-soft);">
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+              </div>
+              <div class="language-info">
+                <div class="language-name">Ver más detalles</div>
+                <div class="language-bar">
+                  <div class="language-bar-fill" style="width: 28%; background: var(--info);"></div>
+                </div>
+              </div>
+              <div class="language-percent">28%</div>
+            </div>
+
+            <div class="language-item">
+              <div class="language-flag" style="background: var(--accent-soft);">
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div class="language-info">
+                <div class="language-name">Clic en Promoción</div>
+                <div class="language-bar">
+                  <div class="language-bar-fill" style="width: 18%;"></div>
+                </div>
+              </div>
+              <div class="language-percent">18%</div>
+            </div>
+
+            <div class="language-item">
+              <div class="language-flag" style="background: var(--fg-soft);">
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                </svg>
+              </div>
+              <div class="language-info">
+                <div class="language-name">Compartir Producto</div>
+                <div class="language-bar">
+                  <div class="language-bar-fill" style="width: 8%; background: var(--muted);"></div>
+                </div>
+              </div>
+              <div class="language-percent">8%</div>
+            </div>
+
+            <div class="language-item">
+              <div class="language-flag" style="background: var(--fg-soft);">
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                </svg>
+              </div>
+              <div class="language-info">
+                <div class="language-name">Cambio de Idioma</div>
+                <div class="language-bar">
+                  <div class="language-bar-fill" style="width: 4%; background: var(--muted);"></div>
+                </div>
+              </div>
+              <div class="language-percent">4%</div>
+            </div>
+          </div>
+          <div style="margin-top: var(--space-lg); padding: var(--space-md); background: var(--success-soft); border-radius: var(--radius); font-size: var(--fs-sm);">
+            <strong>💡 Alta intención de compra:</strong> El 42% de tus visitantes hace clic en WhatsApp (7.210 interacciones). 
+            Asegúrate de responder rápidamente para no perder oportunidades de venta.
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer con timestamp -->
+      <footer style="margin-top: var(--space-2xl); padding-top: var(--space-lg); border-top: 1px solid var(--border); color: var(--muted); font-size: var(--fs-sm); text-align: center;">
+        Última actualización: Hoy a las 14:23 · Próxima actualización automática en 15 minutos
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

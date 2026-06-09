@@ -1,0 +1,1377 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Catálogo de Productos · Admin Panel</title>
+  <style>
+    :root {
+      --bg:      #fafafa;
+      --surface: #ffffff;
+      --fg:      #0d1117;
+      --muted:   #6b7280;
+      --border:  #e5e7eb;
+      --accent:  #ffd21e;
+
+      --accent-soft: color-mix(in oklch, var(--accent) 14%, transparent);
+      --fg-soft:     color-mix(in oklch, var(--fg) 6%, transparent);
+      --success:     #16a34a;
+      --warn:        #f59e0b;
+      --danger:      #dc2626;
+
+      --font-display: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      --font-body:    "Source Sans Pro", Inter, system-ui, -apple-system, sans-serif;
+      --font-mono:    ui-monospace, 'JetBrains Mono', 'SF Mono', Menlo, monospace;
+
+      --fs-h1: 28px;
+      --fs-h2: 22px;
+      --fs-h3: 18px;
+      --fs-body: 15px;
+      --fs-meta: 13px;
+      --fs-sm: 12px;
+
+      --space-xs: 6px;
+      --space-sm: 10px;
+      --space-md: 16px;
+      --space-lg: 24px;
+      --space-xl: 32px;
+
+      --radius: 8px;
+      --radius-lg: 12px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--font-body);
+      font-size: var(--fs-body);
+      line-height: 1.55;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+    }
+    img, svg { display: block; max-width: 100%; }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; cursor: pointer; }
+    input, textarea, select { font: inherit; }
+    p { text-wrap: pretty; margin: 0; }
+    h1, h2, h3 { text-wrap: balance; margin: 0; font-family: var(--font-display); }
+
+    /* Layout principal */
+    .app-layout {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: var(--space-lg);
+      overflow-y: auto;
+    }
+    .sidebar-brand {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: var(--space-xl);
+      padding-bottom: var(--space-md);
+      border-bottom: 2px solid var(--fg);
+    }
+    .sidebar-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-sm) var(--space-md);
+      border-radius: var(--radius);
+      color: var(--muted);
+      font-size: var(--fs-body);
+      transition: all 0.15s ease;
+      border: 1px solid transparent;
+    }
+    .nav-item:hover {
+      background: var(--bg);
+      color: var(--fg);
+    }
+    .nav-item.active {
+      background: var(--accent);
+      color: var(--fg);
+      font-weight: 600;
+      border-color: color-mix(in oklch, var(--fg), transparent 80%);
+    }
+    .nav-icon {
+      width: 18px;
+      height: 18px;
+      opacity: 0.6;
+    }
+    .nav-item.active .nav-icon {
+      opacity: 1;
+    }
+
+    /* Main content */
+    .main-content {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Header */
+    .content-header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: var(--space-lg) var(--space-xl);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-lg);
+    }
+    .header-left {
+      display: flex;
+      align-items: baseline;
+      gap: var(--space-md);
+    }
+    .page-title {
+      font-size: var(--fs-h1);
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+    .products-count {
+      font-family: var(--font-mono);
+      font-size: var(--fs-meta);
+      color: var(--muted);
+      background: var(--bg);
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+    .header-actions {
+      display: flex;
+      gap: var(--space-sm);
+    }
+    .btn {
+      padding: 10px 18px;
+      border-radius: var(--radius);
+      font-size: var(--fs-body);
+      font-weight: 500;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--fg);
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn:hover {
+      background: var(--bg);
+      border-color: var(--fg);
+    }
+    .btn-primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: var(--fg);
+      font-weight: 600;
+    }
+    .btn-primary:hover {
+      background: var(--warn);
+      border-color: var(--warn);
+    }
+
+    /* Toolbar */
+    .toolbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: var(--space-md) var(--space-xl);
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+    }
+    .search-box {
+      flex: 1;
+      max-width: 400px;
+      position: relative;
+    }
+    .search-input {
+      width: 100%;
+      padding: 10px 16px 10px 40px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg);
+      color: var(--fg);
+      transition: border-color 0.15s ease;
+    }
+    .search-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      background: var(--surface);
+    }
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      color: var(--muted);
+      pointer-events: none;
+    }
+    .filter-group {
+      display: flex;
+      gap: 8px;
+    }
+    .filter-chip {
+      padding: 8px 14px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: var(--fs-sm);
+      font-weight: 500;
+      color: var(--muted);
+      background: var(--surface);
+      transition: all 0.15s ease;
+    }
+    .filter-chip:hover {
+      border-color: var(--fg);
+      color: var(--fg);
+    }
+    .filter-chip.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: var(--fg);
+      font-weight: 600;
+    }
+    .view-toggle {
+      display: flex;
+      gap: 4px;
+      margin-left: auto;
+    }
+    .view-btn {
+      padding: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      border-radius: var(--radius);
+      color: var(--muted);
+      transition: all 0.15s ease;
+    }
+    .view-btn:hover {
+      color: var(--fg);
+      border-color: var(--fg);
+    }
+    .view-btn.active {
+      background: var(--fg);
+      border-color: var(--fg);
+      color: var(--surface);
+    }
+
+    /* Products area */
+    .products-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: var(--space-xl);
+    }
+
+    /* Category section */
+    .category-block {
+      margin-bottom: var(--space-xl);
+    }
+    .category-block-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--space-md);
+      padding-bottom: var(--space-sm);
+      border-bottom: 2px solid var(--fg);
+    }
+    .category-name {
+      font-size: var(--fs-h2);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+    .category-actions {
+      display: flex;
+      gap: 8px;
+    }
+    .icon-btn {
+      padding: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      border-radius: 6px;
+      color: var(--muted);
+      transition: all 0.15s ease;
+      display: grid;
+      place-items: center;
+    }
+    .icon-btn:hover {
+      color: var(--fg);
+      border-color: var(--fg);
+    }
+
+    /* Product table */
+    .products-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    .products-table thead {
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+    }
+    .products-table th {
+      padding: var(--space-md);
+      text-align: left;
+      font-family: var(--font-mono);
+      font-size: var(--fs-sm);
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+    }
+    .products-table td {
+      padding: var(--space-md);
+      border-top: 1px solid var(--border);
+    }
+    .products-table tbody tr {
+      transition: background 0.15s ease;
+      cursor: pointer;
+    }
+    .products-table tbody tr:hover {
+      background: var(--bg);
+    }
+    .drag-handle {
+      color: var(--muted);
+      cursor: grab;
+    }
+    .drag-handle:active {
+      cursor: grabbing;
+    }
+
+    /* Product mini card */
+    .product-mini {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+    }
+    .product-thumb {
+      width: 60px;
+      height: 60px;
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, var(--accent-soft), var(--fg-soft));
+      border: 1px solid var(--border);
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      font-size: var(--fs-sm);
+      flex-shrink: 0;
+    }
+    .product-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .product-name-cell {
+      font-weight: 600;
+      font-size: var(--fs-body);
+      margin-bottom: 4px;
+    }
+    .product-desc-cell {
+      font-size: var(--fs-sm);
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Status badges */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+    .status-active {
+      background: color-mix(in oklch, var(--success) 15%, transparent);
+      color: #065f46;
+    }
+    .status-paused {
+      background: color-mix(in oklch, var(--muted) 15%, transparent);
+      color: #374151;
+    }
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: currentColor;
+    }
+
+    /* Completeness bar */
+    .completeness {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .completeness-label {
+      font-family: var(--font-mono);
+      font-size: var(--fs-sm);
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+    }
+    .completeness-bar {
+      height: 6px;
+      background: var(--border);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .completeness-fill {
+      height: 100%;
+      background: var(--success);
+      border-radius: 999px;
+      transition: width 0.3s ease;
+    }
+    .completeness-fill.low {
+      background: var(--danger);
+    }
+    .completeness-fill.mid {
+      background: var(--warn);
+    }
+
+    /* Price cell */
+    .price-cell {
+      font-family: var(--font-mono);
+      font-size: var(--fs-body);
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Languages cell */
+    .languages-cell {
+      display: flex;
+      gap: 4px;
+    }
+    .lang-flag {
+      font-size: 16px;
+      opacity: 0.4;
+      transition: opacity 0.15s ease;
+    }
+    .lang-flag.active {
+      opacity: 1;
+    }
+
+    /* Actions cell */
+    .actions-cell {
+      display: flex;
+      gap: 6px;
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: var(--space-xl) * 2;
+      color: var(--muted);
+    }
+    .empty-icon {
+      font-size: 64px;
+      opacity: 0.2;
+      margin-bottom: var(--space-md);
+    }
+
+    /* Modal overlay */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: color-mix(in oklch, var(--fg) 40%, transparent);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-xl);
+    }
+    .modal-overlay.open {
+      display: flex;
+    }
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 800px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px color-mix(in oklch, var(--fg) 30%, transparent);
+    }
+    .modal-header {
+      padding: var(--space-lg) var(--space-xl);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal-title {
+      font-size: var(--fs-h2);
+      font-weight: 600;
+    }
+    .modal-body {
+      padding: var(--space-xl);
+    }
+    .modal-footer {
+      padding: var(--space-lg) var(--space-xl);
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: var(--space-sm);
+      justify-content: flex-end;
+    }
+
+    /* Form fields */
+    .form-grid {
+      display: grid;
+      gap: var(--space-lg);
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .form-label {
+      font-weight: 600;
+      font-size: var(--fs-body);
+      color: var(--fg);
+    }
+    .form-help {
+      font-size: var(--fs-sm);
+      color: var(--muted);
+    }
+    .form-input, .form-textarea, .form-select {
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--fg);
+      transition: border-color 0.15s ease;
+    }
+    .form-input:focus, .form-textarea:focus, .form-select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+    .form-textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    /* Image uploader */
+    .image-upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-xl);
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      background: var(--bg);
+    }
+    .image-upload-zone:hover {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+    .upload-icon {
+      font-size: 48px;
+      margin-bottom: var(--space-sm);
+      opacity: 0.3;
+    }
+
+    /* Availability config */
+    .availability-config {
+      display: grid;
+      gap: var(--space-md);
+      padding: var(--space-md);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+    .radio-group {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+    .radio-option {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-sm);
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+    .radio-option:hover {
+      background: var(--surface);
+    }
+
+    /* Translation tabs */
+    .translation-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: var(--space-md);
+      border-bottom: 1px solid var(--border);
+    }
+    .translation-tab {
+      padding: var(--space-sm) var(--space-md);
+      border: none;
+      background: none;
+      color: var(--muted);
+      font-weight: 500;
+      cursor: pointer;
+      position: relative;
+      transition: color 0.15s ease;
+    }
+    .translation-tab:hover {
+      color: var(--fg);
+    }
+    .translation-tab.active {
+      color: var(--fg);
+      font-weight: 600;
+    }
+    .translation-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--accent);
+    }
+
+    @media (max-width: 1200px) {
+      .app-layout {
+        grid-template-columns: 1fr;
+      }
+      .sidebar {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Layout principal -->
+  <div class="app-layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">MenuDigital</div>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="nav-item">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"/>
+            <rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/>
+            <rect x="3" y="14" width="7" height="7"/>
+          </svg>
+          Dashboard
+        </a>
+        <a href="catalogo-admin.html" class="nav-item active">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 7h16M4 12h16M4 17h16"/>
+          </svg>
+          Catálogo
+        </a>
+        <a href="galeria-multimedia.html" class="nav-item">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2"/>
+            <circle cx="8.5" cy="8.5" r="1.5"/>
+            <path d="M21 15l-5-5L5 21"/>
+          </svg>
+          Multimedia
+        </a>
+        <a href="#" class="nav-item">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+            <path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+          Marketing
+        </a>
+        <a href="#" class="nav-item">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 20V10M12 20V4M6 20v-6"/>
+          </svg>
+          Estadísticas
+        </a>
+        <a href="usuarios-permisos.html" class="nav-item">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+          Usuarios
+        </a>
+        <a href="planes-suscripciones.html" class="nav-item">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="8" width="18" height="4" rx="1"/>
+            <path d="M12 8v13M8 21h8"/>
+          </svg>
+          Suscripción
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main-content">
+
+      <!-- Header -->
+      <header class="content-header">
+        <div class="header-left">
+          <h1 class="page-title">Catálogo de Productos</h1>
+          <span class="products-count">47 productos</span>
+        </div>
+        <div class="header-actions">
+          <button class="btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Exportar
+          </button>
+          <button class="btn btn-primary" onclick="document.getElementById('modal-crear-producto').classList.add('open')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Nuevo Producto
+          </button>
+        </div>
+      </header>
+
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <div class="search-box">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="M21 21l-4.35-4.35"/>
+          </svg>
+          <input type="search" class="search-input" placeholder="Buscar productos...">
+        </div>
+
+        <div class="filter-group">
+          <button class="filter-chip active">Todos</button>
+          <button class="filter-chip">Activos</button>
+          <button class="filter-chip">Pausados</button>
+          <button class="filter-chip">Destacados</button>
+        </div>
+
+        <div class="view-toggle">
+          <button class="view-btn active">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="8" y1="6" x2="21" y2="6"/>
+              <line x1="8" y1="12" x2="21" y2="12"/>
+              <line x1="8" y1="18" x2="21" y2="18"/>
+              <line x1="3" y1="6" x2="3.01" y2="6"/>
+              <line x1="3" y1="12" x2="3.01" y2="12"/>
+              <line x1="3" y1="18" x2="3.01" y2="18"/>
+            </svg>
+          </button>
+          <button class="view-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="7"/>
+              <rect x="14" y="3" width="7" height="7"/>
+              <rect x="14" y="14" width="7" height="7"/>
+              <rect x="3" y="14" width="7" height="7"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Products area -->
+      <div class="products-area">
+
+        <!-- Categoría: Pizzas -->
+        <section class="category-block">
+          <div class="category-block-header">
+            <h2 class="category-name">
+              🍕 Pizzas
+              <span class="products-count">12</span>
+            </h2>
+            <div class="category-actions">
+              <button class="icon-btn" title="Editar categoría">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+              </button>
+              <button class="icon-btn" title="Añadir producto">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="12" y1="5" x2="12" y2="19"/>
+                  <line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <table class="products-table">
+            <thead>
+              <tr>
+                <th style="width: 40px;"></th>
+                <th>Producto</th>
+                <th>Precio</th>
+                <th>Estado</th>
+                <th>Completitud</th>
+                <th>Idiomas</th>
+                <th style="width: 120px;">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <svg class="drag-handle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="3" y1="12" x2="21" y2="12"/>
+                    <line x1="3" y1="6" x2="21" y2="6"/>
+                    <line x1="3" y1="18" x2="21" y2="18"/>
+                  </svg>
+                </td>
+                <td>
+                  <div class="product-mini">
+                    <div class="product-thumb">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <path d="M21 15l-5-5L5 21"/>
+                      </svg>
+                    </div>
+                    <div class="product-info">
+                      <div class="product-name-cell">Pizza Margarita</div>
+                      <div class="product-desc-cell">Tomate, mozzarella, albahaca fresca y aceite de oliva</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="price-cell">$12.90</td>
+                <td>
+                  <span class="status-badge status-active">
+                    <span class="status-dot"></span>
+                    Activo
+                  </span>
+                </td>
+                <td>
+                  <div class="completeness">
+                    <div class="completeness-label">
+                      <span>95%</span>
+                    </div>
+                    <div class="completeness-bar">
+                      <div class="completeness-fill" style="width: 95%;"></div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="languages-cell">
+                    <span class="lang-flag active" title="Español">🇪🇸</span>
+                    <span class="lang-flag active" title="Inglés">🇬🇧</span>
+                    <span class="lang-flag active" title="Portugués">🇧🇷</span>
+                    <span class="lang-flag" title="Francés">🇫🇷</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="actions-cell">
+                    <button class="icon-btn" title="Editar">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                      </svg>
+                    </button>
+                    <button class="icon-btn" title="Ver público">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                      </svg>
+                    </button>
+                    <button class="icon-btn" title="Más opciones">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="1"/>
+                        <circle cx="12" cy="5" r="1"/>
+                        <circle cx="12" cy="19" r="1"/>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+
+              <tr>
+                <td>
+                  <svg class="drag-handle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="3" y1="12" x2="21" y2="12"/>
+                    <line x1="3" y1="6" x2="21" y2="6"/>
+                    <line x1="3" y1="18" x2="21" y2="18"/>
+                  </svg>
+                </td>
+                <td>
+                  <div class="product-mini">
+                    <div class="product-thumb">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <path d="M21 15l-5-5L5 21"/>
+                      </svg>
+                    </div>
+                    <div class="product-info">
+                      <div class="product-name-cell">Pizza Pepperoni</div>
+                      <div class="product-desc-cell">Salsa de tomate, mozzarella y pepperoni premium</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="price-cell">$14.50</td>
+                <td>
+                  <span class="status-badge status-active">
+                    <span class="status-dot"></span>
+                    Activo
+                  </span>
+                </td>
+                <td>
+                  <div class="completeness">
+                    <div class="completeness-label">
+                      <span>70%</span>
+                    </div>
+                    <div class="completeness-bar">
+                      <div class="completeness-fill mid" style="width: 70%;"></div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="languages-cell">
+                    <span class="lang-flag active" title="Español">🇪🇸</span>
+                    <span class="lang-flag active" title="Inglés">🇬🇧</span>
+                    <span class="lang-flag" title="Portugués">🇧🇷</span>
+                    <span class="lang-flag" title="Francés">🇫🇷</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="actions-cell">
+                    <button class="icon-btn" title="Editar">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                      </svg>
+                    </button>
+                    <button class="icon-btn" title="Ver público">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                      </svg>
+                    </button>
+                    <button class="icon-btn" title="Más opciones">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="1"/>
+                        <circle cx="12" cy="5" r="1"/>
+                        <circle cx="12" cy="19" r="1"/>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+
+              <tr>
+                <td>
+                  <svg class="drag-handle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="3" y1="12" x2="21" y2="12"/>
+                    <line x1="3" y1="6" x2="21" y2="6"/>
+                    <line x1="3" y1="18" x2="21" y2="18"/>
+                  </svg>
+                </td>
+                <td>
+                  <div class="product-mini">
+                    <div class="product-thumb">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <path d="M21 15l-5-5L5 21"/>
+                      </svg>
+                    </div>
+                    <div class="product-info">
+                      <div class="product-name-cell">Pizza Quattro Formaggi</div>
+                      <div class="product-desc-cell">Mozzarella, gorgonzola, parmesano y provolone</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="price-cell">$16.90</td>
+                <td>
+                  <span class="status-badge status-paused">
+                    <span class="status-dot"></span>
+                    Pausado
+                  </span>
+                </td>
+                <td>
+                  <div class="completeness">
+                    <div class="completeness-label">
+                      <span>45%</span>
+                    </div>
+                    <div class="completeness-bar">
+                      <div class="completeness-fill low" style="width: 45%;"></div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="languages-cell">
+                    <span class="lang-flag active" title="Español">🇪🇸</span>
+                    <span class="lang-flag" title="Inglés">🇬🇧</span>
+                    <span class="lang-flag" title="Portugués">🇧🇷</span>
+                    <span class="lang-flag" title="Francés">🇫🇷</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="actions-cell">
+                    <button class="icon-btn" title="Editar">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                      </svg>
+                    </button>
+                    <button class="icon-btn" title="Ver público">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                      </svg>
+                    </button>
+                    <button class="icon-btn" title="Más opciones">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="1"/>
+                        <circle cx="12" cy="5" r="1"/>
+                        <circle cx="12" cy="19" r="1"/>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <!-- Categoría: Pastas -->
+        <section class="category-block">
+          <div class="category-block-header">
+            <h2 class="category-name">
+              🍝 Pastas
+              <span class="products-count">8</span>
+            </h2>
+            <div class="category-actions">
+              <button class="icon-btn" title="Editar categoría">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+              </button>
+              <button class="icon-btn" title="Añadir producto">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="12" y1="5" x2="12" y2="19"/>
+                  <line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <table class="products-table">
+            <thead>
+              <tr>
+                <th style="width: 40px;"></th>
+                <th>Producto</th>
+                <th>Precio</th>
+                <th>Estado</th>
+                <th>Completitud</th>
+                <th>Idiomas</th>
+                <th style="width: 120px;">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <svg class="drag-handle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="3" y1="12" x2="21" y2="12"/>
+                    <line x1="3" y1="6" x2="21" y2="6"/>
+                    <line x1="3" y1="18" x2="21" y2="18"/>
+                  </svg>
+                </td>
+                <td>
+                  <div class="product-mini">
+                    <div class="product-thumb">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <path d="M21 15l-5-5L5 21"/>
+                      </svg>
+                    </div>
+                    <div class="product-info">
+                      <div class="product-name-cell">Spaghetti Carbonara</div>
+                      <div class="product-desc-cell">Pasta fresca, panceta, huevo, parmesano y pimienta negra</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="price-cell">$13.50</td>
+                <td>
+                  <span class="status-badge status-active">
+                    <span class="status-dot"></span>
+                    Activo
+                  </span>
+                </td>
+                <td>
+                  <div class="completeness">
+                    <div class="completeness-label">
+                      <span>100%</span>
+                    </div>
+                    <div class="completeness-bar">
+                      <div class="completeness-fill" style="width: 100%;"></div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="languages-cell">
+                    <span class="lang-flag active" title="Español">🇪🇸</span>
+                    <span class="lang-flag active" title="Inglés">🇬🇧</span>
+                    <span class="lang-flag active" title="Portugués">🇧🇷</span>
+                    <span class="lang-flag active" title="Francés">🇫🇷</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="actions-cell">
+                    <button class="icon-btn" title="Editar">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                      </svg>
+                    </button>
+                    <button class="icon-btn" title="Ver público">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                      </svg>
+                    </button>
+                    <button class="icon-btn" title="Más opciones">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="1"/>
+                        <circle cx="12" cy="5" r="1"/>
+                        <circle cx="12" cy="19" r="1"/>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+
+              <tr>
+                <td>
+                  <svg class="drag-handle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="3" y1="12" x2="21" y2="12"/>
+                    <line x1="3" y1="6" x2="21" y2="6"/>
+                    <line x1="3" y1="18" x2="21" y2="18"/>
+                  </svg>
+                </td>
+                <td>
+                  <div class="product-mini">
+                    <div class="product-thumb">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <path d="M21 15l-5-5L5 21"/>
+                      </svg>
+                    </div>
+                    <div class="product-info">
+                      <div class="product-name-cell">Lasagna Bolognesa</div>
+                      <div class="product-desc-cell">Capas de pasta fresca, ragú de carne, bechamel y parmesano</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="price-cell">$15.90</td>
+                <td>
+                  <span class="status-badge status-active">
+                    <span class="status-dot"></span>
+                    Activo
+                  </span>
+                </td>
+                <td>
+                  <div class="completeness">
+                    <div class="completeness-label">
+                      <span>85%</span>
+                    </div>
+                    <div class="completeness-bar">
+                      <div class="completeness-fill" style="width: 85%;"></div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="languages-cell">
+                    <span class="lang-flag active" title="Español">🇪🇸</span>
+                    <span class="lang-flag active" title="Inglés">🇬🇧</span>
+                    <span class="lang-flag" title="Portugués">🇧🇷</span>
+                    <span class="lang-flag" title="Francés">🇫🇷</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="actions-cell">
+                    <button class="icon-btn" title="Editar">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                      </svg>
+                    </button>
+                    <button class="icon-btn" title="Ver público">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                      </svg>
+                    </button>
+                    <button class="icon-btn" title="Más opciones">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="1"/>
+                        <circle cx="12" cy="5" r="1"/>
+                        <circle cx="12" cy="19" r="1"/>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- Modal: Crear/Editar Producto -->
+  <div id="modal-crear-producto" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Nuevo Producto</h2>
+        <button class="icon-btn" onclick="document.getElementById('modal-crear-producto').classList.remove('open')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <form class="form-grid">
+
+          <!-- Tabs de idioma -->
+          <div class="translation-tabs">
+            <button type="button" class="translation-tab active">🇪🇸 Español</button>
+            <button type="button" class="translation-tab">🇬🇧 English</button>
+            <button type="button" class="translation-tab">🇧🇷 Português</button>
+            <button type="button" class="translation-tab">🇫🇷 Français</button>
+          </div>
+
+          <!-- Nombre -->
+          <div class="form-group">
+            <label class="form-label">Nombre del Producto</label>
+            <input type="text" class="form-input" placeholder="Ej: Pizza Margarita">
+            <p class="form-help">Este nombre aparecerá en el menú público.</p>
+          </div>
+
+          <!-- Descripción -->
+          <div class="form-group">
+            <label class="form-label">Descripción</label>
+            <textarea class="form-textarea" placeholder="Describe los ingredientes y características principales..."></textarea>
+            <p class="form-help">Ayuda al cliente a tomar su decisión.</p>
+          </div>
+
+          <!-- Precio y Categoría -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-lg);">
+            <div class="form-group">
+              <label class="form-label">Precio</label>
+              <input type="number" class="form-input" placeholder="12.90" step="0.01">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Categoría</label>
+              <select class="form-select">
+                <option>Seleccionar categoría...</option>
+                <option>🍕 Pizzas</option>
+                <option>🍝 Pastas</option>
+                <option>🥗 Entradas</option>
+                <option>🥩 Carnes</option>
+                <option>🍰 Postres</option>
+                <option>🍷 Bebidas</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Imagen -->
+          <div class="form-group">
+            <label class="form-label">Imagen Principal</label>
+            <div class="image-upload-zone">
+              <div class="upload-icon">📷</div>
+              <p><strong>Arrastra una imagen aquí</strong> o haz clic para seleccionar</p>
+              <p class="form-help">JPG, PNG o WEBP · Máx. 5MB</p>
+            </div>
+          </div>
+
+          <!-- Disponibilidad -->
+          <div class="form-group">
+            <label class="form-label">Disponibilidad</label>
+            <div class="availability-config">
+              <div class="radio-group">
+                <label class="radio-option">
+                  <input type="radio" name="availability" value="always" checked>
+                  <span>Disponible siempre</span>
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="availability" value="schedule">
+                  <span>Disponible por horario</span>
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="availability" value="days">
+                  <span>Disponible por días específicos</span>
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="availability" value="temporary">
+                  <span>Disponible temporalmente</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Etiquetas destacadas -->
+          <div class="form-group">
+            <label class="form-label">Etiquetas Destacadas (opcional)</label>
+            <div style="display: flex; gap: var(--space-sm); flex-wrap: wrap;">
+              <label class="radio-option" style="padding: 8px 14px; border: 1px solid var(--border); border-radius: 8px;">
+                <input type="checkbox" name="badge" value="new">
+                <span>🆕 Nuevo</span>
+              </label>
+              <label class="radio-option" style="padding: 8px 14px; border: 1px solid var(--border); border-radius: 8px;">
+                <input type="checkbox" name="badge" value="hot">
+                <span>🔥 Más vendido</span>
+              </label>
+              <label class="radio-option" style="padding: 8px 14px; border: 1px solid var(--border); border-radius: 8px;">
+                <input type="checkbox" name="badge" value="promo">
+                <span>🎯 Promoción</span>
+              </label>
+              <label class="radio-option" style="padding: 8px 14px; border: 1px solid var(--border); border-radius: 8px;">
+                <input type="checkbox" name="badge" value="limited">
+                <span>⏰ Limitado</span>
+              </label>
+            </div>
+          </div>
+
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn" onclick="document.getElementById('modal-crear-producto').classList.remove('open')">Cancelar</button>
+        <button class="btn">Guardar como borrador</button>
+        <button class="btn btn-primary">Crear y Publicar</button>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

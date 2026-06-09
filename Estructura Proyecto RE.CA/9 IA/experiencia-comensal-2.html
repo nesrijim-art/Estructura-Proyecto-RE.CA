@@ -1,0 +1,1218 @@
+
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Menú Digital · Experiencia Comensal</title>
+  <style>
+    :root {
+      --bg:      #fafafa;
+      --surface: #ffffff;
+      --fg:      #0d1117;
+      --muted:   #6b7280;
+      --border:  #e5e7eb;
+      --accent:  #ffd21e;
+
+      --accent-soft: color-mix(in oklch, var(--accent) 14%, transparent);
+      --fg-soft:     color-mix(in oklch, var(--fg) 6%, transparent);
+
+      --font-display: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      --font-body:    "Source Sans Pro", Inter, system-ui, -apple-system, sans-serif;
+
+      --fs-xs: 11px;
+      --fs-sm: 13px;
+      --fs-base: 15px;
+      --fs-lg: 17px;
+      --fs-xl: 20px;
+      --fs-2xl: 24px;
+      --fs-3xl: 28px;
+
+      --space-xs: 6px;
+      --space-sm: 10px;
+      --space-md: 16px;
+      --space-lg: 24px;
+      --space-xl: 32px;
+
+      --radius: 10px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
+
+      --safe-top: env(safe-area-inset-top);
+      --safe-bottom: env(safe-area-inset-bottom);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--font-body);
+      font-size: var(--fs-base);
+      line-height: 1.5;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+      -webkit-tap-highlight-color: transparent;
+      padding-bottom: calc(var(--safe-bottom) + 90px);
+      overscroll-behavior-y: none;
+    }
+    img, svg { display: block; max-width: 100%; }
+    button { font: inherit; cursor: pointer; border: none; background: none; padding: 0; -webkit-tap-highlight-color: transparent; }
+    p { text-wrap: pretty; margin: 0; }
+    h1, h2, h3 { text-wrap: balance; margin: 0; font-weight: 600; }
+
+    /* ──────────────────────────────────────────────────────────────
+     * 🧭 Layout global — dispositivo iOS con notch y home indicator
+     * ────────────────────────────────────────────────────────── */
+    .device-frame {
+      max-width: 430px;
+      margin: 0 auto;
+      background: var(--fg);
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+    .status-bar {
+      height: calc(44px + var(--safe-top));
+      background: var(--surface);
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      padding: 0 var(--space-md) var(--space-xs);
+      font-size: var(--fs-xs);
+      font-weight: 600;
+      color: var(--fg);
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      border-bottom: 1px solid var(--border);
+    }
+    .status-left, .status-right { display: flex; gap: 4px; align-items: center; }
+    .status-icon { width: 16px; height: 11px; }
+
+    /* ──────────────────────────────────────────────────────────────
+     * 📱 Screen 1 — Navegación principal (categorías + grid)
+     * ────────────────────────────────────────────────────────── */
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    .screen-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: color-mix(in oklch, var(--surface) 96%, transparent);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: var(--space-md);
+    }
+    .screen-header-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--space-sm);
+    }
+    .brand-badge {
+      font-family: var(--font-display);
+      font-size: 17px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+    .header-actions {
+      display: flex;
+      gap: var(--space-sm);
+    }
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      transition: transform 0.1s ease;
+    }
+    .icon-btn:active { transform: scale(0.92); }
+    .icon-btn svg { width: 18px; height: 18px; stroke: var(--fg); }
+
+    .search-input-wrapper {
+      position: relative;
+    }
+    .search-input {
+      width: 100%;
+      padding: 10px 16px 10px 40px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg);
+      color: var(--fg);
+      font-size: var(--fs-base);
+      transition: border-color 0.15s ease;
+    }
+    .search-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      background: var(--surface);
+    }
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 18px;
+      height: 18px;
+      color: var(--muted);
+      pointer-events: none;
+    }
+
+    /* Tabs de categorías con scroll horizontal */
+    .category-tabs {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      padding: var(--space-md) var(--space-md) 0;
+    }
+    .category-tabs::-webkit-scrollbar { display: none; }
+    .category-tab {
+      flex-shrink: 0;
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-size: var(--fs-sm);
+      font-weight: 500;
+      color: var(--muted);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      white-space: nowrap;
+      transition: all 0.15s ease;
+    }
+    .category-tab.active {
+      background: var(--accent);
+      color: var(--fg);
+      border-color: var(--accent);
+      font-weight: 600;
+    }
+
+    /* Grid de productos */
+    .products-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--space-md);
+      padding: var(--space-md);
+    }
+    .product-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      display: flex;
+      gap: var(--space-md);
+      transition: transform 0.1s ease;
+    }
+    .product-card:active { transform: scale(0.98); }
+
+    .product-image {
+      width: 110px;
+      height: 110px;
+      flex-shrink: 0;
+      background: linear-gradient(135deg, var(--accent-soft), var(--fg-soft));
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      font-family: var(--font-display);
+      font-size: 10px;
+      position: relative;
+    }
+    .product-badge {
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      backdrop-filter: blur(8px);
+    }
+    .badge-new { background: color-mix(in oklch, var(--accent) 90%, transparent); color: var(--fg); }
+    .badge-promo { background: color-mix(in oklch, #16a34a 85%, transparent); color: #065f46; }
+
+    .product-info {
+      flex: 1;
+      padding: var(--space-sm) var(--space-sm) var(--space-sm) 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .product-name {
+      font-size: var(--fs-lg);
+      font-weight: 600;
+      line-height: 1.3;
+      letter-spacing: -0.01em;
+      margin-bottom: var(--space-xs);
+    }
+    .product-desc {
+      font-size: var(--fs-sm);
+      color: var(--muted);
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-bottom: auto;
+    }
+    .product-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: var(--space-sm);
+    }
+    .product-price {
+      font-family: var(--font-display);
+      font-size: 19px;
+      font-weight: 600;
+      color: var(--fg);
+      font-variant-numeric: tabular-nums;
+    }
+    .add-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      background: var(--accent);
+      display: grid;
+      place-items: center;
+      transition: transform 0.1s ease;
+    }
+    .add-btn:active { transform: scale(0.88); }
+    .add-btn svg { width: 16px; height: 16px; stroke: var(--fg); stroke-width: 2.5; }
+
+    /* ──────────────────────────────────────────────────────────────
+     * 📱 Screen 2 — Detalle de producto
+     * ────────────────────────────────────────────────────────── */
+    .product-detail-screen {
+      background: var(--surface);
+      min-height: 100vh;
+    }
+    .detail-header {
+      position: relative;
+      height: 340px;
+      background: linear-gradient(135deg, var(--accent-soft), var(--fg-soft));
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      font-family: var(--font-display);
+      font-size: var(--fs-sm);
+    }
+    .detail-nav {
+      position: absolute;
+      top: calc(var(--safe-top) + 12px);
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      padding: 0 var(--space-md);
+    }
+    .nav-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 999px;
+      background: color-mix(in oklch, var(--surface) 92%, transparent);
+      backdrop-filter: blur(12px);
+      border: 1px solid color-mix(in oklch, var(--border) 50%, transparent);
+      display: grid;
+      place-items: center;
+      transition: transform 0.1s ease;
+    }
+    .nav-btn:active { transform: scale(0.92); }
+    .nav-btn svg { width: 20px; height: 20px; stroke: var(--fg); stroke-width: 2; }
+
+    .detail-content {
+      padding: var(--space-lg) var(--space-md);
+    }
+    .detail-header-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: var(--space-md);
+      margin-bottom: var(--space-md);
+    }
+    .detail-title {
+      font-size: var(--fs-3xl);
+      font-weight: 700;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+      flex: 1;
+    }
+    .detail-price {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--fg);
+      font-variant-numeric: tabular-nums;
+      background: var(--accent-soft);
+      padding: 8px 16px;
+      border-radius: var(--radius);
+      flex-shrink: 0;
+    }
+    .detail-desc {
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: var(--space-lg);
+    }
+
+    .detail-section {
+      margin-bottom: var(--space-lg);
+    }
+    .section-title {
+      font-size: var(--fs-lg);
+      font-weight: 600;
+      margin-bottom: var(--space-sm);
+    }
+    .option-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+    .option-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-md);
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      transition: all 0.15s ease;
+    }
+    .option-item.selected {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+    }
+    .option-label {
+      font-size: var(--fs-base);
+      font-weight: 500;
+    }
+    .option-price {
+      font-family: var(--font-display);
+      font-size: var(--fs-base);
+      font-weight: 600;
+      color: var(--muted);
+    }
+    .option-item.selected .option-price {
+      color: var(--fg);
+    }
+    .option-radio {
+      width: 20px;
+      height: 20px;
+      border-radius: 999px;
+      border: 2px solid var(--border);
+      margin-right: var(--space-sm);
+      position: relative;
+      transition: all 0.15s ease;
+    }
+    .option-item.selected .option-radio {
+      border-color: var(--accent);
+      background: var(--accent);
+    }
+    .option-item.selected .option-radio::after {
+      content: '';
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--fg);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .quantity-control {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      padding: var(--space-md);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+    .quantity-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      display: grid;
+      place-items: center;
+      transition: transform 0.1s ease;
+    }
+    .quantity-btn:active { transform: scale(0.92); }
+    .quantity-btn svg { width: 16px; height: 16px; stroke: var(--fg); stroke-width: 2.5; }
+    .quantity-value {
+      flex: 1;
+      text-align: center;
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .notes-input {
+      width: 100%;
+      padding: var(--space-md);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--font-body);
+      font-size: var(--fs-base);
+      line-height: 1.5;
+      resize: vertical;
+      min-height: 80px;
+    }
+    .notes-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      background: var(--surface);
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+     * 📱 Screen 3 — Carrito
+     * ────────────────────────────────────────────────────────── */
+    .cart-screen {
+      background: var(--surface);
+      min-height: 100vh;
+    }
+    .cart-header {
+      padding: calc(var(--safe-top) + var(--space-md)) var(--space-md) var(--space-md);
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+    .cart-title {
+      font-size: var(--fs-2xl);
+      font-weight: 700;
+      margin-bottom: var(--space-xs);
+    }
+    .cart-subtitle {
+      font-size: var(--fs-sm);
+      color: var(--muted);
+    }
+
+    .cart-items {
+      padding: var(--space-md);
+    }
+    .cart-item {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-md);
+      margin-bottom: var(--space-md);
+    }
+    .cart-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: var(--space-sm);
+    }
+    .cart-item-name {
+      font-size: var(--fs-lg);
+      font-weight: 600;
+      flex: 1;
+    }
+    .cart-item-price {
+      font-family: var(--font-display);
+      font-size: var(--fs-lg);
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+    .cart-item-options {
+      font-size: var(--fs-sm);
+      color: var(--muted);
+      margin-bottom: var(--space-sm);
+    }
+    .cart-item-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .remove-btn {
+      font-size: var(--fs-sm);
+      color: #dc2626;
+      font-weight: 500;
+    }
+
+    .cart-summary {
+      padding: var(--space-lg) var(--space-md);
+      background: var(--bg);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      margin-bottom: var(--space-md);
+    }
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: var(--space-sm);
+      font-size: var(--fs-base);
+    }
+    .summary-row.total {
+      margin-top: var(--space-md);
+      padding-top: var(--space-md);
+      border-top: 2px solid var(--border);
+      font-size: var(--fs-xl);
+      font-weight: 700;
+    }
+    .summary-value {
+      font-family: var(--font-display);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+     * 🧭 Bottom navigation bar
+     * ────────────────────────────────────────────────────────── */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      max-width: 430px;
+      margin: 0 auto;
+      background: color-mix(in oklch, var(--surface) 96%, transparent);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid var(--border);
+      padding: var(--space-sm) var(--space-md) calc(var(--safe-bottom) + var(--space-sm));
+      z-index: 200;
+    }
+    .primary-btn {
+      width: 100%;
+      padding: 16px 24px;
+      background: var(--accent);
+      color: var(--fg);
+      font-size: var(--fs-lg);
+      font-weight: 700;
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-sm);
+      transition: transform 0.1s ease;
+    }
+    .primary-btn:active { transform: scale(0.97); }
+    .btn-badge {
+      background: var(--fg);
+      color: var(--accent);
+      border-radius: 999px;
+      width: 24px;
+      height: 24px;
+      display: grid;
+      place-items: center;
+      font-size: var(--fs-sm);
+      font-weight: 700;
+    }
+
+    /* Floating cart indicator en screen principal */
+    .floating-cart {
+      position: fixed;
+      bottom: calc(var(--safe-bottom) + 100px);
+      right: var(--space-md);
+      background: var(--accent);
+      color: var(--fg);
+      border-radius: 999px;
+      padding: 14px 20px;
+      box-shadow: 0 4px 20px color-mix(in oklch, var(--fg), transparent 75%);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 700;
+      z-index: 150;
+      transition: transform 0.1s ease;
+    }
+    .floating-cart:active { transform: scale(0.94); }
+    .cart-count {
+      background: var(--fg);
+      color: var(--accent);
+      border-radius: 999px;
+      width: 22px;
+      height: 22px;
+      display: grid;
+      place-items: center;
+      font-size: 12px;
+    }
+
+    /* Home indicator iOS */
+    .home-indicator {
+      position: fixed;
+      bottom: calc(var(--safe-bottom) + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      width: 134px;
+      height: 5px;
+      background: color-mix(in oklch, var(--fg), transparent 70%);
+      border-radius: 999px;
+      z-index: 300;
+    }
+  </style>
+</head>
+<body>
+
+<div class="device-frame">
+
+  <!-- ──────────────────────────────────────────────────────────────
+   * Status bar iOS
+   * ────────────────────────────────────────────────────────── -->
+  <div class="status-bar">
+    <div class="status-left">
+      <span>9:41</span>
+    </div>
+    <div class="status-right">
+      <svg class="status-icon" viewBox="0 0 24 16" fill="currentColor">
+        <path d="M1 4.5C1 2.015 3.015 0 5.5 0h13C20.985 0 23 2.015 23 4.5v7c0 2.485-2.015 4.5-4.5 4.5h-13C3.015 16 1 13.985 1 11.5v-7zM5.5 2C4.12 2 3 3.12 3 4.5v7C3 12.88 4.12 14 5.5 14h13c1.38 0 2.5-1.12 2.5-2.5v-7C21 3.12 19.88 2 18.5 2h-13z"/>
+        <path d="M24 6v4c1.1 0 2-.9 2-2s-.9-2-2-2z"/>
+      </svg>
+      <span>100%</span>
+    </div>
+  </div>
+
+  <!-- ──────────────────────────────────────────────────────────────
+   * Screen 1 — Catálogo principal
+   * ────────────────────────────────────────────────────────── -->
+  <div class="screen active" id="catalog-screen">
+
+    <header class="screen-header">
+      <div class="screen-header-content">
+        <div class="brand-badge">La Piazza</div>
+        <div class="header-actions">
+          <button class="icon-btn" aria-label="Idioma">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
+            </svg>
+          </button>
+          <button class="icon-btn" aria-label="Ayuda">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="search-input-wrapper">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="M21 21l-4.35-4.35"/>
+        </svg>
+        <input type="search" class="search-input" placeholder="Buscar platos, bebidas...">
+      </div>
+    </header>
+
+    <div class="category-tabs">
+      <button class="category-tab active">Todo</button>
+      <button class="category-tab">🔥 Promociones</button>
+      <button class="category-tab">🍕 Pizzas</button>
+      <button class="category-tab">🥗 Entradas</button>
+      <button class="category-tab">🍝 Pastas</button>
+      <button class="category-tab">🥩 Carnes</button>
+      <button class="category-tab">🍰 Postres</button>
+      <button class="category-tab">🍷 Bebidas</button>
+    </div>
+
+    <div class="products-grid">
+
+      <button class="product-card" data-product="1">
+        <div class="product-image">
+          <span class="product-badge badge-promo">Promo</span>
+          <span>[ Pizza Margarita ]</span>
+        </div>
+        <div class="product-info">
+          <div>
+            <h3 class="product-name">Pizza Margarita Especial</h3>
+            <p class="product-desc">Salsa de tomate casera, mozzarella búfala fresca, albahaca del huerto, aceite de oliva virgen extra</p>
+          </div>
+          <div class="product-footer">
+            <span class="product-price">$12.90</span>
+            <button class="add-btn" aria-label="Añadir">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M12 5v14M5 12h14"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </button>
+
+      <button class="product-card" data-product="2">
+        <div class="product-image">
+          <span class="product-badge badge-new">Nuevo</span>
+          <span>[ Carpaccio Salmón ]</span>
+        </div>
+        <div class="product-info">
+          <div>
+            <h3 class="product-name">Carpaccio de Salmón Rosado</h3>
+            <p class="product-desc">Láminas finas de salmón noruego, alcaparras, rúcula fresca, queso parmesano, reducción de limón</p>
+          </div>
+          <div class="product-footer">
+            <span class="product-price">$16.50</span>
+            <button class="add-btn" aria-label="Añadir">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M12 5v14M5 12h14"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </button>
+
+      <button class="product-card" data-product="3">
+        <div class="product-image">
+          <span>[ Pizza Rúcula ]</span>
+        </div>
+        <div class="product-info">
+          <div>
+            <h3 class="product-name">Pizza Rúcula & Prosciutto</h3>
+            <p class="product-desc">Mozzarella búfala, prosciutto crudo di Parma, rúcula fresca, parmesano en virutas, tomates cherry</p>
+          </div>
+          <div class="product-footer">
+            <span class="product-price">$18.90</span>
+            <button class="add-btn" aria-label="Añadir">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M12 5v14M5 12h14"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </button>
+
+      <button class="product-card" data-product="4">
+        <div class="product-image">
+          <span>[ Tagliatelle Tartufo ]</span>
+        </div>
+        <div class="product-info">
+          <div>
+            <h3 class="product-name">Tagliatelle al Tartufo Nero</h3>
+            <p class="product-desc">Pasta fresca artesanal, salsa cremosa de trufa negra, parmesano envejecido 36 meses, mantequilla clarificada</p>
+          </div>
+          <div class="product-footer">
+            <span class="product-price">$24.90</span>
+            <button class="add-btn" aria-label="Añadir">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M12 5v14M5 12h14"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </button>
+
+      <button class="product-card" data-product="5">
+        <div class="product-image">
+          <span>[ Tiramisù ]</span>
+        </div>
+        <div class="product-info">
+          <div>
+            <h3 class="product-name">Tiramisù della Nonna</h3>
+            <p class="product-desc">Capas de bizcocho savoiardi remojado en café espresso, crema mascarpone casera, cacao amargo en polvo</p>
+          </div>
+          <div class="product-footer">
+            <span class="product-price">$8.90</span>
+            <button class="add-btn" aria-label="Añadir">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M12 5v14M5 12h14"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </button>
+
+      <button class="product-card" data-product="6">
+        <div class="product-image">
+          <span>[ Chianti Classico ]</span>
+        </div>
+        <div class="product-info">
+          <div>
+            <h3 class="product-name">Chianti Classico DOCG</h3>
+            <p class="product-desc">Toscana, Italia. Cosecha 2020. Notas de cereza negra, especias, taninos suaves. Maridaje perfecto con carnes</p>
+          </div>
+          <div class="product-footer">
+            <span class="product-price">$32.00</span>
+            <button class="add-btn" aria-label="Añadir">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M12 5v14M5 12h14"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </button>
+
+    </div>
+
+    <button class="floating-cart" id="show-cart">
+      <span class="cart-count">3</span>
+      <span>$42.30</span>
+    </button>
+
+  </div>
+
+  <!-- ──────────────────────────────────────────────────────────────
+   * Screen 2 — Detalle de producto
+   * ────────────────────────────────────────────────────────── -->
+  <div class="screen product-detail-screen" id="detail-screen">
+
+    <div class="detail-header">
+      <div class="detail-nav">
+        <button class="nav-btn" id="back-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
+        </button>
+        <button class="nav-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+          </svg>
+        </button>
+      </div>
+      <span>[ Foto del producto ]</span>
+    </div>
+
+    <div class="detail-content">
+
+      <div class="detail-header-row">
+        <h1 class="detail-title">Pizza Margarita Especial</h1>
+        <span class="detail-price">$12.90</span>
+      </div>
+
+      <p class="detail-desc">Salsa de tomate casera, mozzarella búfala fresca, albahaca del huerto, aceite de oliva virgen extra. Masa madre fermentada 48h para una base crujiente y esponjosa. Horno de piedra a 450°C.</p>
+
+      <div class="detail-section">
+        <h2 class="section-title">Tamaño</h2>
+        <div class="option-list">
+          <button class="option-item selected">
+            <div style="display: flex; align-items: center; flex: 1;">
+              <div class="option-radio"></div>
+              <span class="option-label">Mediana · 30cm</span>
+            </div>
+            <span class="option-price">$12.90</span>
+          </button>
+          <button class="option-item">
+            <div style="display: flex; align-items: center; flex: 1;">
+              <div class="option-radio"></div>
+              <span class="option-label">Grande · 40cm</span>
+            </div>
+            <span class="option-price">+$5.00</span>
+          </button>
+          <button class="option-item">
+            <div style="display: flex; align-items: center; flex: 1;">
+              <div class="option-radio"></div>
+              <span class="option-label">Familiar · 50cm</span>
+            </div>
+            <span class="option-price">+$9.00</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h2 class="section-title">Masa</h2>
+        <div class="option-list">
+          <button class="option-item selected">
+            <div style="display: flex; align-items: center; flex: 1;">
+              <div class="option-radio"></div>
+              <span class="option-label">Masa madre tradicional</span>
+            </div>
+            <span class="option-price">Incluido</span>
+          </button>
+          <button class="option-item">
+            <div style="display: flex; align-items: center; flex: 1;">
+              <div class="option-radio"></div>
+              <span class="option-label">Masa delgada crujiente</span>
+            </div>
+            <span class="option-price">Sin costo</span>
+          </button>
+          <button class="option-item">
+            <div style="display: flex; align-items: center; flex: 1;">
+              <div class="option-radio"></div>
+              <span class="option-label">Masa integral con semillas</span>
+            </div>
+            <span class="option-price">+$2.00</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h2 class="section-title">Cantidad</h2>
+        <div class="quantity-control">
+          <button class="quantity-btn" id="qty-minus">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M5 12h14"/>
+            </svg>
+          </button>
+          <span class="quantity-value">1</span>
+          <button class="quantity-btn" id="qty-plus">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M12 5v14M5 12h14"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h2 class="section-title">Instrucciones especiales (opcional)</h2>
+        <textarea class="notes-input" placeholder="Ej: Sin cebolla, cocción bien hecha, poca sal..."></textarea>
+      </div>
+
+    </div>
+
+    <div class="bottom-nav">
+      <button class="primary-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <circle cx="9" cy="21" r="1"/>
+          <circle cx="20" cy="21" r="1"/>
+          <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/>
+        </svg>
+        <span>Añadir al pedido · $12.90</span>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- ──────────────────────────────────────────────────────────────
+   * Screen 3 — Carrito de compra
+   * ────────────────────────────────────────────────────────── -->
+  <div class="screen cart-screen" id="cart-screen">
+
+    <header class="cart-header">
+      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+        <button class="nav-btn" id="cart-back-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
+        </button>
+        <h1 class="cart-title">Tu Pedido</h1>
+      </div>
+      <p class="cart-subtitle">Mesa 12 · 3 productos</p>
+    </header>
+
+    <div class="cart-items">
+
+      <article class="cart-item">
+        <div class="cart-item-header">
+          <h3 class="cart-item-name">Pizza Margarita Especial</h3>
+          <span class="cart-item-price">$12.90</span>
+        </div>
+        <p class="cart-item-options">Mediana · Masa madre tradicional</p>
+        <div class="cart-item-footer">
+          <button class="remove-btn">Eliminar</button>
+          <div class="quantity-control" style="width: auto; padding: 8px 12px;">
+            <button class="quantity-btn" style="width: 28px; height: 28px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M5 12h14"/>
+              </svg>
+            </button>
+            <span class="quantity-value" style="font-size: 16px; min-width: 32px;">1</span>
+            <button class="quantity-btn" style="width: 28px; height: 28px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M12 5v14M5 12h14"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </article>
+
+      <article class="cart-item">
+        <div class="cart-item-header">
+          <h3 class="cart-item-name">Tagliatelle al Tartufo Nero</h3>
+          <span class="cart-item-price">$24.90</span>
+        </div>
+        <p class="cart-item-options">Porción estándar</p>
+        <div class="cart-item-footer">
+          <button class="remove-btn">Eliminar</button>
+          <div class="quantity-control" style="width: auto; padding: 8px 12px;">
+            <button class="quantity-btn" style="width: 28px; height: 28px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M5 12h14"/>
+              </svg>
+            </button>
+            <span class="quantity-value" style="font-size: 16px; min-width: 32px;">1</span>
+            <button class="quantity-btn" style="width: 28px; height: 28px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M12 5v14M5 12h14"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </article>
+
+      <article class="cart-item">
+        <div class="cart-item-header">
+          <h3 class="cart-item-name">Limonata Fresca di Casa</h3>
+          <span class="cart-item-price">$4.50</span>
+        </div>
+        <p class="cart-item-options">Jarra 500ml</p>
+        <div class="cart-item-footer">
+          <button class="remove-btn">Eliminar</button>
+          <div class="quantity-control" style="width: auto; padding: 8px 12px;">
+            <button class="quantity-btn" style="width: 28px; height: 28px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M5 12h14"/>
+              </svg>
+            </button>
+            <span class="quantity-value" style="font-size: 16px; min-width: 32px;">1</span>
+            <button class="quantity-btn" style="width: 28px; height: 28px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M12 5v14M5 12h14"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </article>
+
+    </div>
+
+    <div class="cart-summary">
+      <div class="summary-row">
+        <span>Subtotal</span>
+        <span class="summary-value">$42.30</span>
+      </div>
+      <div class="summary-row">
+        <span>Servicio de mesa (10%)</span>
+        <span class="summary-value">$4.23</span>
+      </div>
+      <div class="summary-row total">
+        <span>Total a pagar</span>
+        <span class="summary-value">$46.53</span>
+      </div>
+    </div>
+
+    <div style="padding: 0 var(--space-md);">
+      <button class="primary-btn" style="margin-bottom: var(--space-md);">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+          <path d="M22 4L12 14.01l-3-3"/>
+        </svg>
+        <span>Confirmar pedido</span>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Home indicator -->
+  <div class="home-indicator"></div>
+
+</div>
+
+<script>
+// ──────────────────────────────────────────────────────────────
+// Navegación entre pantallas
+// ────────────────────────────────────────────────────────────
+
+const screens = {
+  catalog: document.getElementById('catalog-screen'),
+  detail: document.getElementById('detail-screen'),
+  cart: document.getElementById('cart-screen')
+};
+
+function showScreen(screenName) {
+  Object.values(screens).forEach(s => s?.classList.remove('active'));
+  screens[screenName]?.classList.add('active');
+}
+
+// Abrir detalle de producto
+document.querySelectorAll('.product-card').forEach(card => {
+  card.addEventListener('click', (e) => {
+    if (!e.target.closest('.add-btn')) {
+      showScreen('detail');
+    }
+  });
+});
+
+// Volver al catálogo desde detalle
+document.getElementById('back-btn')?.addEventListener('click', () => {
+  showScreen('catalog');
+});
+
+// Mostrar carrito
+document.getElementById('show-cart')?.addEventListener('click', () => {
+  showScreen('cart');
+});
+
+// Volver al catálogo desde carrito
+document.getElementById('cart-back-btn')?.addEventListener('click', () => {
+  showScreen('catalog');
+});
+
+// ──────────────────────────────────────────────────────────────
+// Interacciones en detalle de producto
+// ────────────────────────────────────────────────────────────
+
+// Selección de opciones
+document.querySelectorAll('.option-item').forEach(item => {
+  item.addEventListener('click', () => {
+    const parent = item.closest('.option-list');
+    parent.querySelectorAll('.option-item').forEach(opt => opt.classList.remove('selected'));
+    item.classList.add('selected');
+  });
+});
+
+// Control de cantidad
+let quantity = 1;
+document.getElementById('qty-minus')?.addEventListener('click', () => {
+  if (quantity > 1) {
+    quantity--;
+    document.querySelector('#detail-screen .quantity-value').textContent = quantity;
+  }
+});
+document.getElementById('qty-plus')?.addEventListener('click', () => {
+  quantity++;
+  document.querySelector('#detail-screen .quantity-value').textContent = quantity;
+});
+
+// ──────────────────────────────────────────────────────────────
+// Tabs de categorías
+// ────────────────────────────────────────────────────────────
+
+document.querySelectorAll('.category-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+  });
+});
+
+// ──────────────────────────────────────────────────────────────
+// Búsqueda en tiempo real
+// ────────────────────────────────────────────────────────────
+
+const searchInput = document.querySelector('.search-input');
+let searchTimeout;
+
+searchInput?.addEventListener('input', (e) => {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    const query = e.target.value.toLowerCase();
+    console.log('Búsqueda:', query);
+    // Aquí filtrarías productos
+  }, 300);
+});
+
+// ──────────────────────────────────────────────────────────────
+// Detección automática de idioma
+// ────────────────────────────────────────────────────────────
+
+const userLang = navigator.language || navigator.userLanguage;
+const langCode = userLang.split('-')[0];
+console.log('Idioma del dispositivo detectado:', langCode);
+// Aquí cargarías el catálogo en el idioma detectado
+
+// ──────────────────────────────────────────────────────────────
+// Persistencia del carrito en localStorage
+// ────────────────────────────────────────────────────────────
+
+const CART_KEY = 'menu_cart';
+
+function saveCart(cart) {
+  localStorage.setItem(CART_KEY, JSON.stringify(cart));
+}
+
+function loadCart() {
+  const saved = localStorage.getItem(CART_KEY);
+  return saved ? JSON.parse(saved) : [];
+}
+
+// Inicializar carrito desde localStorage al cargar
+let cart = loadCart();
+console.log('Carrito cargado:', cart);
+</script>
+
+</body>
+</html>

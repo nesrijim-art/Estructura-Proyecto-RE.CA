@@ -1,0 +1,1218 @@
+
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Automatizaciones y Operación Inteligente · SaaS Menús Digitales</title>
+  <style>
+    :root {
+      --bg:      #fafafa;
+      --surface: #ffffff;
+      --fg:      #0d1117;
+      --muted:   #6b7280;
+      --border:  #e5e7eb;
+      --accent:  #ffd21e;
+
+      --accent-soft: color-mix(in oklch, var(--accent) 14%, transparent);
+      --fg-soft:     color-mix(in oklch, var(--fg) 6%, transparent);
+      --success:     #16a34a;
+      --success-soft: color-mix(in oklch, var(--success) 12%, transparent);
+      --warn:        #f59e0b;
+      --warn-soft:   color-mix(in oklch, var(--warn) 12%, transparent);
+      --danger:      #dc2626;
+      --danger-soft: color-mix(in oklch, var(--danger) 12%, transparent);
+      --info:        #2563eb;
+      --info-soft:   color-mix(in oklch, var(--info) 12%, transparent);
+      --purple:      #9333ea;
+      --purple-soft: color-mix(in oklch, var(--purple) 12%, transparent);
+
+      --font-display: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      --font-body:    "Source Sans Pro", Inter, system-ui, -apple-system, sans-serif;
+
+      --fs-xs: 11px;
+      --fs-sm: 13px;
+      --fs-base: 15px;
+      --fs-lg: 17px;
+      --fs-xl: 20px;
+      --fs-2xl: 24px;
+      --fs-3xl: 32px;
+
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 16px;
+      --space-lg: 24px;
+      --space-xl: 32px;
+      --space-2xl: 48px;
+
+      --radius: 6px;
+      --radius-lg: 10px;
+      --radius-xl: 16px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--font-body);
+      font-size: var(--fs-base);
+      line-height: 1.5;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+    }
+    img, svg { display: block; max-width: 100%; }
+    button { font: inherit; cursor: pointer; border: none; background: none; padding: 0; }
+    p { text-wrap: pretty; margin: 0; }
+    h1, h2, h3 { text-wrap: balance; margin: 0; font-weight: 600; }
+
+    /* ──────────────────────────────────────────────────────────────
+     * 🧭 Layout global — sidebar + main content
+     * ────────────────────────────────────────────────────────── */
+    .app-container {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      min-height: 100vh;
+    }
+
+    @media (max-width: 920px) {
+      .app-container {
+        grid-template-columns: 1fr;
+      }
+      .sidebar {
+        display: none;
+      }
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: var(--space-lg);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xl);
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    .brand {
+      font-family: var(--font-display);
+      font-size: 19px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      padding-bottom: var(--space-md);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-section {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+    }
+    .nav-label {
+      font-size: var(--fs-xs);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      margin-bottom: var(--space-sm);
+    }
+    .nav-item {
+      padding: var(--space-sm) var(--space-md);
+      border-radius: var(--radius);
+      font-size: var(--fs-base);
+      font-weight: 500;
+      color: var(--muted);
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      text-decoration: none;
+    }
+    .nav-item:hover {
+      background: var(--bg);
+      color: var(--fg);
+    }
+    .nav-item.active {
+      background: var(--accent-soft);
+      color: var(--fg);
+      font-weight: 600;
+    }
+
+    /* Main content area */
+    .main-content {
+      padding: var(--space-xl);
+      max-width: 1440px;
+      width: 100%;
+    }
+
+    @media (max-width: 920px) {
+      .main-content {
+        padding: var(--space-md);
+      }
+    }
+
+    /* Header con acciones */
+    .page-header {
+      margin-bottom: var(--space-xl);
+    }
+    .page-title {
+      font-size: var(--fs-3xl);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: var(--space-sm);
+    }
+    .page-subtitle {
+      color: var(--muted);
+      font-size: var(--fs-lg);
+      margin-bottom: var(--space-lg);
+      line-height: 1.6;
+    }
+    .header-actions {
+      display: flex;
+      gap: var(--space-md);
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: var(--space-sm) var(--space-lg);
+      border-radius: var(--radius);
+      font-size: var(--fs-base);
+      font-weight: 600;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+    .btn-primary {
+      background: var(--fg);
+      color: var(--surface);
+    }
+    .btn-primary:hover {
+      background: color-mix(in oklch, var(--fg) 85%, transparent);
+    }
+    .btn-secondary {
+      background: var(--surface);
+      color: var(--fg);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover {
+      background: var(--bg);
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+     * 📊 Tabs de navegación
+     * ────────────────────────────────────────────────────────── */
+    .tabs {
+      display: flex;
+      gap: var(--space-sm);
+      border-bottom: 1px solid var(--border);
+      margin-bottom: var(--space-xl);
+      overflow-x: auto;
+    }
+    .tab {
+      padding: var(--space-md) var(--space-lg);
+      font-size: var(--fs-base);
+      font-weight: 500;
+      color: var(--muted);
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .tab:hover {
+      color: var(--fg);
+    }
+    .tab.active {
+      color: var(--fg);
+      font-weight: 600;
+      border-bottom-color: var(--accent);
+    }
+
+    /* Tab panels */
+    .tab-panel {
+      display: none;
+    }
+    .tab-panel.active {
+      display: block;
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+     * 🤖 Lista de Automatizaciones
+     * ────────────────────────────────────────────────────────── */
+    .automation-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+    .automation-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg);
+      display: flex;
+      gap: var(--space-lg);
+      align-items: flex-start;
+      transition: all 0.15s ease;
+    }
+    .automation-card:hover {
+      border-color: var(--accent);
+    }
+
+    .automation-icon {
+      width: 48px;
+      height: 48px;
+      flex-shrink: 0;
+      border-radius: var(--radius);
+      display: grid;
+      place-items: center;
+      font-size: 24px;
+    }
+    .automation-card.active .automation-icon {
+      background: var(--success-soft);
+    }
+    .automation-card.paused .automation-icon {
+      background: var(--warn-soft);
+    }
+    .automation-card.disabled .automation-icon {
+      background: var(--fg-soft);
+    }
+
+    .automation-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+    .automation-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-md);
+    }
+    .automation-title {
+      font-size: var(--fs-xl);
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+    .automation-status {
+      padding: var(--space-xs) var(--space-md);
+      border-radius: var(--radius);
+      font-size: var(--fs-xs);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      font-family: var(--font-display);
+    }
+    .status-active {
+      background: var(--success-soft);
+      color: var(--success);
+    }
+    .status-paused {
+      background: var(--warn-soft);
+      color: var(--warn);
+    }
+    .status-disabled {
+      background: var(--fg-soft);
+      color: var(--muted);
+    }
+
+    .automation-desc {
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .automation-meta {
+      display: flex;
+      gap: var(--space-lg);
+      flex-wrap: wrap;
+      font-size: var(--fs-sm);
+      color: var(--muted);
+      padding-top: var(--space-sm);
+      border-top: 1px solid var(--border);
+    }
+    .meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+    }
+    .meta-label {
+      font-size: var(--fs-xs);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .meta-value {
+      font-family: var(--font-display);
+      font-size: var(--fs-sm);
+      color: var(--fg);
+    }
+
+    .automation-actions {
+      display: flex;
+      gap: var(--space-sm);
+      margin-top: var(--space-sm);
+    }
+    .icon-btn {
+      padding: var(--space-sm);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      transition: all 0.15s ease;
+      display: grid;
+      place-items: center;
+    }
+    .icon-btn:hover {
+      background: var(--bg);
+      border-color: var(--fg);
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+     * 🎨 Constructor Visual de Reglas (Modal)
+     * ────────────────────────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: color-mix(in oklch, var(--fg) 50%, transparent);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-lg);
+    }
+    .modal-overlay.active {
+      display: flex;
+    }
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      max-width: 720px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px color-mix(in oklch, var(--fg) 30%, transparent);
+    }
+    .modal-header {
+      padding: var(--space-xl);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal-title {
+      font-size: var(--fs-2xl);
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+    .modal-close {
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      background: var(--bg);
+      transition: all 0.15s ease;
+    }
+    .modal-close:hover {
+      background: var(--border);
+    }
+
+    .modal-body {
+      padding: var(--space-xl);
+    }
+
+    /* Stepper */
+    .stepper {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: var(--space-2xl);
+      position: relative;
+    }
+    .stepper::before {
+      content: '';
+      position: absolute;
+      top: 16px;
+      left: 24px;
+      right: 24px;
+      height: 2px;
+      background: var(--border);
+      z-index: -1;
+    }
+    .step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-sm);
+      flex: 1;
+    }
+    .step-circle {
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      display: grid;
+      place-items: center;
+      font-family: var(--font-display);
+      font-size: var(--fs-sm);
+      font-weight: 700;
+      color: var(--muted);
+      transition: all 0.15s ease;
+    }
+    .step.active .step-circle {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: var(--fg);
+    }
+    .step.completed .step-circle {
+      background: var(--success);
+      border-color: var(--success);
+      color: white;
+    }
+    .step-label {
+      font-size: var(--fs-sm);
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .step.active .step-label {
+      color: var(--fg);
+      font-weight: 600;
+    }
+
+    /* Form fields */
+    .form-group {
+      margin-bottom: var(--space-lg);
+    }
+    .form-label {
+      display: block;
+      font-size: var(--fs-base);
+      font-weight: 600;
+      margin-bottom: var(--space-sm);
+    }
+    .form-input,
+    .form-select,
+    .form-textarea {
+      width: 100%;
+      padding: var(--space-md);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg);
+      color: var(--fg);
+      font-size: var(--fs-base);
+      font-family: var(--font-body);
+      transition: all 0.15s ease;
+    }
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      background: var(--surface);
+    }
+    .form-textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    /* Rule builder visual */
+    .rule-builder {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg);
+      margin-bottom: var(--space-lg);
+    }
+    .rule-section {
+      margin-bottom: var(--space-lg);
+    }
+    .rule-section:last-child {
+      margin-bottom: 0;
+    }
+    .rule-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-md);
+    }
+    .rule-keyword {
+      font-family: var(--font-display);
+      font-size: var(--fs-lg);
+      font-weight: 700;
+      color: var(--purple);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .rule-arrow {
+      font-size: var(--fs-xl);
+      color: var(--muted);
+    }
+
+    .option-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: var(--space-sm);
+    }
+    .option-card {
+      padding: var(--space-md);
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      transition: all 0.15s ease;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+    .option-card:hover {
+      border-color: var(--accent);
+    }
+    .option-card.selected {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+    }
+    .option-icon {
+      font-size: 20px;
+    }
+    .option-label {
+      font-size: var(--fs-base);
+      font-weight: 500;
+    }
+
+    /* Summary card */
+    .summary-card {
+      background: var(--accent-soft);
+      border: 1px solid var(--accent);
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg);
+    }
+    .summary-title {
+      font-size: var(--fs-xl);
+      font-weight: 600;
+      margin-bottom: var(--space-md);
+    }
+    .summary-item {
+      display: flex;
+      gap: var(--space-md);
+      margin-bottom: var(--space-sm);
+    }
+    .summary-label {
+      font-weight: 600;
+      color: var(--muted);
+      min-width: 100px;
+    }
+    .summary-value {
+      color: var(--fg);
+    }
+
+    .modal-footer {
+      padding: var(--space-xl);
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: var(--space-md);
+      justify-content: flex-end;
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+     * 📜 Historial de Ejecuciones
+     * ────────────────────────────────────────────────────────── */
+    .history-table {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    thead {
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      padding: var(--space-md) var(--space-lg);
+      text-align: left;
+      font-size: var(--fs-sm);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: var(--muted);
+    }
+    td {
+      padding: var(--space-md) var(--space-lg);
+      border-bottom: 1px solid var(--border);
+      font-size: var(--fs-base);
+    }
+    tr:last-child td {
+      border-bottom: none;
+    }
+    tr:hover {
+      background: var(--bg);
+    }
+
+    .result-badge {
+      padding: var(--space-xs) var(--space-sm);
+      border-radius: var(--radius);
+      font-size: var(--fs-xs);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      font-family: var(--font-display);
+    }
+    .result-success {
+      background: var(--success-soft);
+      color: var(--success);
+    }
+    .result-error {
+      background: var(--danger-soft);
+      color: var(--danger);
+    }
+    .result-no-action {
+      background: var(--fg-soft);
+      color: var(--muted);
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: var(--space-2xl);
+    }
+    .empty-icon {
+      font-size: 64px;
+      margin-bottom: var(--space-lg);
+      opacity: 0.3;
+    }
+    .empty-title {
+      font-size: var(--fs-2xl);
+      font-weight: 600;
+      margin-bottom: var(--space-sm);
+    }
+    .empty-desc {
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: var(--space-lg);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="brand">Menús Digitales</div>
+      
+      <nav class="nav-section">
+        <div class="nav-label">Principal</div>
+        <a href="#" class="nav-item">Dashboard</a>
+        <a href="#" class="nav-item">Catálogo</a>
+        <a href="#" class="nav-item">Marketing</a>
+        <a href="#" class="nav-item active">Automatizaciones</a>
+      </nav>
+
+      <nav class="nav-section">
+        <div class="nav-label">Inteligencia</div>
+        <a href="#" class="nav-item">Estadísticas</a>
+        <a href="#" class="nav-item">IA Asistente</a>
+      </nav>
+
+      <nav class="nav-section">
+        <div class="nav-label">Configuración</div>
+        <a href="#" class="nav-item">Usuarios</a>
+        <a href="#" class="nav-item">Multiempresa</a>
+        <a href="#" class="nav-item">Planes</a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Header -->
+      <div class="page-header">
+        <h1 class="page-title">Automatizaciones y Operación Inteligente</h1>
+        <p class="page-subtitle">
+          Configura reglas automáticas para reducir trabajo manual, mejorar la consistencia operativa y mantener tu negocio activo sin supervisión constante.
+        </p>
+        <div class="header-actions">
+          <button class="btn btn-primary" onclick="openModal()">
+            ⚡ Nueva Automatización
+          </button>
+          <button class="btn btn-secondary">
+            📊 Exportar Historial
+          </button>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('list')">Automatizaciones</button>
+        <button class="tab" onclick="switchTab('history')">Historial de Ejecuciones</button>
+      </div>
+
+      <!-- Tab Panel: Lista de Automatizaciones -->
+      <div id="panel-list" class="tab-panel active">
+        <div class="automation-list">
+          <!-- Automatización 1: Activa -->
+          <div class="automation-card active">
+            <div class="automation-icon">⏰</div>
+            <div class="automation-content">
+              <div class="automation-header">
+                <h3 class="automation-title">Happy Hour Viernes</h3>
+                <span class="automation-status status-active">Activa</span>
+              </div>
+              <p class="automation-desc">
+                Cada viernes a las 18:00 → Publicar promoción "Happy Hour 2x1 en cervezas".
+              </p>
+              <div class="automation-meta">
+                <div class="meta-item">
+                  <div class="meta-label">Creación</div>
+                  <div class="meta-value">2026-05-15</div>
+                </div>
+                <div class="meta-item">
+                  <div class="meta-label">Última Ejecución</div>
+                  <div class="meta-value">2026-06-06 18:00</div>
+                </div>
+                <div class="meta-item">
+                  <div class="meta-label">Próxima Ejecución</div>
+                  <div class="meta-value">2026-06-13 18:00</div>
+                </div>
+                <div class="meta-item">
+                  <div class="meta-label">Resultado</div>
+                  <div class="meta-value">✓ Éxito</div>
+                </div>
+              </div>
+              <div class="automation-actions">
+                <button class="icon-btn" title="Editar">✏️</button>
+                <button class="icon-btn" title="Pausar">⏸️</button>
+                <button class="icon-btn" title="Ver Historial">📜</button>
+                <button class="icon-btn" title="Eliminar">🗑️</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Automatización 2: Activa -->
+          <div class="automation-card active">
+            <div class="automation-icon">🍳</div>
+            <div class="automation-content">
+              <div class="automation-header">
+                <h3 class="automation-title">Menú Desayunos Dinámico</h3>
+                <span class="automation-status status-active">Activa</span>
+              </div>
+              <p class="automation-desc">
+                Cada día de 06:00 a 11:00 → Activar categoría "Desayunos". A las 11:00 → Pausar categoría.
+              </p>
+              <div class="automation-meta">
+                <div class="meta-item">
+                  <div class="meta-label">Creación</div>
+                  <div class="meta-value">2026-05-01</div>
+                </div>
+                <div class="meta-item">
+                  <div class="meta-label">Última Ejecución</div>
+                  <div class="meta-value">2026-06-08 11:00</div>
+                </div>
+                <div class="meta-item">
+                  <div class="meta-label">Próxima Ejecución</div>
+                  <div class="meta-value">2026-06-09 06:00</div>
+                </div>
+                <div class="meta-item">
+                  <div class="meta-label">Resultado</div>
+                  <div class="meta-value">✓ Éxito</div>
+                </div>
+              </div>
+              <div class="automation-actions">
+                <button class="icon-btn" title="Editar">✏️</button>
+                <button class="icon-btn" title="Pausar">⏸️</button>
+                <button class="icon-btn" title="Ver Historial">📜</button>
+                <button class="icon-btn" title="Eliminar">🗑️</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Automatización 3: Pausada -->
+          <div class="automation-card paused">
+            <div class="automation-icon">🔔</div>
+            <div class="automation-content">
+              <div class="automation-header">
+                <h3 class="automation-title">Recordatorio Semanal de Precios</h3>
+                <span class="automation-status status-paused">Pausada</span>
+              </div>
+              <p class="automation-desc">
+                Cada lunes a las 09:00 → Generar recordatorio "Revisar precios del menú".
+              </p>
+              <div class="automation-meta">
+                <div class="meta-item">
+                  <div class="meta-label">Creación</div>
+                  <div class="meta-value">2026-04-20</div>
+                </div>
+                <div class="meta-item">
+                  <div class="meta-label">Última Ejecución</div>
+                  <div class="meta-value">2026-05-27 09:00</div>
+                </div>
+                <div class="meta-item">
+                  <div class="meta-label">Próxima Ejecución</div>
+                  <div class="meta-value">—</div>
+                </div>
+                <div class="meta-item">
+                  <div class="meta-label">Resultado</div>
+                  <div class="meta-value">⏸️ Pausada</div>
+                </div>
+              </div>
+              <div class="automation-actions">
+                <button class="icon-btn" title="Editar">✏️</button>
+                <button class="icon-btn" title="Reanudar">▶️</button>
+                <button class="icon-btn" title="Ver Historial">📜</button>
+                <button class="icon-btn" title="Eliminar">🗑️</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Automatización 4: Activa con IA -->
+          <div class="automation-card active">
+            <div class="automation-icon">🤖</div>
+            <div class="automation-content">
+              <div class="automation-header">
+                <h3 class="automation-title">Campaña Navideña con IA</h3>
+                <span class="automation-status status-active">Activa</span>
+              </div>
+              <p class="automation-desc">
+                Cada 1 de diciembre a las 09:00 → Generar contenido con IA para campaña navideña → Enviar para aprobación.
+              </p>
+              <div class="automation-meta">
+                <div class="meta-item">
+                  <div class="meta-label">Creación</div>
+                  <div class="meta-value">2026-05-10</div>
+                </div>
+                <div class="meta-item">
+                  <div class="meta-label">Última Ejecución</div>
+                  <div class="meta-value">—</div>
+                </div>
+                <div class="meta-item">
+                  <div class="meta-label">Próxima Ejecución</div>
+                  <div class="meta-value">2026-12-01 09:00</div>
+                </div>
+                <div class="meta-item">
+                  <div class="meta-label">Resultado</div>
+                  <div class="meta-value">⏳ Pendiente</div>
+                </div>
+              </div>
+              <div class="automation-actions">
+                <button class="icon-btn" title="Editar">✏️</button>
+                <button class="icon-btn" title="Pausar">⏸️</button>
+                <button class="icon-btn" title="Ver Historial">📜</button>
+                <button class="icon-btn" title="Eliminar">🗑️</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Automatización 5: Basada en métricas -->
+          <div class="automation-card active">
+            <div class="automation-icon">📊</div>
+            <div class="automation-content">
+              <div class="automation-header">
+                <h3 class="automation-title">Sugerencia para Productos Populares</h3>
+                <span class="automation-status status-active">Activa</span>
+              </div>
+              <p class="automation-desc">
+                Cuando un producto supere 100 visualizaciones en una semana → Generar sugerencia "Crear promoción para este producto".
+              </p>
+              <div class="automation-meta">
+                <div class="meta-item">
+                  <div class="meta-label">Creación</div>
+                  <div class="meta-value">2026-05-22</div>
+                </div>
+                <div class="meta-item">
+                  <div class="meta-label">Última Ejecución</div>
+                  <div class="meta-value">2026-06-05 14:30</div>
+                </div>
+                <div class="meta-item">
+                  <div class="meta-label">Próxima Ejecución</div>
+                  <div class="meta-value">Continua</div>
+                </div>
+                <div class="meta-item">
+                  <div class="meta-label">Resultado</div>
+                  <div class="meta-value">✓ Sugerencia generada</div>
+                </div>
+              </div>
+              <div class="automation-actions">
+                <button class="icon-btn" title="Editar">✏️</button>
+                <button class="icon-btn" title="Pausar">⏸️</button>
+                <button class="icon-btn" title="Ver Historial">📜</button>
+                <button class="icon-btn" title="Eliminar">🗑️</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Panel: Historial de Ejecuciones -->
+      <div id="panel-history" class="tab-panel">
+        <div class="history-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha / Hora</th>
+                <th>Automatización</th>
+                <th>Acción Realizada</th>
+                <th>Resultado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div style="font-family: var(--font-display); font-weight: 600;">2026-06-08</div>
+                  <div style="color: var(--muted); font-size: var(--fs-sm);">11:00:00</div>
+                </td>
+                <td>Menú Desayunos Dinámico</td>
+                <td>Pausar categoría "Desayunos"</td>
+                <td><span class="result-badge result-success">Éxito</span></td>
+              </tr>
+              <tr>
+                <td>
+                  <div style="font-family: var(--font-display); font-weight: 600;">2026-06-08</div>
+                  <div style="color: var(--muted); font-size: var(--fs-sm);">06:00:00</div>
+                </td>
+                <td>Menú Desayunos Dinámico</td>
+                <td>Activar categoría "Desayunos"</td>
+                <td><span class="result-badge result-success">Éxito</span></td>
+              </tr>
+              <tr>
+                <td>
+                  <div style="font-family: var(--font-display); font-weight: 600;">2026-06-06</div>
+                  <div style="color: var(--muted); font-size: var(--fs-sm);">18:00:00</div>
+                </td>
+                <td>Happy Hour Viernes</td>
+                <td>Publicar promoción "Happy Hour 2x1"</td>
+                <td><span class="result-badge result-success">Éxito</span></td>
+              </tr>
+              <tr>
+                <td>
+                  <div style="font-family: var(--font-display); font-weight: 600;">2026-06-05</div>
+                  <div style="color: var(--muted); font-size: var(--fs-sm);">14:30:22</div>
+                </td>
+                <td>Sugerencia Productos Populares</td>
+                <td>Generar sugerencia para "Pizza Rúcula"</td>
+                <td><span class="result-badge result-success">Éxito</span></td>
+              </tr>
+              <tr>
+                <td>
+                  <div style="font-family: var(--font-display); font-weight: 600;">2026-06-03</div>
+                  <div style="color: var(--muted); font-size: var(--fs-sm);">12:00:00</div>
+                </td>
+                <td>Recordatorio Inventario</td>
+                <td>Generar recordatorio "Revisar stock"</td>
+                <td><span class="result-badge result-error">Error</span></td>
+              </tr>
+              <tr>
+                <td>
+                  <div style="font-family: var(--font-display); font-weight: 600;">2026-06-01</div>
+                  <div style="color: var(--muted); font-size: var(--fs-sm);">09:00:00</div>
+                </td>
+                <td>Actualización Mensual</td>
+                <td>Revisar productos sin visitas</td>
+                <td><span class="result-badge result-no-action">Sin acción</span></td>
+              </tr>
+              <tr>
+                <td>
+                  <div style="font-family: var(--font-display); font-weight: 600;">2026-05-30</div>
+                  <div style="color: var(--muted); font-size: var(--fs-sm);">18:00:00</div>
+                </td>
+                <td>Happy Hour Viernes</td>
+                <td>Publicar promoción "Happy Hour 2x1"</td>
+                <td><span class="result-badge result-success">Éxito</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal: Constructor de Automatización -->
+  <div class="modal-overlay" id="modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Nueva Automatización</h2>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Stepper -->
+        <div class="stepper">
+          <div class="step active">
+            <div class="step-circle">1</div>
+            <div class="step-label">Condición</div>
+          </div>
+          <div class="step">
+            <div class="step-circle">2</div>
+            <div class="step-label">Acción</div>
+          </div>
+          <div class="step">
+            <div class="step-circle">3</div>
+            <div class="step-label">Confirmar</div>
+          </div>
+        </div>
+
+        <!-- Step 1: Condición (SI...) -->
+        <div id="step-1">
+          <div class="form-group">
+            <label class="form-label">Nombre de la Automatización</label>
+            <input type="text" class="form-input" placeholder="Ejemplo: Promoción de Fin de Semana" />
+          </div>
+
+          <div class="rule-builder">
+            <div class="rule-section">
+              <div class="rule-header">
+                <span class="rule-keyword">SI</span>
+                <span class="rule-arrow">↓</span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Selecciona una condición</label>
+                <div class="option-grid">
+                  <div class="option-card selected">
+                    <span class="option-icon">⏰</span>
+                    <span class="option-label">Horario / Fecha</span>
+                  </div>
+                  <div class="option-card">
+                    <span class="option-icon">📊</span>
+                    <span class="option-label">Métrica</span>
+                  </div>
+                  <div class="option-card">
+                    <span class="option-icon">🎯</span>
+                    <span class="option-label">Evento</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Frecuencia</label>
+                <select class="form-select">
+                  <option>Cada día a una hora específica</option>
+                  <option selected>Cada viernes a las 18:00</option>
+                  <option>Cada lunes a las 09:00</option>
+                  <option>Cada 1 de mes a las 08:00</option>
+                  <option>Fecha específica</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2: Acción (ENTONCES...) -->
+        <div id="step-2" style="display: none;">
+          <div class="rule-builder">
+            <div class="rule-section">
+              <div class="rule-header">
+                <span class="rule-keyword">ENTONCES</span>
+                <span class="rule-arrow">↓</span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Selecciona una acción</label>
+                <div class="option-grid">
+                  <div class="option-card selected">
+                    <span class="option-icon">📢</span>
+                    <span class="option-label">Publicar Promoción</span>
+                  </div>
+                  <div class="option-card">
+                    <span class="option-icon">✅</span>
+                    <span class="option-label">Activar Producto</span>
+                  </div>
+                  <div class="option-card">
+                    <span class="option-icon">⏸️</span>
+                    <span class="option-label">Pausar Producto</span>
+                  </div>
+                  <div class="option-card">
+                    <span class="option-icon">⭐</span>
+                    <span class="option-label">Destacar Producto</span>
+                  </div>
+                  <div class="option-card">
+                    <span class="option-icon">🔔</span>
+                    <span class="option-label">Generar Recordatorio</span>
+                  </div>
+                  <div class="option-card">
+                    <span class="option-icon">🤖</span>
+                    <span class="option-label">Generar con IA</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Selecciona la promoción</label>
+                <select class="form-select">
+                  <option selected>Happy Hour 2x1 en cervezas</option>
+                  <option>Descuento 20% en postres</option>
+                  <option>Menú ejecutivo especial</option>
+                  <option>Promoción fin de semana</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3: Confirmar -->
+        <div id="step-3" style="display: none;">
+          <div class="summary-card">
+            <h3 class="summary-title">Resumen de la Automatización</h3>
+            <div class="summary-item">
+              <span class="summary-label">Nombre:</span>
+              <span class="summary-value">Promoción de Fin de Semana</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Condición:</span>
+              <span class="summary-value">Cada viernes a las 18:00</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Acción:</span>
+              <span class="summary-value">Publicar promoción "Happy Hour 2x1 en cervezas"</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Estado inicial:</span>
+              <span class="summary-value">Activa</span>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-top: var(--space-lg);">
+            <label class="form-label">Estado inicial</label>
+            <select class="form-select">
+              <option selected>Activa (se ejecutará automáticamente)</option>
+              <option>Pausada (configurada pero inactiva)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+        <button class="btn btn-primary">Siguiente</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function openModal() {
+      document.getElementById('modal').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('modal').classList.remove('active');
+    }
+
+    function switchTab(tab) {
+      // Remove active from all tabs
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+
+      // Add active to selected tab
+      if (tab === 'list') {
+        document.querySelector('.tab:nth-child(1)').classList.add('active');
+        document.getElementById('panel-list').classList.add('active');
+      } else if (tab === 'history') {
+        document.querySelector('.tab:nth-child(2)').classList.add('active');
+        document.getElementById('panel-history').classList.add('active');
+      }
+    }
+  </script>
+</body>
+</html>

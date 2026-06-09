@@ -1,0 +1,500 @@
+
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Arquitectura Maestra — SaaS Menús Digitales Multiempresa</title>
+<style>
+:root{
+  --bg:#0d1117;--s:#161b22;--s2:#21262d;--bd:#30363d;
+  --fg:#e6edf3;--mu:#8b949e;
+  --blue:#58a6ff;--green:#3fb950;--orange:#f0883e;
+  --purple:#bc8cff;--red:#ff7b72;--yellow:#e3b341;--gray:#6e7681;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--fg);
+  font-family:-apple-system,'SF Pro Text',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+
+/* HEADER */
+#hd{position:fixed;top:0;left:0;right:0;height:48px;background:var(--s);
+  border-bottom:1px solid var(--bd);display:flex;align-items:center;
+  padding:0 16px;gap:10px;z-index:200}
+#hd h1{font-size:12px;font-weight:600;color:var(--fg);white-space:nowrap;letter-spacing:-.01em}
+.sep{width:1px;height:20px;background:var(--bd);flex-shrink:0}
+.badge{font-size:10px;font-family:ui-monospace,monospace;color:var(--green);
+  border:1px solid rgba(63,185,80,.35);padding:2px 8px;border-radius:100px;letter-spacing:.06em}
+.tabs{display:flex;gap:2px}
+.tab{font-size:12px;padding:5px 12px;border-radius:6px;cursor:pointer;color:var(--mu);
+  border:1px solid transparent;background:none;font-family:inherit;transition:all .12s}
+.tab:hover{color:var(--fg);background:var(--s2)}
+.tab.on{color:var(--fg);background:var(--s2);border-color:var(--bd)}
+.right{margin-left:auto;display:flex;align-items:center;gap:6px}
+.btn{font-size:11px;padding:5px 10px;border-radius:6px;cursor:pointer;color:var(--mu);
+  border:1px solid var(--bd);background:var(--s2);font-family:inherit;transition:all .12s}
+.btn:hover{color:var(--fg);border-color:var(--mu)}
+
+/* CANVAS */
+#cw{position:fixed;top:48px;left:0;right:0;bottom:0;overflow:hidden;cursor:grab;user-select:none}
+#cw.drag{cursor:grabbing}
+#cv{position:absolute;width:1800px;height:1500px;transform-origin:0 0}
+#cv::before{content:'';position:absolute;inset:0;
+  background-image:radial-gradient(circle,rgba(48,54,61,.7) 1px,transparent 1px);
+  background-size:28px 28px;pointer-events:none;z-index:0}
+#svg-layer{position:absolute;top:0;left:0;width:1800px;height:1500px;pointer-events:none;overflow:visible;z-index:1}
+
+/* LAYER BANDS */
+.lband{position:absolute;left:12px;right:20px;border-top:1px dashed;display:flex;
+  align-items:flex-start;padding-top:5px;pointer-events:none;z-index:2}
+.lband span{font-size:9px;font-family:ui-monospace,monospace;text-transform:uppercase;
+  letter-spacing:.12em;padding:2px 8px;border-radius:4px;background:var(--s)}
+
+/* MODULE CARD */
+.mod{position:absolute;width:210px;min-height:132px;background:var(--s);border:1px solid var(--bd);
+  border-radius:10px;padding:13px 14px;cursor:pointer;
+  transition:border-color .15s,box-shadow .15s,transform .12s;z-index:3}
+.mod::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:10px 10px 0 0}
+.mod:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.5)}
+.mod.sel{box-shadow:0 0 0 2px var(--blue),0 8px 32px rgba(88,166,255,.15)}
+
+.mod[data-l=presentation]::before{background:var(--blue)}
+.mod[data-l=presentation]:hover,.mod[data-l=presentation].sel{border-color:rgba(88,166,255,.6)}
+.mod[data-l=gateway]::before{background:var(--purple)}
+.mod[data-l=gateway]:hover,.mod[data-l=gateway].sel{border-color:rgba(188,140,255,.6)}
+.mod[data-l=core]::before{background:var(--green)}
+.mod[data-l=core]:hover,.mod[data-l=core].sel{border-color:rgba(63,185,80,.6)}
+.mod[data-l=business]::before{background:var(--orange)}
+.mod[data-l=business]:hover,.mod[data-l=business].sel{border-color:rgba(240,136,62,.6)}
+.mod[data-l=data]::before{background:var(--red)}
+.mod[data-l=data]:hover,.mod[data-l=data].sel{border-color:rgba(255,123,114,.6)}
+.mod[data-l=infra]::before{background:var(--gray)}
+.mod[data-l=infra]:hover,.mod[data-l=infra].sel{border-color:rgba(110,118,129,.6)}
+
+.mod-layer{font-size:9px;font-family:ui-monospace,monospace;text-transform:uppercase;
+  letter-spacing:.1em;opacity:.5;margin-bottom:7px}
+.mod-title{font-size:12px;font-weight:700;color:var(--fg);margin-bottom:2px;letter-spacing:-.01em;line-height:1.3}
+.mod-sub{font-size:10px;font-family:ui-monospace,monospace;color:var(--mu);margin-bottom:8px}
+.chips{display:flex;flex-wrap:wrap;gap:3px}
+.chip{font-size:9px;font-family:ui-monospace,monospace;padding:2px 6px;border-radius:3px;
+  background:var(--s2);color:var(--mu);border:1px solid var(--bd)}
+
+/* DETAIL PANEL */
+#dp{position:fixed;top:48px;right:-380px;width:360px;bottom:0;background:var(--s);
+  border-left:1px solid var(--bd);overflow-y:auto;
+  transition:right .25s cubic-bezier(.16,1,.3,1);z-index:150}
+#dp.open{right:0}
+#dp-hd{padding:16px;border-bottom:1px solid var(--bd);display:flex;
+  justify-content:space-between;align-items:flex-start;gap:10px;
+  position:sticky;top:0;background:var(--s);z-index:1}
+#dp-close{width:28px;height:28px;background:none;border:1px solid var(--bd);color:var(--mu);
+  border-radius:6px;cursor:pointer;font-size:14px;display:grid;place-items:center;
+  flex-shrink:0;transition:all .12s;font-family:inherit}
+#dp-close:hover{color:var(--fg);border-color:var(--mu)}
+#dp-body{padding:16px}
+.ds{margin-bottom:20px}
+.ds-title{font-size:10px;font-family:ui-monospace,monospace;text-transform:uppercase;
+  letter-spacing:.1em;color:var(--mu);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--bd)}
+.ds-desc{font-size:12px;line-height:1.75;color:var(--fg)}
+.sm-list{list-style:none;display:flex;flex-direction:column;gap:4px}
+.sm-list li{font-size:11px;font-family:ui-monospace,monospace;color:var(--fg);
+  padding:6px 10px;background:var(--s2);border:1px solid var(--bd);
+  border-radius:6px;display:flex;align-items:center;gap:8px}
+.sm-list li::before{content:'▸';font-size:9px;opacity:.4;flex-shrink:0}
+.ct{display:flex;flex-wrap:wrap;gap:4px}
+.ctag{font-size:10px;font-family:ui-monospace,monospace;padding:3px 8px;border-radius:4px;
+  border:1px solid var(--bd);color:var(--mu);background:var(--s2);cursor:pointer;transition:all .12s}
+.ctag:hover{color:var(--fg);border-color:var(--blue);color:var(--blue)}
+
+/* LEGEND */
+#leg{position:fixed;bottom:20px;left:20px;background:var(--s);border:1px solid var(--bd);
+  border-radius:10px;padding:12px 14px;z-index:100}
+.leg-t{font-size:9px;font-family:ui-monospace,monospace;text-transform:uppercase;
+  letter-spacing:.12em;color:var(--mu);margin-bottom:8px}
+.leg-items{display:flex;flex-direction:column;gap:5px}
+.leg-item{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--fg)}
+.leg-dot{width:14px;height:3px;border-radius:2px;flex-shrink:0}
+
+/* ZOOM */
+#zc{position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column;gap:4px;z-index:100}
+.zbtn{width:34px;height:34px;background:var(--s);border:1px solid var(--bd);color:var(--fg);
+  border-radius:8px;cursor:pointer;font-size:18px;display:grid;place-items:center;
+  transition:background .12s;font-family:inherit}
+.zbtn:hover{background:var(--s2)}
+
+/* ROLES VIEW */
+#rv{display:none;position:fixed;top:48px;left:0;right:0;bottom:0;background:var(--bg);
+  overflow-y:auto;padding:28px 32px;z-index:100}
+#rv.on{display:block}
+.rv-h{font-size:22px;font-weight:700;margin-bottom:4px;letter-spacing:-.02em}
+.rv-s{font-size:13px;color:var(--mu);margin-bottom:24px}
+.rv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px}
+.rc{background:var(--s);border:1px solid var(--bd);border-radius:12px;padding:20px}
+.rc-hd{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.rc-icon{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;font-size:20px;flex-shrink:0}
+.rc-title{font-size:14px;font-weight:600}
+.rc-desc{font-size:11px;color:var(--mu);margin-top:2px;line-height:1.4}
+.pg{display:grid;gap:4px}
+.pr{display:flex;justify-content:space-between;align-items:center;font-size:11px;
+  font-family:ui-monospace,monospace;padding:5px 8px;background:var(--s2);
+  border-radius:5px;border:1px solid var(--bd)}
+.pk{color:var(--mu)}.pf{color:var(--green);font-weight:600}.pp{color:var(--yellow)}.pn{color:var(--bd)}
+
+/* FLOW VIEW */
+#fv{display:none;position:fixed;top:48px;left:0;right:0;bottom:0;background:var(--bg);
+  overflow-y:auto;padding:28px 32px;z-index:100}
+#fv.on{display:block}
+.fv-h{font-size:22px;font-weight:700;margin-bottom:4px;letter-spacing:-.02em}
+.fv-s{font-size:13px;color:var(--mu);margin-bottom:24px}
+.flow-col{display:flex;flex-direction:column;gap:32px;max-width:720px}
+.flow-sect-title{font-size:15px;font-weight:700;margin-bottom:12px;padding-bottom:10px;
+  border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:10px}
+.fdot{display:inline-block;width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.fstep{background:var(--s);border:1px solid var(--bd);border-radius:10px;
+  padding:14px 18px;display:flex;gap:14px}
+.fnum{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;
+  font-size:12px;font-weight:700;font-family:ui-monospace,monospace;flex-shrink:0}
+.fstep-t{font-size:13px;font-weight:600;margin-bottom:4px}
+.fstep-d{font-size:12px;color:var(--mu);line-height:1.65}
+.farrow{text-align:center;color:var(--bd);font-size:18px;line-height:1;margin:-4px 0}
+</style>
+</head>
+<body>
+
+<header id="hd">
+  <h1>SaaS Menús Digitales — Arquitectura Maestra</h1>
+  <div class="sep"></div>
+  <span class="badge">v1.0 · DRAFT</span>
+  <div class="tabs" id="tabs">
+    <button class="tab on" data-view="arch">Arquitectura</button>
+    <button class="tab" data-view="roles">Roles &amp; Permisos</button>
+    <button class="tab" data-view="flow">Flujo de Datos</button>
+  </div>
+  <div class="right">
+    <button class="btn" id="btn-fit">⊡ Fit</button>
+    <button class="btn" id="btn-reset">↺ Reset</button>
+  </div>
+</header>
+
+<div id="cw">
+  <div id="cv">
+    <svg id="svg-layer" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+</div>
+
+<aside id="dp">
+  <div id="dp-hd">
+    <div>
+      <div id="dp-lt" style="font-size:9px;font-family:ui-monospace,monospace;text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px"></div>
+      <div id="dp-ti" style="font-size:16px;font-weight:700;margin-bottom:2px;letter-spacing:-.01em"></div>
+      <div id="dp-su" style="font-size:11px;font-family:ui-monospace,monospace;color:var(--mu)"></div>
+    </div>
+    <button id="dp-close">✕</button>
+  </div>
+  <div id="dp-body">
+    <div class="ds"><div class="ds-title">Descripción</div><p class="ds-desc" id="dp-de"></p></div>
+    <div class="ds"><div class="ds-title">Submódulos</div><ul class="sm-list" id="dp-sm"></ul></div>
+    <div class="ds"><div class="ds-title">Conecta con</div><div class="ct" id="dp-co"></div></div>
+  </div>
+</aside>
+
+<div id="leg">
+  <div class="leg-t">Capas del sistema</div>
+  <div class="leg-items" id="leg-items"></div>
+</div>
+
+<div id="zc">
+  <button class="zbtn" id="z-in">+</button>
+  <button class="zbtn" id="z-out">−</button>
+</div>
+
+<div id="rv">
+  <div class="rv-h">Roles &amp; Permisos</div>
+  <div class="rv-s">Matriz de control de acceso por rol en la plataforma SaaS multiempresa</div>
+  <div class="rv-grid" id="rv-grid"></div>
+</div>
+
+<div id="fv">
+  <div class="fv-h">Flujo de Datos</div>
+  <div class="fv-s">Trayectoria de datos en los procesos críticos del sistema</div>
+  <div class="flow-col" id="fv-col"></div>
+</div>
+
+<script>
+const CW=210,CH=135;
+const LAYERS={
+  presentation:{color:'#58a6ff',label:'Presentación'},
+  gateway:{color:'#bc8cff',label:'API Gateway'},
+  core:{color:'#3fb950',label:'Core Services'},
+  business:{color:'#f0883e',label:'Business Services'},
+  data:{color:'#ff7b72',label:'Data Layer'},
+  infra:{color:'#6e7681',label:'Infraestructura'},
+};
+const MODS=[
+  {id:'menu-viewer',title:'Menu Viewer',sub:'Customer PWA',layer:'presentation',x:55,y:80,
+   subs:['QR Scan Entry','Menu Browser PWA','Item Detail View','Multi-idioma','Theme Renderer','Offline Cache'],
+   desc:'PWA pública sin autenticación. Renderiza el menú del tenant por slug/QR. Totalmente cacheable en CDN edge. Soporta temas personalizados y múltiples idiomas por tenant.',con:['api-gateway','cdn-edge']},
+  {id:'tenant-portal',title:'Admin Portal',sub:'Tenant Dashboard',layer:'presentation',x:290,y:80,
+   subs:['Dashboard Overview','Menu Builder','Category Manager','Product Editor','Media Upload','QR Manager','Roles de Staff'],
+   desc:'Panel completo para el TenantAdmin. Gestiona menús, productos, categorías, medios, QR codes, sucursales y usuarios de su organización.',con:['api-gateway']},
+  {id:'branch-app',title:'Branch Manager',sub:'Gestor de Sucursal',layer:'presentation',x:525,y:80,
+   subs:['Vista de Sucursal','Edición limitada','QR locales','Reportes de sucursal'],
+   desc:'Interfaz acotada para managers de sucursal. Permisos limitados: edita disponibilidad, ve reportes de su sucursal y gestiona QR locales. Sin acceso a configuración global.',con:['api-gateway']},
+  {id:'superadmin',title:'SuperAdmin Console',sub:'Plataforma SaaS',layer:'presentation',x:760,y:80,
+   subs:['Tenant Manager','Plan Manager','Facturación Global','Logs del sistema','Feature Flags','Impersonation'],
+   desc:'Consola de control total para el operador del SaaS. Provisiona tenants, configura planes, revisa facturación global, activa feature flags e impersona cuentas para soporte.',con:['api-gateway']},
+  {id:'partner-sdk',title:'Partner API / SDK',sub:'Integraciones externas',layer:'presentation',x:995,y:80,
+   subs:['REST API pública','Webhooks outbound','SDK JavaScript','Documentación OpenAPI','OAuth 2.0'],
+   desc:'Superficie para integraciones externas: POS, ERPs, plataformas delivery. Autenticación por API key u OAuth 2.0. Rate limiting y cuotas según plan de suscripción.',con:['api-gateway']},
+  {id:'api-gateway',title:'API Gateway',sub:'Load Balancer + Router',layer:'gateway',x:185,y:300,
+   subs:['Request Router','Load Balancer','Rate Limiter','WAF / DDoS Shield','Request Logger','Circuit Breaker'],
+   desc:'Punto de entrada único. Enruta al microservicio correcto, aplica rate limiting por tenant/plan, WAF, circuit breaker y logging centralizado de requests.',con:['iam-service','tenant-service','menu-service','media-service','qr-service','display-service']},
+  {id:'cdn-edge',title:'CDN + Edge Cache',sub:'Cloudflare / AWS CloudFront',layer:'gateway',x:620,y:300,
+   subs:['Static Assets','Menu Cache (TTL)','Image Optimization','Edge Geo-routing','Purge API'],
+   desc:'Cache en el edge de menús renderizados y assets. El Menu Viewer es completamente cacheable. Geo-routing para latencia mínima. Purge selectivo al actualizar menú.',con:['media-service']},
+  {id:'auth-middleware',title:'Auth Middleware',sub:'JWT + API Keys',layer:'gateway',x:920,y:300,
+   subs:['JWT Validator','API Key Auth','Session Manager','Token Refresh','CORS Policy'],
+   desc:'Middleware integrado en el API Gateway. Valida JWT (portales admin) y API keys (integraciones). Gestiona sesiones y refreshes sin estado (stateless).',con:['iam-service']},
+  {id:'iam-service',title:'IAM Service',sub:'Identity & Access Mgmt',layer:'core',x:35,y:520,
+   subs:['Auth email/SSO/OIDC','RBAC Engine','Tenant Isolation','JWT Issuer','MFA / 2FA','Password Reset'],
+   desc:'Servicio central de identidad con aislamiento estricto por tenant. RBAC con 5 roles predefinidos. Soporta SSO/OIDC para Enterprise. Emite JWT con claims de tenant.',con:['tenant-db','audit-service']},
+  {id:'tenant-service',title:'Tenant Orchestrator',sub:'Multi-tenant Core',layer:'core',x:265,y:520,
+   subs:['Tenant Provisioning','Plan Enforcement','Feature Flags','Slug Manager','Config Store','Branch Manager'],
+   desc:'Núcleo del multi-tenancy. Provisiona tenants (schema + config), aplica límites de plan (productos, sucursales, usuarios, storage), gestiona slugs únicos y configuración por tenant.',con:['tenant-db','billing-service','event-bus']},
+  {id:'menu-service',title:'Menu Engine',sub:'Core Business Logic',layer:'core',x:495,y:520,
+   subs:['Category Manager','Product Manager','Variants & Modifiers','Availability Rules','Schedule Manager','Version Control'],
+   desc:'Motor de menús. Categorías, productos, variantes (tamaños/extras), disponibilidad por horario y sucursal, y versionado con historial completo para rollback.',con:['tenant-db','cache-layer','search-service','analytics-service']},
+  {id:'media-service',title:'Media Manager',sub:'Assets & Images',layer:'core',x:725,y:520,
+   subs:['Upload Handler','Image Optimizer','CDN Sync','Gallery Manager','Asset Quotas','Format Converter'],
+   desc:'Gestión de medios por tenant. Upload, optimización automática (WebP/AVIF), sync con CDN y control de cuotas de storage por plan. Cada tenant tiene su bucket lógico aislado.',con:['object-storage','cdn-edge']},
+  {id:'qr-service',title:'QR Code Service',sub:'Generador & Tracker',layer:'core',x:955,y:520,
+   subs:['QR Generator','Short URL Engine','Redirect Tracker','Print Templates','Batch Export'],
+   desc:'Genera QR con redirects dinámicos por tenant/sucursal/mesa. Los redirects son mutables sin regenerar el QR físico. Trackea scans para analytics. Exportación en lote.',con:['tenant-db','analytics-service']},
+  {id:'display-service',title:'Display Controller',sub:'Smart Screens',layer:'core',x:1185,y:520,
+   subs:['Screen Profiles','Real-time Sync','Layout Templates','Remote Update','Offline Mode'],
+   desc:'Controlador para pantallas físicas (menú de pared, display de cocina). Sincronización en tiempo real por WebSocket. Soporte offline ante pérdida de conectividad.',con:['tenant-db','event-bus']},
+  {id:'analytics-service',title:'Analytics Engine',sub:'Business Intelligence',layer:'business',x:35,y:750,
+   subs:['View Tracker','QR Scan Events','Product Performance','Traffic Dashboards','Export Reports','Funnel Analysis'],
+   desc:'Motor de analytics propio. Trackea vistas, scans QR y performance de productos. Dashboards en tiempo real para TenantAdmin y reportes exportables CSV/PDF.',con:['analytics-store','event-bus']},
+  {id:'notification-service',title:'Notification Hub',sub:'Comunicaciones',layer:'business',x:265,y:750,
+   subs:['Email (SES/SendGrid)','Push Notifications','SMS (Twilio)','In-app Alerts','Template Engine'],
+   desc:'Hub multi-canal. Envía alertas de bienvenida, límites de plan, fallos de pago y eventos críticos por email, push y SMS con templates configurables por tenant.',con:['event-bus','tenant-db']},
+  {id:'billing-service',title:'Billing & Plans',sub:'Subscriptions SaaS',layer:'business',x:495,y:750,
+   subs:['Plan Manager','Stripe Integration','Usage Metering','Invoice Generator','Grace Period','Dunning Manager'],
+   desc:'Gestión de suscripciones: Planes (Starter/Pro/Enterprise), integración Stripe, medición de uso en tiempo real, generación de facturas y gestión de impagos (dunning automático).',con:['tenant-db','notification-service','event-bus']},
+  {id:'integration-hub',title:'Integration Hub',sub:'POS / Webhooks / ERP',layer:'business',x:725,y:750,
+   subs:['POS Connectors','Webhook Manager','Event Mapper','Sync Queue','Retry Logic','OAuth Apps'],
+   desc:'Hub de integraciones bidireccionales: POS (Square, Toast, Lightspeed), ERPs y plataformas delivery. Webhooks con retry automático y dead-letter queue.',con:['event-bus','menu-service','tenant-db']},
+  {id:'audit-service',title:'Audit & Compliance',sub:'Trazabilidad',layer:'business',x:955,y:750,
+   subs:['Audit Trail','GDPR/LGPD Logger','Change History','Admin Actions Log','Data Export (GDPR)','Retention Policies'],
+   desc:'Registro inmutable de acciones críticas. Compliance GDPR/LGPD. Historial de cambios en menús, roles y configuración. Exportación de datos a petición legal.',con:['audit-log-store','event-bus']},
+  {id:'search-service',title:'Search & Discovery',sub:'Búsqueda en Menús',layer:'business',x:1185,y:750,
+   subs:['Full-text Search','Category Filter','Dietary Filters','Price Range','Availability Filter','Index Sync'],
+   desc:'Motor de búsqueda por tenant. Indexa productos, soporta filtros (alérgenos, dieta, precio, disponibilidad) y full-text search. Sincronización automática vía event bus.',con:['search-index']},
+  {id:'tenant-db',title:'Tenant Database',sub:'PostgreSQL multi-tenant',layer:'data',x:35,y:980,
+   subs:['Schema per tenant','Row-level Security','Migrations automáticas','Backups automáticos','Read Replicas','PITR'],
+   desc:'BD principal con aislamiento por tenant (schema-per-tenant + RLS). PostgreSQL. Réplicas de lectura, backups automáticos y Point-in-Time Recovery.',con:[]},
+  {id:'cache-layer',title:'Cache Layer',sub:'Redis / Valkey',layer:'data',x:265,y:980,
+   subs:['Menu Cache (TTL)','Session Store','Rate Limit Counters','Pub/Sub Channels','Feature Flags Cache'],
+   desc:'Cache distribuida. Menús renderizados (TTL), sesiones JWT, contadores de rate limiting y feature flags. Baja latencia para lecturas frecuentes del Menu Viewer.',con:[]},
+  {id:'object-storage',title:'Object Storage',sub:'S3 / Cloudflare R2',layer:'data',x:495,y:980,
+   subs:['Images por tenant','Originals + Variants','Access Control','Lifecycle Policies','CDN Origin'],
+   desc:'Almacenamiento de objetos compatible S3. Organizado por tenant con control de acceso. Sirve como origin del CDN. Lifecycle policies de expiración por plan.',con:[]},
+  {id:'search-index',title:'Search Index',sub:'Typesense / Elasticsearch',layer:'data',x:725,y:980,
+   subs:['Índices por tenant','Mappings de productos','Sinónimos','Facets / Filtros','Re-indexing jobs'],
+   desc:'Índice de búsqueda por tenant. Alta performance para consultas con filtros y full-text. Re-indexación automática vía event bus al actualizar productos.',con:[]},
+  {id:'analytics-store',title:'Analytics Store',sub:'ClickHouse / TimescaleDB',layer:'data',x:955,y:980,
+   subs:['Events table (append-only)','Aggregations','Materialized Views','Retention TTL','Export API'],
+   desc:'BD analítica OLAP (ClickHouse). Append-only, optimizada para alta escritura y queries de agregación. TTL de retención configurable según plan.',con:[]},
+  {id:'audit-log-store',title:'Audit Log Store',sub:'Inmutable / Append-only',layer:'data',x:1185,y:980,
+   subs:['Immutable logs','Signed entries','Compliance exports','Legal hold','Long-term retention'],
+   desc:'Almacenamiento inmutable de auditoría. Entradas firmadas criptográficamente. Retención mínima 7 años para compliance. Soporte de legal hold.',con:[]},
+  {id:'k8s',title:'Container Orchestration',sub:'Kubernetes / ECS',layer:'infra',x:55,y:1200,
+   subs:['Auto-scaling','Health checks','Rolling deploys','Resource quotas','Service mesh (Istio)','Namespace isolation'],
+   desc:'Orquestación con auto-scaling por servicio, rolling deploys sin downtime, cuotas de recursos y service mesh para comunicación segura entre microservicios.',con:[]},
+  {id:'event-bus',title:'Event Bus',sub:'Apache Kafka / RabbitMQ',layer:'infra',x:300,y:1200,
+   subs:['Topic por dominio','Consumer groups','Dead-letter queues','Schema registry','Replay capability','At-least-once delivery'],
+   desc:'Bus de eventos central. Desacopla servicios con comunicación asíncrona. Replay de eventos históricos, auditoría de mensajes y escalado independiente.',con:[]},
+  {id:'cicd',title:'CI/CD Pipeline',sub:'GitHub Actions / ArgoCD',layer:'infra',x:545,y:1200,
+   subs:['Automated tests','SAST / SCA scanning','Docker build','GitOps deploys','Rollback automático','Environment promotion'],
+   desc:'Pipeline completo: tests, escaneo de seguridad (SAST/SCA), build Docker, deploys GitOps (ArgoCD) y rollback automático ante fallo de health checks.',con:[]},
+  {id:'monitoring',title:'Monitoring & Alerting',sub:'Observability Stack',layer:'infra',x:790,y:1200,
+   subs:['Métricas (Prometheus)','Logs (Loki / ELK)','Trazas (Jaeger)','Dashboards (Grafana)','On-call (PagerDuty)','SLO Tracking'],
+   desc:'Stack de observabilidad: métricas, logs estructurados, trazas distribuidas y alertas. SLO tracking por tenant. Integración con on-call para incidentes de producción.',con:[]},
+  {id:'secret-manager',title:'Config & Secrets',sub:'HashiCorp Vault / AWS SM',layer:'infra',x:1035,y:1200,
+   subs:['API keys cifradas','Rotación automática','Environment configs','Feature flags store','Audit de acceso','DR keys'],
+   desc:'Gestión centralizada de secretos y configuración. Rotación automática, auditoría de acceso y configuración de entornos sin valores hardcodeados.',con:[]},
+];
+const CONNS=[
+  ['menu-viewer','api-gateway'],['menu-viewer','cdn-edge'],
+  ['tenant-portal','api-gateway'],['branch-app','api-gateway'],
+  ['superadmin','api-gateway'],['partner-sdk','api-gateway'],
+  ['auth-middleware','iam-service'],['cdn-edge','media-service'],
+  ['api-gateway','iam-service'],['api-gateway','tenant-service'],
+  ['api-gateway','menu-service'],['api-gateway','media-service'],
+  ['api-gateway','qr-service'],['api-gateway','display-service'],
+  ['iam-service','tenant-service'],
+  ['menu-service','analytics-service'],['menu-service','search-service'],
+  ['qr-service','analytics-service'],['tenant-service','billing-service'],
+  ['iam-service','audit-service'],
+  ['iam-service','tenant-db'],['tenant-service','tenant-db'],
+  ['menu-service','tenant-db'],['menu-service','cache-layer'],
+  ['media-service','object-storage'],['qr-service','tenant-db'],
+  ['display-service','tenant-db'],
+  ['analytics-service','analytics-store'],['billing-service','tenant-db'],
+  ['integration-hub','tenant-db'],['audit-service','audit-log-store'],
+  ['search-service','search-index'],['notification-service','tenant-db'],
+  ['analytics-service','event-bus'],['notification-service','event-bus'],
+  ['billing-service','event-bus'],['integration-hub','event-bus'],
+  ['audit-service','event-bus'],['tenant-service','event-bus'],
+  ['display-service','event-bus'],['search-service','menu-service'],
+];
+const ROLES=[
+  {title:'SuperAdmin',desc:'Operador del SaaS. Acceso total a la plataforma.',icon:'🔐',color:'#f0883e',
+   perms:[['Gestión de tenants','✓ Full'],['Planes y precios','✓ Full'],['Facturación global','✓ Full'],['Feature flags','✓ Full'],['Impersonation','✓ Full'],['Logs del sistema','✓ Full'],['Todos los menús','✓ Full'],['Analytics global','✓ Full']]},
+  {title:'Tenant Admin',desc:'Propietario o admin del restaurante/negocio.',icon:'👤',color:'#58a6ff',
+   perms:[['Gestión de menús','✓ Full'],['Gestión de productos','✓ Full'],['Gestión de medios','✓ Full'],['QR codes','✓ Full'],['Gestión de sucursales','✓ Full'],['Usuarios del tenant','✓ Full'],['Analytics del tenant','✓ Su tenant'],['Facturación','✓ Su plan']]},
+  {title:'Branch Manager',desc:'Gestor de una sucursal específica.',icon:'🏪',color:'#3fb950',
+   perms:[['Ver menú completo','✓ Full'],['Editar disponibilidad','✓ Su sucursal'],['QR locales','✓ Su sucursal'],['Reportes','✓ Su sucursal'],['Gestión de productos','✗ No'],['Crear sucursales','✗ No'],['Subir medios','✗ No'],['Facturación','✗ No']]},
+  {title:'Editor',desc:'Editor de contenido de menú del tenant.',icon:'✏️',color:'#bc8cff',
+   perms:[['Crear/editar productos','✓ Full'],['Editar categorías','✓ Full'],['Subir medios','~ Limitado'],['Ver reportes básicos','~ Limitado'],['Gestión de usuarios','✗ No'],['QR Manager','✗ No'],['Facturación','✗ No'],['Config. del tenant','✗ No']]},
+  {title:'Customer (Viewer)',desc:'Cliente final. Solo lectura pública del menú.',icon:'👁️',color:'#6e7681',
+   perms:[['Ver menú público','✓ Full'],['Buscar productos','✓ Full'],['Filtrar categorías','✓ Full'],['Cualquier otra acción','✗ No']]},
+];
+const FLOWS=[
+  {title:'Registro y Onboarding de Tenant',color:'#58a6ff',steps:[
+    {t:'SuperAdmin configura el plan',d:'SuperAdmin Console → API Gateway → Billing & Plans. Define límites: máx. productos, sucursales, usuarios y storage asignados.'},
+    {t:'Tenant Admin se registra',d:'Admin Portal → API Gateway → Auth Middleware → IAM Service. Verifica email. Notification Hub envía bienvenida. JWT emitido con claims de tenant.'},
+    {t:'Tenant Provisioning automático',d:'IAM → Tenant Orchestrator. Crea schema aislado en PostgreSQL, registra slug único, aplica límites del plan y activa feature flags correspondientes.'},
+    {t:'Configuración del menú inicial',d:'Admin Portal → Menu Engine. Crea categorías, productos con variantes y sube medios vía Media Manager → Object Storage → CDN sync.'},
+    {t:'Generación de QR codes',d:'Admin Portal → QR Code Service. Genera QRs dinámicos por sucursal/mesa con short URLs. Los redirects son mutables sin regenerar el QR físico.'},
+    {t:'Menú en producción',d:'Cliente escanea QR → CDN Edge (cache hit) → Menu Viewer PWA. Cada actualización invalida el cache del CDN vía Purge API selectiva.'},
+  ]},
+  {title:'Visualización de Menú por Cliente Final',color:'#3fb950',steps:[
+    {t:'Cliente escanea QR',d:'QR → Short URL → QR Code Service resuelve el redirect al slug del tenant. El scan se registra como evento en el Event Bus.'},
+    {t:'Cache hit en CDN Edge',d:'La request llega al edge. Si el menú está en cache (TTL activo), se sirve directamente sin tocar el backend. Latencia < 50ms.'},
+    {t:'Cache miss → backend',d:'CDN → API Gateway → Menu Engine. Consulta Tenant DB (réplica de lectura) y Cache Layer (Redis). Respuesta cacheada en CDN para las siguientes requests.'},
+    {t:'Tracking del evento de scan',d:'QR Service emite evento al Event Bus → Analytics Engine consume → persiste en Analytics Store. El TenantAdmin ve el scan en su dashboard en tiempo real.'},
+  ]},
+  {title:'Actualización de Menú con Propagación',color:'#f0883e',steps:[
+    {t:'Admin edita un producto',d:'Admin Portal → API Gateway. Auth Middleware valida JWT → verifica rol RBAC (TenantAdmin o Editor). Si autorizado, enruta al Menu Engine.'},
+    {t:'Persistencia con versioning',d:'Menu Engine crea nueva versión del menú en Tenant DB (append, no sobrescribe). El historial completo permite rollback a cualquier versión anterior.'},
+    {t:'Invalidación selectiva de cache',d:'Menu Engine llama al Purge API del CDN para invalidar solo el cache del tenant afectado. Los demás tenants no se impactan.'},
+    {t:'Sincronización de displays físicos',d:'Menu Engine emite evento al Event Bus → Display Controller consume → envía update en tiempo real (WebSocket) a pantallas físicas del local.'},
+    {t:'Re-indexación de búsqueda',d:'Event Bus → Search Service → re-indexa solo los productos modificados en el Search Index del tenant. Sin re-indexación completa del catálogo.'},
+  ]},
+];
+
+// ── RENDER ──────────────────────────────────────────────────────────────────
+const cv=document.getElementById('cv'),svg=document.getElementById('svg-layer');
+const cw=document.getElementById('cw'),dp=document.getElementById('dp');
+const modMap={};
+
+document.getElementById('leg-items').innerHTML=Object.entries(LAYERS).map(([,v])=>
+  `<div class="leg-item"><div class="leg-dot" style="background:${v.color}"></div>${v.label}</div>`).join('');
+
+[{y:68,label:'PRESENTACIÓN',key:'presentation'},{y:288,label:'API GATEWAY',key:'gateway'},
+ {y:508,label:'CORE SERVICES',key:'core'},{y:738,label:'BUSINESS SERVICES',key:'business'},
+ {y:968,label:'DATA LAYER',key:'data'},{y:1188,label:'INFRAESTRUCTURA',key:'infra'}
+].forEach(b=>{
+  const el=document.createElement('div');
+  el.className='lband';el.style.top=b.y+'px';el.style.borderTopColor=LAYERS[b.key].color+'33';
+  el.innerHTML=`<span style="color:${LAYERS[b.key].color};border:1px solid ${LAYERS[b.key].color}33">${b.label}</span>`;
+  cv.appendChild(el);
+});
+
+const defs=document.createElementNS('http://www.w3.org/2000/svg','defs');
+Object.entries(LAYERS).forEach(([key,val])=>{
+  const m=document.createElementNS('http://www.w3.org/2000/svg','marker');
+  m.setAttribute('id','arr-'+key);m.setAttribute('markerWidth','7');m.setAttribute('markerHeight','7');
+  m.setAttribute('refX','6');m.setAttribute('refY','3');m.setAttribute('orient','auto');
+  const p=document.createElementNS('http://www.w3.org/2000/svg','polygon');
+  p.setAttribute('points','0 0,7 3,0 6');p.setAttribute('fill',val.color);p.setAttribute('opacity','0.5');
+  m.appendChild(p);defs.appendChild(m);
+});
+svg.appendChild(defs);
+
+let selectedId=null;
+MODS.forEach(m=>{
+  modMap[m.id]=m;
+  const el=document.createElement('div');
+  el.className='mod';el.dataset.l=m.layer;el.dataset.id=m.id;
+  el.style.left=m.x+'px';el.style.top=m.y+'px';
+  const vis=m.subs.slice(0,3),extra=m.subs.length-3;
+  el.innerHTML=`<div class="mod-layer" style="color:${LAYERS[m.layer].color}">${LAYERS[m.layer].label}</div>
+    <div class="mod-title">${m.title}</div><div class="mod-sub">${m.sub}</div>
+    <div class="chips">${vis.map(s=>`<span class="chip">${s}</span>`).join('')}${extra>0?`<span class="chip">+${extra}</span>`:''}</div>`;
+  el.addEventListener('click',e=>{e.stopPropagation();selectMod(m.id);});
+  cv.appendChild(el);m._el=el;
+});
+
+CONNS.forEach(([fid,tid])=>{
+  const f=modMap[fid],t=modMap[tid];if(!f||!t)return;
+  const sx=f.x+CW/2,sy=f.y+CH,tx=t.x+CW/2,ty=t.y;
+  const dy=Math.abs(ty-sy),cy1=sy+Math.min(dy*.55,90),cy2=ty-Math.min(dy*.55,90);
+  const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+  path.setAttribute('d',`M${sx},${sy} C${sx},${cy1} ${tx},${cy2} ${tx},${ty}`);
+  path.setAttribute('stroke',LAYERS[f.layer].color);path.setAttribute('stroke-width','1.5');
+  path.setAttribute('fill','none');path.setAttribute('stroke-opacity','0.28');
+  path.setAttribute('marker-end',`url(#arr-${f.layer})`);
+  svg.appendChild(path);
+});
+
+function selectMod(id){
+  if(selectedId===id){deselect();return;}
+  selectedId=id;
+  document.querySelectorAll('.mod').forEach(el=>el.classList.remove('sel'));
+  const m=modMap[id];m._el.classList.add('sel');
+  document.getElementById('dp-lt').textContent=LAYERS[m.layer].label;
+  document.getElementById('dp-lt').style.color=LAYERS[m.layer].color;
+  document.getElementById('dp-ti').textContent=m.title;
+  document.getElementById('dp-su').textContent=m.sub;
+  document.getElementById('dp-de').textContent=m.desc;
+  document.getElementById('dp-sm').innerHTML=m.subs.map(s=>`<li>${s}</li>`).join('');
+  const out=CONNS.filter(([f])=>f===id).map(([,t])=>t);
+  const inc=CONNS.filter(([,t])=>t===id).map(([f])=>f);
+  const all=[...new Set([...out,...inc])];
+  const co=document.getElementById('dp-co');
+  co.innerHTML=all.map(cid=>{const cm=modMap[cid];if(!cm)return '';
+    return `<span class="ctag" style="border-color:${LAYERS[cm.layer].color}44;color:${LAYERS[cm.layer].color}" data-id="${cid}">${cm.title}</span>`;
+  }).join('');
+  co.querySelectorAll('.ctag').forEach(tag=>tag.addEventListener('click',()=>{selectMod(tag.dataset.id);centerOn(tag.dataset.id);}));
+  dp.classList.add('open');
+}
+function deselect(){selectedId=null;document.querySelectorAll('.mod').forEach(el=>el.classList.remove('sel'));dp.classList.remove('open');}
+function centerOn(id){const m=modMap[id];if(!m)return;const vw=cw.offsetWidth,vh=cw.offsetHeight;panX=vw/2-(m.x+CW/2)*scale;panY=vh/2-(m.y+CH/2)*scale;applyT();}
+cv.addEventListener('click',e=>{if(!e.target.closest('.mod'))deselect();});
+document.getElementById('dp-close').addEventListener('click',deselect);
+
+let scale=0.72,panX=0,panY=0,dragging=false,dsx,dsy;
+function applyT(){cv.style.transform=`translate(${panX}px,${panY}px) scale(${scale})`;}
+function fitView(){const vw=cw.offsetWidth,vh=cw.offsetHeight;const s=Math.min((vw-40)/1430,(vh-40)/1360);scale=Math.max(0.3,Math.min(1.5,s));panX=(vw-1430*scale)/2;panY=(vh-1360*scale)/2;applyT();}
+fitView();
+cw.addEventListener('mousedown',e=>{if(e.target.closest('.mod'))return;dragging=true;dsx=e.clientX-panX;dsy=e.clientY-panY;cw.classList.add('drag');});
+window.addEventListener('mousemove',e=>{if(!dragging)return;panX=e.clientX-dsx;panY=e.clientY-dsy;applyT();});
+window.addEventListener('mouseup',()=>{dragging=false;cw.classList.remove('drag');});
+cw.addEventListener('wheel',e=>{e.preventDefault();const d=e.deltaY<0?1.1:0.9;const r=cw.getBoundingClientRect();const mx=e.clientX-r.left,my=e.clientY-r.top;const ns=Math.max(0.25,Math.min(2.5,scale*d));panX=mx-(mx-panX)*(ns/scale);panY=my-(my-panY)*(ns/scale);scale=ns;applyT();},{passive:false});
+document.getElementById('z-in').addEventListener('click',()=>{scale=Math.min(2.5,scale*1.2);applyT();});
+document.getElementById('z-out').addEventListener('click',()=>{scale=Math.max(0.25,scale/1.2);applyT();});
+document.getElementById('btn-fit').addEventListener('click',fitView);
+document.getElementById('btn-reset').addEventListener('click',()=>{scale=0.72;fitView();});
+
+const rvEl=document.getElementById('rv'),fvEl=document.getElementById('fv');
+document.getElementById('tabs').addEventListener('click',e=>{const tab=e.target.closest('.tab');if(!tab)return;document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));tab.classList.add('on');const v=tab.dataset.view;rvEl.classList.toggle('on',v==='roles');fvEl.classList.toggle('on',v==='flow');});
+
+const rvg=document.getElementById('rv-grid');
+ROLES.forEach(r=>{const c=document.createElement('div');c.className='rc';
+  c.innerHTML=`<div class="rc-hd"><div class="rc-icon" style="background:${r.color}20">${r.icon}</div><div><div class="rc-title">${r.title}</div><div class="rc-desc">${r.desc}</div></div></div>
+  <div class="pg">${r.perms.map(([k,v])=>{const cls=v.startsWith('✓')?'pf':v.startsWith('~')?'pp':'pn';return `<div class="pr"><span class="pk">${k}</span><span class="${cls}">${v}</span></div>`;}).join('')}</div>`;
+  rvg.appendChild(c);});
+
+const fvc=document.getElementById('fv-col');
+FLOWS.forEach(f=>{const sect=document.createElement('div');
+  const tEl=document.createElement('div');tEl.className='flow-sect-title';
+  tEl.innerHTML=`<span class="fdot" style="background:${f.color}"></span>${f.title}`;sect.appendChild(tEl);
+  f.steps.forEach((step,i)=>{const el=document.createElement('div');el.className='fstep';
+    el.innerHTML=`<div class="fnum" style="background:${f.color}20;color:${f.color}">${i+1}</div><div><div class="fstep-t">${step.t}</div><div class="fstep-d">${step.d}</div></div>`;
+    sect.appendChild(el);
+    if(i<f.steps.length-1){const arr=document.createElement('div');arr.className='farrow';arr.textContent='↓';sect.appendChild(arr);}
+  });fvc.appendChild(sect);});
+</script>
+</body>
+</html>

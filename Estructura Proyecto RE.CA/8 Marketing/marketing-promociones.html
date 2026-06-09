@@ -1,0 +1,1554 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Marketing y Promociones · SaaS Menús Digitales</title>
+  <style>
+    :root {
+      --bg:      #fafafa;
+      --surface: #ffffff;
+      --fg:      #0d1117;
+      --muted:   #6b7280;
+      --border:  #e5e7eb;
+      --accent:  #ffd21e;
+
+      --accent-soft: color-mix(in oklch, var(--accent) 14%, transparent);
+      --fg-soft:     color-mix(in oklch, var(--fg) 6%, transparent);
+      --success:     #16a34a;
+      --success-soft: color-mix(in oklch, var(--success) 12%, transparent);
+      --warn:        #f59e0b;
+      --warn-soft:   color-mix(in oklch, var(--warn) 12%, transparent);
+      --danger:      #dc2626;
+      --danger-soft: color-mix(in oklch, var(--danger) 12%, transparent);
+      --info:        #2563eb;
+      --info-soft:   color-mix(in oklch, var(--info) 12%, transparent);
+      --purple:      #9333ea;
+      --purple-soft: color-mix(in oklch, var(--purple) 12%, transparent);
+
+      --font-display: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      --font-body:    "Source Sans Pro", Inter, system-ui, -apple-system, sans-serif;
+
+      --fs-xs: 11px;
+      --fs-sm: 13px;
+      --fs-base: 15px;
+      --fs-lg: 17px;
+      --fs-xl: 20px;
+      --fs-2xl: 24px;
+      --fs-3xl: 32px;
+
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 16px;
+      --space-lg: 24px;
+      --space-xl: 32px;
+      --space-2xl: 48px;
+
+      --radius: 6px;
+      --radius-lg: 10px;
+      --radius-xl: 16px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--font-body);
+      font-size: var(--fs-base);
+      line-height: 1.5;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+    }
+    img, svg { display: block; max-width: 100%; }
+    button { font: inherit; cursor: pointer; border: none; background: none; padding: 0; }
+    p { text-wrap: pretty; margin: 0; }
+    h1, h2, h3 { text-wrap: balance; margin: 0; font-weight: 600; }
+
+    /* ──────────────────────────────────────────────────────────────
+     * 🧭 Layout global — sidebar + main content
+     * ────────────────────────────────────────────────────────── */
+    .app-container {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      min-height: 100vh;
+    }
+
+    @media (max-width: 920px) {
+      .app-container {
+        grid-template-columns: 1fr;
+      }
+      .sidebar {
+        display: none;
+      }
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: var(--space-lg);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xl);
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    .brand {
+      font-family: var(--font-display);
+      font-size: 19px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      padding-bottom: var(--space-md);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-section {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+    }
+    .nav-label {
+      font-size: var(--fs-xs);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      margin-bottom: var(--space-sm);
+    }
+    .nav-item {
+      padding: var(--space-sm) var(--space-md);
+      border-radius: var(--radius);
+      font-size: var(--fs-base);
+      font-weight: 500;
+      color: var(--muted);
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      text-decoration: none;
+    }
+    .nav-item:hover {
+      background: var(--bg);
+      color: var(--fg);
+    }
+    .nav-item.active {
+      background: var(--accent-soft);
+      color: var(--fg);
+      font-weight: 600;
+    }
+
+    /* Main content area */
+    .main-content {
+      padding: var(--space-xl);
+      max-width: 1440px;
+      width: 100%;
+    }
+
+    @media (max-width: 920px) {
+      .main-content {
+        padding: var(--space-md);
+      }
+    }
+
+    /* Header con acciones */
+    .page-header {
+      margin-bottom: var(--space-xl);
+    }
+    .page-title {
+      font-size: var(--fs-3xl);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: var(--space-sm);
+    }
+    .page-subtitle {
+      color: var(--muted);
+      font-size: var(--fs-lg);
+      margin-bottom: var(--space-lg);
+      line-height: 1.6;
+    }
+    .header-actions {
+      display: flex;
+      gap: var(--space-md);
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: var(--space-sm) var(--space-lg);
+      border-radius: var(--radius);
+      font-size: var(--fs-base);
+      font-weight: 600;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+    .btn-primary {
+      background: var(--fg);
+      color: var(--surface);
+    }
+    .btn-primary:hover {
+      background: color-mix(in oklch, var(--fg) 85%, transparent);
+    }
+    .btn-secondary {
+      background: var(--surface);
+      color: var(--fg);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover {
+      background: var(--bg);
+    }
+    .btn-accent {
+      background: var(--accent);
+      color: var(--fg);
+    }
+    .btn-accent:hover {
+      background: color-mix(in oklch, var(--accent) 85%, transparent);
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+     * 📊 Tabs de navegación
+     * ────────────────────────────────────────────────────────── */
+    .tabs {
+      display: flex;
+      gap: var(--space-sm);
+      border-bottom: 1px solid var(--border);
+      margin-bottom: var(--space-xl);
+      overflow-x: auto;
+    }
+    .tab {
+      padding: var(--space-md) var(--space-lg);
+      font-size: var(--fs-base);
+      font-weight: 500;
+      color: var(--muted);
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .tab:hover {
+      color: var(--fg);
+    }
+    .tab.active {
+      color: var(--fg);
+      font-weight: 600;
+      border-bottom-color: var(--accent);
+    }
+
+    /* Tab panels */
+    .tab-panel {
+      display: none;
+    }
+    .tab-panel.active {
+      display: block;
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+     * 🎯 Promociones Activas — Grid de tarjetas
+     * ────────────────────────────────────────────────────────── */
+    .promotions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: var(--space-md);
+    }
+    .promotion-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: all 0.15s ease;
+    }
+    .promotion-card:hover {
+      border-color: var(--accent);
+      box-shadow: 0 4px 16px color-mix(in oklch, var(--fg) 8%, transparent);
+    }
+
+    .promotion-image {
+      height: 180px;
+      background: linear-gradient(135deg, var(--accent-soft), var(--fg-soft));
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      font-family: var(--font-display);
+      font-size: var(--fs-sm);
+      position: relative;
+    }
+    .promotion-badge {
+      position: absolute;
+      top: var(--space-md);
+      right: var(--space-md);
+      padding: var(--space-xs) var(--space-md);
+      border-radius: var(--radius);
+      font-size: var(--fs-xs);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      font-family: var(--font-display);
+      backdrop-filter: blur(8px);
+    }
+    .badge-active {
+      background: color-mix(in oklch, var(--success) 85%, transparent);
+      color: var(--success);
+    }
+    .badge-scheduled {
+      background: color-mix(in oklch, var(--info) 85%, transparent);
+      color: var(--info);
+    }
+    .badge-paused {
+      background: color-mix(in oklch, var(--warn) 85%, transparent);
+      color: var(--warn);
+    }
+    .badge-finished {
+      background: color-mix(in oklch, var(--muted) 85%, transparent);
+      color: var(--muted);
+    }
+
+    .promotion-content {
+      padding: var(--space-lg);
+    }
+    .promotion-title {
+      font-size: var(--fs-xl);
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      margin-bottom: var(--space-xs);
+    }
+    .promotion-product {
+      font-size: var(--fs-sm);
+      color: var(--muted);
+      margin-bottom: var(--space-md);
+    }
+    .promotion-meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-md);
+      padding-top: var(--space-md);
+      border-top: 1px solid var(--border);
+      font-size: var(--fs-sm);
+    }
+    .meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+    }
+    .meta-label {
+      font-size: var(--fs-xs);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: var(--muted);
+    }
+    .meta-value {
+      font-family: var(--font-display);
+      font-size: var(--fs-sm);
+      color: var(--fg);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .promotion-actions {
+      padding: var(--space-md) var(--space-lg);
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: var(--space-sm);
+    }
+    .icon-btn {
+      padding: var(--space-sm);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      transition: all 0.15s ease;
+      display: grid;
+      place-items: center;
+      flex: 1;
+    }
+    .icon-btn:hover {
+      background: var(--bg);
+      border-color: var(--fg);
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+     * 📅 Calendario Comercial
+     * ────────────────────────────────────────────────────────── */
+    .calendar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--space-lg);
+    }
+    .calendar-title {
+      font-size: var(--fs-2xl);
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      font-family: var(--font-display);
+      font-variant-numeric: tabular-nums;
+    }
+    .calendar-nav {
+      display: flex;
+      gap: var(--space-sm);
+    }
+    .nav-btn {
+      padding: var(--space-sm) var(--space-md);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      font-size: var(--fs-sm);
+      font-weight: 600;
+      transition: all 0.15s ease;
+    }
+    .nav-btn:hover {
+      background: var(--bg);
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    .calendar-day-header {
+      background: var(--surface);
+      padding: var(--space-md);
+      text-align: center;
+      font-size: var(--fs-sm);
+      font-weight: 600;
+      color: var(--muted);
+    }
+    .calendar-day {
+      background: var(--surface);
+      min-height: 110px;
+      padding: var(--space-sm);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+      transition: all 0.15s ease;
+    }
+    .calendar-day:hover {
+      background: var(--bg);
+    }
+    .calendar-day.other-month {
+      background: color-mix(in oklch, var(--bg) 50%, transparent);
+    }
+    .day-number {
+      font-family: var(--font-display);
+      font-size: var(--fs-sm);
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: var(--space-xs);
+    }
+    .calendar-day.today .day-number {
+      background: var(--accent);
+      color: var(--fg);
+      width: 24px;
+      height: 24px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+    }
+    .day-event {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+      line-height: 1.4;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .event-promotion {
+      background: var(--accent-soft);
+      color: var(--fg);
+    }
+    .event-scheduled {
+      background: var(--info-soft);
+      color: var(--info);
+    }
+    .event-special {
+      background: var(--purple-soft);
+      color: var(--purple);
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+     * 📝 Biblioteca de Contenido Generado
+     * ────────────────────────────────────────────────────────── */
+    .content-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+    .content-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg);
+      display: flex;
+      gap: var(--space-lg);
+      align-items: flex-start;
+    }
+    .content-icon {
+      width: 48px;
+      height: 48px;
+      flex-shrink: 0;
+      border-radius: var(--radius);
+      display: grid;
+      place-items: center;
+      font-size: 24px;
+    }
+    .content-card.draft .content-icon {
+      background: var(--fg-soft);
+    }
+    .content-card.pending .content-icon {
+      background: var(--warn-soft);
+    }
+    .content-card.approved .content-icon {
+      background: var(--success-soft);
+    }
+    .content-card.published .content-icon {
+      background: var(--accent-soft);
+    }
+
+    .content-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+    .content-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-md);
+    }
+    .content-title {
+      font-size: var(--fs-lg);
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+    .content-status {
+      padding: var(--space-xs) var(--space-md);
+      border-radius: var(--radius);
+      font-size: var(--fs-xs);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      font-family: var(--font-display);
+    }
+    .status-draft {
+      background: var(--fg-soft);
+      color: var(--muted);
+    }
+    .status-pending {
+      background: var(--warn-soft);
+      color: var(--warn);
+    }
+    .status-approved {
+      background: var(--success-soft);
+      color: var(--success);
+    }
+    .status-published {
+      background: var(--accent-soft);
+      color: var(--fg);
+    }
+    .status-discarded {
+      background: var(--danger-soft);
+      color: var(--danger);
+    }
+
+    .content-text {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: var(--space-md);
+      font-size: var(--fs-base);
+      line-height: 1.6;
+      color: var(--muted);
+    }
+    .content-footer {
+      display: flex;
+      gap: var(--space-lg);
+      font-size: var(--fs-sm);
+      color: var(--muted);
+      padding-top: var(--space-sm);
+      border-top: 1px solid var(--border);
+    }
+    .footer-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+    }
+    .footer-icon {
+      width: 14px;
+      height: 14px;
+      opacity: 0.6;
+    }
+
+    .content-actions {
+      display: flex;
+      gap: var(--space-sm);
+      margin-top: var(--space-sm);
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+     * ⭐ Productos Destacados
+     * ────────────────────────────────────────────────────────── */
+    .featured-section {
+      margin-bottom: var(--space-2xl);
+    }
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--space-lg);
+    }
+    .section-title {
+      font-size: var(--fs-2xl);
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .featured-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: var(--space-md);
+      margin-bottom: var(--space-lg);
+    }
+    .featured-card {
+      background: var(--surface);
+      border: 2px solid var(--accent);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      position: relative;
+    }
+    .featured-badge {
+      position: absolute;
+      top: var(--space-md);
+      left: var(--space-md);
+      padding: var(--space-xs) var(--space-md);
+      background: var(--accent);
+      color: var(--fg);
+      border-radius: var(--radius);
+      font-size: var(--fs-xs);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      font-family: var(--font-display);
+      z-index: 10;
+    }
+    .featured-image {
+      height: 160px;
+      background: linear-gradient(135deg, var(--accent-soft), var(--fg-soft));
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      font-family: var(--font-display);
+      font-size: var(--fs-sm);
+    }
+    .featured-content {
+      padding: var(--space-lg);
+    }
+    .featured-title {
+      font-size: var(--fs-lg);
+      font-weight: 600;
+      margin-bottom: var(--space-xs);
+    }
+    .featured-desc {
+      font-size: var(--fs-sm);
+      color: var(--muted);
+      margin-bottom: var(--space-md);
+    }
+    .featured-actions {
+      padding-top: var(--space-md);
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: var(--space-sm);
+    }
+
+    .empty-slot {
+      background: var(--bg);
+      border: 2px dashed var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-2xl) var(--space-lg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-md);
+      text-align: center;
+      min-height: 280px;
+    }
+    .empty-icon {
+      font-size: 48px;
+      opacity: 0.3;
+    }
+    .empty-text {
+      color: var(--muted);
+      font-size: var(--fs-base);
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+     * 🎨 Modal Creator (Crear promoción / Generar contenido IA)
+     * ────────────────────────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: color-mix(in oklch, var(--fg) 50%, transparent);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-lg);
+    }
+    .modal-overlay.active {
+      display: flex;
+    }
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      max-width: 680px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px color-mix(in oklch, var(--fg) 30%, transparent);
+    }
+    .modal-header {
+      padding: var(--space-xl);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal-title {
+      font-size: var(--fs-2xl);
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+    .modal-close {
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      background: var(--bg);
+      transition: all 0.15s ease;
+    }
+    .modal-close:hover {
+      background: var(--border);
+    }
+
+    .modal-body {
+      padding: var(--space-xl);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-lg);
+    }
+
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+    .field-label {
+      font-size: var(--fs-sm);
+      font-weight: 600;
+      color: var(--fg);
+    }
+    .field-input {
+      padding: var(--space-sm) var(--space-md);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--fg);
+      font-size: var(--fs-base);
+      font-family: var(--font-body);
+    }
+    .field-input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    .field-textarea {
+      min-height: 100px;
+      resize: vertical;
+      font-family: var(--font-body);
+    }
+    .field-select {
+      padding: var(--space-sm) var(--space-md);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--fg);
+      font-size: var(--fs-base);
+      font-family: var(--font-body);
+    }
+    .field-select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-md);
+    }
+
+    .modal-footer {
+      padding: var(--space-xl);
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: var(--space-md);
+      justify-content: flex-end;
+    }
+
+    /* AI Generated Content Preview */
+    .ai-preview {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg);
+      position: relative;
+    }
+    .ai-badge {
+      position: absolute;
+      top: var(--space-md);
+      right: var(--space-md);
+      padding: var(--space-xs) var(--space-md);
+      background: var(--purple-soft);
+      color: var(--purple);
+      border-radius: var(--radius);
+      font-size: var(--fs-xs);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      font-family: var(--font-display);
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+    }
+    .ai-content {
+      font-size: var(--fs-base);
+      line-height: 1.6;
+      color: var(--fg);
+      white-space: pre-wrap;
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+     * 📱 Responsive adjustments
+     * ────────────────────────────────────────────────────────── */
+    @media (max-width: 920px) {
+      .promotions-grid {
+        grid-template-columns: 1fr;
+      }
+      .featured-grid {
+        grid-template-columns: 1fr;
+      }
+      .calendar-grid {
+        font-size: var(--fs-xs);
+      }
+      .calendar-day {
+        min-height: 80px;
+      }
+      .field-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- ══════════════════════════════════════════════════════════════
+      SIDEBAR NAVEGACIÓN
+    ═══════════════════════════════════════════════════════════════ -->
+    <aside class="sidebar">
+      <div class="brand">MENÚ DIGITAL</div>
+
+      <nav class="nav-section">
+        <div class="nav-label">Principal</div>
+        <a href="#" class="nav-item">Dashboard</a>
+        <a href="#" class="nav-item">Catálogo</a>
+        <a href="#" class="nav-item active">Marketing</a>
+        <a href="#" class="nav-item">Estadísticas</a>
+      </nav>
+
+      <nav class="nav-section">
+        <div class="nav-label">Herramientas</div>
+        <a href="#" class="nav-item">Multimedia</a>
+        <a href="#" class="nav-item">IA</a>
+        <a href="#" class="nav-item">Automatizaciones</a>
+      </nav>
+
+      <nav class="nav-section">
+        <div class="nav-label">Configuración</div>
+        <a href="#" class="nav-item">Usuarios</a>
+        <a href="#" class="nav-item">Multiempresa</a>
+        <a href="#" class="nav-item">Suscripción</a>
+      </nav>
+    </aside>
+
+    <!-- ══════════════════════════════════════════════════════════════
+      MAIN CONTENT
+    ═══════════════════════════════════════════════════════════════ -->
+    <main class="main-content">
+      <!-- Header -->
+      <header class="page-header">
+        <h1 class="page-title">Marketing y Promociones</h1>
+        <p class="page-subtitle">
+          Impulsa tus productos, crea campañas profesionales y genera contenido con IA en segundos.
+        </p>
+        <div class="header-actions">
+          <button class="btn btn-primary" onclick="openModal('create-promotion')">
+            ➕ Crear Promoción
+          </button>
+          <button class="btn btn-accent" onclick="openModal('generate-ai')">
+            ✨ Generar con IA
+          </button>
+          <button class="btn btn-secondary">
+            📤 Exportar Campañas
+          </button>
+        </div>
+      </header>
+
+      <!-- Tabs de navegación -->
+      <div class="tabs">
+        <button class="tab active" onclick="showTab('promotions')">Promociones Activas</button>
+        <button class="tab" onclick="showTab('calendar')">Calendario Comercial</button>
+        <button class="tab" onclick="showTab('content')">Contenido Generado</button>
+        <button class="tab" onclick="showTab('featured')">Productos Destacados</button>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════════════════
+        TAB 1: Promociones Activas
+      ═══════════════════════════════════════════════════════════════ -->
+      <div id="tab-promotions" class="tab-panel active">
+        <div class="promotions-grid">
+          <!-- Promoción Activa -->
+          <div class="promotion-card">
+            <div class="promotion-image">
+              [Imagen promocional]
+              <span class="promotion-badge badge-active">Activa</span>
+            </div>
+            <div class="promotion-content">
+              <h3 class="promotion-title">🍕 2x1 en Pizzas los Martes</h3>
+              <p class="promotion-product">Pizza Margherita</p>
+              <div class="promotion-meta">
+                <div class="meta-item">
+                  <span class="meta-label">Inicio</span>
+                  <span class="meta-value">05 Jun 2026</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-label">Fin</span>
+                  <span class="meta-value">30 Jun 2026</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-label">Visualizaciones</span>
+                  <span class="meta-value">1,248</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-label">Clics</span>
+                  <span class="meta-value">327</span>
+                </div>
+              </div>
+            </div>
+            <div class="promotion-actions">
+              <button class="icon-btn" title="Editar">✏️</button>
+              <button class="icon-btn" title="Pausar">⏸️</button>
+              <button class="icon-btn" title="Duplicar">📋</button>
+              <button class="icon-btn" title="Estadísticas">📊</button>
+              <button class="icon-btn" title="Eliminar">🗑️</button>
+            </div>
+          </div>
+
+          <!-- Promoción Programada -->
+          <div class="promotion-card">
+            <div class="promotion-image">
+              [Imagen promocional]
+              <span class="promotion-badge badge-scheduled">Programada</span>
+            </div>
+            <div class="promotion-content">
+              <h3 class="promotion-title">☕ Café + Croissant Combo</h3>
+              <p class="promotion-product">Cappuccino Especiado</p>
+              <div class="promotion-meta">
+                <div class="meta-item">
+                  <span class="meta-label">Inicio</span>
+                  <span class="meta-value">10 Jun 2026</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-label">Fin</span>
+                  <span class="meta-value">15 Jun 2026</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-label">Alcance estimado</span>
+                  <span class="meta-value">~800</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-label">Estado</span>
+                  <span class="meta-value">Pendiente</span>
+                </div>
+              </div>
+            </div>
+            <div class="promotion-actions">
+              <button class="icon-btn" title="Editar">✏️</button>
+              <button class="icon-btn" title="Cancelar">❌</button>
+              <button class="icon-btn" title="Duplicar">📋</button>
+              <button class="icon-btn" title="Detalles">👁️</button>
+            </div>
+          </div>
+
+          <!-- Promoción Pausada -->
+          <div class="promotion-card">
+            <div class="promotion-image">
+              [Imagen promocional]
+              <span class="promotion-badge badge-paused">Pausada</span>
+            </div>
+            <div class="promotion-content">
+              <h3 class="promotion-title">🍝 Pasta Fresca del Chef</h3>
+              <p class="promotion-product">Lasagna Bolognesa</p>
+              <div class="promotion-meta">
+                <div class="meta-item">
+                  <span class="meta-label">Inicio</span>
+                  <span class="meta-value">01 Jun 2026</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-label">Fin</span>
+                  <span class="meta-value">07 Jun 2026</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-label">Visualizaciones</span>
+                  <span class="meta-value">892</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-label">Clics</span>
+                  <span class="meta-value">203</span>
+                </div>
+              </div>
+            </div>
+            <div class="promotion-actions">
+              <button class="icon-btn" title="Reactivar">▶️</button>
+              <button class="icon-btn" title="Editar">✏️</button>
+              <button class="icon-btn" title="Duplicar">📋</button>
+              <button class="icon-btn" title="Eliminar">🗑️</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════════════════
+        TAB 2: Calendario Comercial
+      ═══════════════════════════════════════════════════════════════ -->
+      <div id="tab-calendar" class="tab-panel">
+        <div class="calendar-header">
+          <h2 class="calendar-title">Junio 2026</h2>
+          <div class="calendar-nav">
+            <button class="nav-btn">◀ Anterior</button>
+            <button class="nav-btn">Hoy</button>
+            <button class="nav-btn">Siguiente ▶</button>
+          </div>
+        </div>
+
+        <div class="calendar-grid">
+          <!-- Headers -->
+          <div class="calendar-day-header">Lun</div>
+          <div class="calendar-day-header">Mar</div>
+          <div class="calendar-day-header">Mié</div>
+          <div class="calendar-day-header">Jue</div>
+          <div class="calendar-day-header">Vie</div>
+          <div class="calendar-day-header">Sáb</div>
+          <div class="calendar-day-header">Dom</div>
+
+          <!-- Días del mes (simplificado — solo muestra una semana de ejemplo) -->
+          <div class="calendar-day other-month">
+            <div class="day-number">26</div>
+          </div>
+          <div class="calendar-day other-month">
+            <div class="day-number">27</div>
+          </div>
+          <div class="calendar-day other-month">
+            <div class="day-number">28</div>
+          </div>
+          <div class="calendar-day other-month">
+            <div class="day-number">29</div>
+          </div>
+          <div class="calendar-day other-month">
+            <div class="day-number">30</div>
+          </div>
+          <div class="calendar-day other-month">
+            <div class="day-number">31</div>
+          </div>
+          <div class="calendar-day">
+            <div class="day-number">1</div>
+          </div>
+
+          <div class="calendar-day">
+            <div class="day-number">2</div>
+            <div class="day-event event-promotion">🍕 2x1 Pizzas</div>
+          </div>
+          <div class="calendar-day">
+            <div class="day-number">3</div>
+          </div>
+          <div class="calendar-day">
+            <div class="day-number">4</div>
+          </div>
+          <div class="calendar-day">
+            <div class="day-number">5</div>
+          </div>
+          <div class="calendar-day">
+            <div class="day-number">6</div>
+          </div>
+          <div class="calendar-day">
+            <div class="day-number">7</div>
+            <div class="day-event event-special">💝 Día Especial</div>
+          </div>
+          <div class="calendar-day today">
+            <div class="day-number">8</div>
+            <div class="day-event event-promotion">🍕 2x1 Pizzas</div>
+          </div>
+
+          <div class="calendar-day">
+            <div class="day-number">9</div>
+            <div class="day-event event-promotion">🍕 2x1 Pizzas</div>
+          </div>
+          <div class="calendar-day">
+            <div class="day-number">10</div>
+            <div class="day-event event-scheduled">☕ Combo Desayuno</div>
+          </div>
+          <div class="calendar-day">
+            <div class="day-number">11</div>
+            <div class="day-event event-scheduled">☕ Combo Desayuno</div>
+          </div>
+          <div class="calendar-day">
+            <div class="day-number">12</div>
+            <div class="day-event event-scheduled">☕ Combo Desayuno</div>
+          </div>
+          <div class="calendar-day">
+            <div class="day-number">13</div>
+            <div class="day-event event-scheduled">☕ Combo Desayuno</div>
+          </div>
+          <div class="calendar-day">
+            <div class="day-number">14</div>
+            <div class="day-event event-special">🎉 Aniversario</div>
+          </div>
+          <div class="calendar-day">
+            <div class="day-number">15</div>
+            <div class="day-event event-scheduled">☕ Combo Desayuno</div>
+          </div>
+
+          <!-- ... resto de días (simplificados para brevedad) -->
+          <div class="calendar-day"><div class="day-number">16</div></div>
+          <div class="calendar-day"><div class="day-number">17</div></div>
+          <div class="calendar-day"><div class="day-number">18</div></div>
+          <div class="calendar-day"><div class="day-number">19</div></div>
+          <div class="calendar-day"><div class="day-number">20</div></div>
+          <div class="calendar-day"><div class="day-number">21</div></div>
+          <div class="calendar-day"><div class="day-number">22</div></div>
+
+          <div class="calendar-day"><div class="day-number">23</div></div>
+          <div class="calendar-day"><div class="day-number">24</div></div>
+          <div class="calendar-day"><div class="day-number">25</div></div>
+          <div class="calendar-day"><div class="day-number">26</div></div>
+          <div class="calendar-day"><div class="day-number">27</div></div>
+          <div class="calendar-day"><div class="day-number">28</div></div>
+          <div class="calendar-day"><div class="day-number">29</div></div>
+
+          <div class="calendar-day"><div class="day-number">30</div></div>
+          <div class="calendar-day other-month"><div class="day-number">1</div></div>
+          <div class="calendar-day other-month"><div class="day-number">2</div></div>
+          <div class="calendar-day other-month"><div class="day-number">3</div></div>
+          <div class="calendar-day other-month"><div class="day-number">4</div></div>
+          <div class="calendar-day other-month"><div class="day-number">5</div></div>
+          <div class="calendar-day other-month"><div class="day-number">6</div></div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════════════════
+        TAB 3: Contenido Generado
+      ═══════════════════════════════════════════════════════════════ -->
+      <div id="tab-content" class="tab-panel">
+        <div class="content-list">
+          <!-- Contenido Aprobado -->
+          <div class="content-card approved">
+            <div class="content-icon">✅</div>
+            <div class="content-body">
+              <div class="content-header">
+                <h3 class="content-title">Post Instagram · Pizza Margherita</h3>
+                <span class="content-status status-approved">Aprobado</span>
+              </div>
+              <div class="content-text">
+🍕 ¡El fin de semana pide Pizza Margherita! 🍅🧀
+
+Masa artesanal, salsa de tomate natural y mozzarella de primera calidad.
+
+📍 Ordena ahora y recibe en 30 minutos.
+
+#PizzaMargherita #FinDeSemana #DeliziaItaliana
+              </div>
+              <div class="content-footer">
+                <span class="footer-item">
+                  <span class="footer-icon">🤖</span>
+                  Generado por IA
+                </span>
+                <span class="footer-item">
+                  <span class="footer-icon">📅</span>
+                  05 Jun 2026, 14:32
+                </span>
+                <span class="footer-item">
+                  <span class="footer-icon">👤</span>
+                  Admin Principal
+                </span>
+              </div>
+              <div class="content-actions">
+                <button class="btn btn-secondary btn-sm">📋 Copiar</button>
+                <button class="btn btn-secondary btn-sm">✏️ Editar</button>
+                <button class="btn btn-accent btn-sm">🚀 Usar en Promoción</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Contenido Pendiente de Revisión -->
+          <div class="content-card pending">
+            <div class="content-icon">⏳</div>
+            <div class="content-body">
+              <div class="content-header">
+                <h3 class="content-title">Campaña de Temporada · Cappuccino Especiado</h3>
+                <span class="content-status status-pending">Pendiente</span>
+              </div>
+              <div class="content-text">
+☕ Cappuccino Especiado · El favorito del invierno ❄️
+
+Espresso italiano + leche vaporizada + toque de canela y vainilla.
+
+📍 Ordena ahora y disfruta en nuestra terraza.
+
+#CappuccinoEspeciado #CaféArtesanal #InviernoPerfecto
+              </div>
+              <div class="content-footer">
+                <span class="footer-item">
+                  <span class="footer-icon">🤖</span>
+                  Generado por IA
+                </span>
+                <span class="footer-item">
+                  <span class="footer-icon">📅</span>
+                  08 Jun 2026, 09:15
+                </span>
+              </div>
+              <div class="content-actions">
+                <button class="btn btn-primary btn-sm">✅ Aprobar</button>
+                <button class="btn btn-secondary btn-sm">✏️ Editar</button>
+                <button class="btn btn-secondary btn-sm">❌ Descartar</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Contenido Publicado -->
+          <div class="content-card published">
+            <div class="content-icon">🚀</div>
+            <div class="content-body">
+              <div class="content-header">
+                <h3 class="content-title">Oferta Especial · Lasagna Bolognesa</h3>
+                <span class="content-status status-published">Publicado</span>
+              </div>
+              <div class="content-text">
+🍝 Pasta Fresca del Chef · Lasagna Bolognesa
+
+Receta tradicional italiana con salsa bolognesa casera y queso gratinado.
+
+🔥 Promoción válida hasta el domingo.
+
+Ordena ahora: [WhatsApp]
+              </div>
+              <div class="content-footer">
+                <span class="footer-item">
+                  <span class="footer-icon">✏️</span>
+                  Creado manualmente
+                </span>
+                <span class="footer-item">
+                  <span class="footer-icon">📅</span>
+                  01 Jun 2026, 18:00
+                </span>
+                <span class="footer-item">
+                  <span class="footer-icon">👁️</span>
+                  892 visualizaciones
+                </span>
+              </div>
+              <div class="content-actions">
+                <button class="btn btn-secondary btn-sm">📋 Copiar</button>
+                <button class="btn btn-secondary btn-sm">📊 Ver Estadísticas</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════════════════
+        TAB 4: Productos Destacados
+      ═══════════════════════════════════════════════════════════════ -->
+      <div id="tab-featured" class="tab-panel">
+        <div class="featured-section">
+          <div class="section-header">
+            <h2 class="section-title">Productos Destacados Activos</h2>
+            <button class="btn btn-primary">➕ Agregar Producto Destacado</button>
+          </div>
+
+          <div class="featured-grid">
+            <!-- Producto Destacado -->
+            <div class="featured-card">
+              <div class="featured-badge">⭐ Destacado</div>
+              <div class="featured-image">[Imagen del producto]</div>
+              <div class="featured-content">
+                <h3 class="featured-title">Pizza Margherita</h3>
+                <p class="featured-desc">Masa artesanal, salsa de tomate natural y mozzarella de primera calidad.</p>
+                <div class="featured-actions">
+                  <button class="icon-btn" title="Editar">✏️</button>
+                  <button class="icon-btn" title="Quitar Destacado">⭐</button>
+                  <button class="icon-btn" title="Estadísticas">📊</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Producto Destacado -->
+            <div class="featured-card">
+              <div class="featured-badge">🔥 Popular</div>
+              <div class="featured-image">[Imagen del producto]</div>
+              <div class="featured-content">
+                <h3 class="featured-title">Cappuccino Especiado</h3>
+                <p class="featured-desc">Espresso italiano con leche vaporizada y toque de especias de temporada.</p>
+                <div class="featured-actions">
+                  <button class="icon-btn" title="Editar">✏️</button>
+                  <button class="icon-btn" title="Quitar Destacado">⭐</button>
+                  <button class="icon-btn" title="Estadísticas">📊</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Producto Destacado -->
+            <div class="featured-card">
+              <div class="featured-badge">👨‍🍳 Recomendación</div>
+              <div class="featured-image">[Imagen del producto]</div>
+              <div class="featured-content">
+                <h3 class="featured-title">Lasagna Bolognesa</h3>
+                <p class="featured-desc">Receta tradicional italiana con salsa bolognesa casera y queso gratinado.</p>
+                <div class="featured-actions">
+                  <button class="icon-btn" title="Editar">✏️</button>
+                  <button class="icon-btn" title="Quitar Destacado">⭐</button>
+                  <button class="icon-btn" title="Estadísticas">📊</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Slots vacíos (Plan Start: hasta 3 productos destacados) -->
+            <!-- Este empty-slot solo aparece cuando hay espacio disponible según el plan -->
+            <!-- <div class="empty-slot">
+              <div class="empty-icon">⭐</div>
+              <div class="empty-text">Puedes destacar hasta 3 productos más.<br>Actualiza a Plan Business para destacar hasta 6 productos.</div>
+              <button class="btn btn-primary">Agregar Producto</button>
+            </div> -->
+          </div>
+        </div>
+
+        <div class="featured-section">
+          <div class="section-header">
+            <h2 class="section-title">Categorías de Destacados Disponibles</h2>
+          </div>
+          <p style="color: var(--muted); line-height: 1.6;">
+            Los productos destacados se pueden clasificar en: Más vendidos, Promoción de la semana, Recomendación del chef, Producto estrella, Nuevo, Popular.
+            <br><br>
+            Estas etiquetas se muestran automáticamente en el menú público para resaltar tus mejores productos.
+          </p>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+    MODAL: Crear Promoción
+  ═══════════════════════════════════════════════════════════════ -->
+  <div id="modal-create-promotion" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Crear Promoción</h2>
+        <button class="modal-close" onclick="closeModal('create-promotion')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-field">
+          <label class="field-label">Producto</label>
+          <select class="field-select">
+            <option>Seleccionar producto...</option>
+            <option>Pizza Margherita</option>
+            <option>Cappuccino Especiado</option>
+            <option>Lasagna Bolognesa</option>
+            <option>Tiramisu Clásico</option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label class="field-label">Título Promocional</label>
+          <input type="text" class="field-input" placeholder="Ej: 🍕 2x1 en Pizzas los Martes" />
+        </div>
+
+        <div class="form-field">
+          <label class="field-label">Descripción</label>
+          <textarea class="field-input field-textarea" placeholder="Describe tu promoción..."></textarea>
+        </div>
+
+        <div class="form-field">
+          <label class="field-label">Descuento</label>
+          <input type="text" class="field-input" placeholder="Ej: 50% o -$5.00" />
+        </div>
+
+        <div class="form-field">
+          <label class="field-label">Imagen Promocional</label>
+          <button class="btn btn-secondary" style="width: 100%;">📂 Seleccionar desde Multimedia</button>
+        </div>
+
+        <div class="field-row">
+          <div class="form-field">
+            <label class="field-label">Fecha de Inicio</label>
+            <input type="datetime-local" class="field-input" />
+          </div>
+          <div class="form-field">
+            <label class="field-label">Fecha de Finalización</label>
+            <input type="datetime-local" class="field-input" />
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label class="field-label">Estado Inicial</label>
+          <select class="field-select">
+            <option>Activar inmediatamente</option>
+            <option>Programar para fecha futura</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('create-promotion')">Cancelar</button>
+        <button class="btn btn-primary">Crear Promoción</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+    MODAL: Generar Contenido con IA
+  ═══════════════════════════════════════════════════════════════ -->
+  <div id="modal-generate-ai" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Generar Contenido con IA</h2>
+        <button class="modal-close" onclick="closeModal('generate-ai')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-field">
+          <label class="field-label">Producto</label>
+          <select class="field-select">
+            <option>Seleccionar producto...</option>
+            <option>Pizza Margherita</option>
+            <option>Cappuccino Especiado</option>
+            <option>Lasagna Bolognesa</option>
+            <option>Tiramisu Clásico</option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label class="field-label">Tipo de Contenido</label>
+          <select class="field-select">
+            <option>Publicación para Instagram</option>
+            <option>Publicación para Facebook</option>
+            <option>Texto promocional</option>
+            <option>Campaña de temporada</option>
+            <option>Oferta especial</option>
+            <option>Texto para WhatsApp</option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label class="field-label">Contexto (opcional)</label>
+          <textarea class="field-input field-textarea" placeholder="Ej: Fin de semana, festividad, evento especial..."></textarea>
+        </div>
+
+        <button class="btn btn-accent" style="width: 100%;">✨ Generar con IA</button>
+
+        <!-- Preview del contenido generado (mostrado después de generarse) -->
+        <div class="ai-preview" style="display: none;" id="ai-result">
+          <div class="ai-badge">
+            <span>✨ Generado por IA</span>
+          </div>
+          <div class="ai-content" id="ai-content-text">
+<!-- Contenido generado aparecerá aquí -->
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('generate-ai')">Cancelar</button>
+        <button class="btn btn-secondary" disabled id="btn-edit-ai">✏️ Editar</button>
+        <button class="btn btn-primary" disabled id="btn-approve-ai">✅ Aprobar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+    JAVASCRIPT INTERACCIONES
+  ═══════════════════════════════════════════════════════════════ -->
+  <script>
+    // Tabs
+    function showTab(tabName) {
+      // Hide all panels
+      document.querySelectorAll('.tab-panel').forEach(panel => {
+        panel.classList.remove('active');
+      });
+      // Hide all tabs
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      // Show selected panel
+      document.getElementById('tab-' + tabName).classList.add('active');
+      // Highlight selected tab
+      event.target.classList.add('active');
+    }
+
+    // Modals
+    function openModal(modalId) {
+      document.getElementById('modal-' + modalId).classList.add('active');
+    }
+
+    function closeModal(modalId) {
+      document.getElementById('modal-' + modalId).classList.remove('active');
+    }
+
+    // Close modal on overlay click
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+      overlay.addEventListener('click', function(e) {
+        if (e.target === overlay) {
+          overlay.classList.remove('active');
+        }
+      });
+    });
+
+    // Simulación de generación de contenido IA
+    document.querySelector('#modal-generate-ai .btn-accent').addEventListener('click', function() {
+      const aiResult = document.getElementById('ai-result');
+      const aiContent = document.getElementById('ai-content-text');
+      const btnEdit = document.getElementById('btn-edit-ai');
+      const btnApprove = document.getElementById('btn-approve-ai');
+
+      // Simular contenido generado
+      aiContent.textContent = `🍕 ¡El fin de semana pide Pizza Margherita! 🍅🧀
+
+Masa artesanal, salsa de tomate natural y mozzarella de primera calidad.
+
+📍 Ordena ahora y recibe en 30 minutos.
+
+#PizzaMargherita #FinDeSemana #DeliziaItaliana`;
+
+      // Mostrar preview
+      aiResult.style.display = 'block';
+
+      // Habilitar botones
+      btnEdit.disabled = false;
+      btnApprove.disabled = false;
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,1333 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planes y Suscripciones · Menús Digitales SaaS</title>
+  <style>
+    /* ─── Design System: Hugging Face ─── */
+    :root {
+      --bg: #fafafa;
+      --surface: #ffffff;
+      --surface-warm: #fff4cc;
+      --fg: #0d1117;
+      --fg-2: #374151;
+      --muted: #6b7280;
+      --meta: var(--muted);
+      --border: #e5e7eb;
+      --border-soft: #f3f4f6;
+      --accent: #ffd21e;
+      --accent-on: #0d1117;
+      --accent-hover: #f59e0b;
+      --accent-active: color-mix(in oklab, var(--accent), black 20%);
+      --success: #16a34a;
+      --warn: #f59e0b;
+      --danger: #dc2626;
+      --font-display: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      --font-body: "Source Sans Pro", Inter, system-ui, -apple-system, sans-serif;
+      --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      --text-xs: 12px;
+      --text-sm: 13px;
+      --text-base: 15px;
+      --text-lg: 18px;
+      --text-xl: 24px;
+      --text-2xl: 32px;
+      --leading-body: 1.55;
+      --leading-tight: 1.1;
+      --tracking-display: -0.01em;
+      --space-1: 4px;
+      --space-2: 8px;
+      --space-3: 12px;
+      --space-4: 16px;
+      --space-5: 20px;
+      --space-6: 24px;
+      --space-8: 32px;
+      --space-12: 48px;
+      --radius-sm: 4px;
+      --radius-md: 6px;
+      --radius-lg: 8px;
+      --radius-pill: 9999px;
+      --elev-flat: none;
+      --elev-ring: 0 0 0 1px var(--border);
+      --elev-raised: 0 2px 8px color-mix(in oklab, var(--fg), transparent 90%);
+      --focus-ring: 0 0 0 3px rgba(13, 17, 23, 0.1);
+      --motion-fast: 120ms;
+      --motion-base: 200ms;
+      --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      line-height: var(--leading-body);
+      color: var(--fg);
+      background: var(--bg);
+    }
+
+    h1, h2, h3 {
+      font-family: var(--font-display);
+      line-height: var(--leading-tight);
+      letter-spacing: var(--tracking-display);
+    }
+
+    h1 { font-size: var(--text-2xl); font-weight: 600; }
+    h2 { font-size: var(--text-xl); font-weight: 600; }
+    h3 { font-size: var(--text-lg); font-weight: 600; }
+
+    /* ─── Layout ─── */
+    .app { display: flex; min-height: 100vh; }
+
+    .sidebar {
+      width: 280px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: var(--space-6);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-8);
+    }
+
+    .brand {
+      font-family: var(--font-display);
+      font-size: var(--text-lg);
+      font-weight: 600;
+      color: var(--fg);
+    }
+
+    .nav { display: flex; flex-direction: column; gap: var(--space-1); }
+
+    .nav a {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-2) var(--space-3);
+      border-radius: var(--radius-md);
+      font-size: var(--text-sm);
+      color: var(--fg-2);
+      text-decoration: none;
+      transition: all var(--motion-fast) var(--ease-standard);
+    }
+
+    .nav a:hover { background: var(--border-soft); color: var(--fg); }
+    .nav a.active { background: var(--accent); color: var(--accent-on); font-weight: 500; }
+
+    .nav .icon {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+    }
+
+    .main {
+      flex: 1;
+      padding: var(--space-8);
+      max-width: 1400px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-8);
+    }
+
+    .header-actions { display: flex; gap: var(--space-3); }
+
+    /* ─── Cards ─── */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: var(--space-4);
+      margin-bottom: var(--space-8);
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: var(--space-5);
+    }
+
+    .stat-label {
+      font-size: var(--text-sm);
+      color: var(--muted);
+      margin-bottom: var(--space-2);
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+
+    .stat-value {
+      font-family: var(--font-display);
+      font-size: var(--text-2xl);
+      font-weight: 600;
+      margin-bottom: var(--space-2);
+    }
+
+    .stat-meta {
+      font-size: var(--text-xs);
+      color: var(--muted);
+    }
+
+    /* ─── Buttons ─── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-4);
+      border-radius: var(--radius-md);
+      font-family: var(--font-display);
+      font-size: var(--text-sm);
+      font-weight: 500;
+      border: none;
+      cursor: pointer;
+      transition: all var(--motion-fast) var(--ease-standard);
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: var(--accent-on);
+    }
+
+    .btn-primary:hover { background: var(--accent-hover); }
+
+    .btn-secondary {
+      background: var(--surface);
+      color: var(--fg);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover { background: var(--border-soft); }
+
+    .btn-danger {
+      background: var(--danger);
+      color: white;
+    }
+
+    .btn-danger:hover { background: color-mix(in oklab, var(--danger), black 10%); }
+
+    /* ─── Tabs ─── */
+    .tabs {
+      display: flex;
+      gap: var(--space-2);
+      border-bottom: 1px solid var(--border);
+      margin-bottom: var(--space-6);
+    }
+
+    .tab {
+      padding: var(--space-3) var(--space-4);
+      font-family: var(--font-display);
+      font-size: var(--text-sm);
+      color: var(--muted);
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      transition: all var(--motion-fast) var(--ease-standard);
+    }
+
+    .tab:hover { color: var(--fg); }
+    .tab.active {
+      color: var(--fg);
+      border-bottom-color: var(--accent);
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* ─── Plan Card ─── */
+    .plan-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: var(--space-6);
+      margin-bottom: var(--space-8);
+    }
+
+    .plan-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: var(--space-6);
+      position: relative;
+    }
+
+    .plan-card.recommended {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent);
+    }
+
+    .plan-badge {
+      position: absolute;
+      top: -10px;
+      right: var(--space-4);
+      background: var(--accent);
+      color: var(--accent-on);
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      padding: var(--space-1) var(--space-3);
+      border-radius: var(--radius-pill);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+
+    .plan-name {
+      font-family: var(--font-display);
+      font-size: var(--text-xl);
+      font-weight: 600;
+      margin-bottom: var(--space-2);
+    }
+
+    .plan-price {
+      font-family: var(--font-display);
+      font-size: var(--text-2xl);
+      font-weight: 600;
+      margin-bottom: var(--space-1);
+    }
+
+    .plan-period {
+      font-size: var(--text-sm);
+      color: var(--muted);
+      margin-bottom: var(--space-5);
+    }
+
+    .plan-features {
+      list-style: none;
+      margin-bottom: var(--space-5);
+    }
+
+    .plan-features li {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-2);
+      padding: var(--space-2) 0;
+      font-size: var(--text-sm);
+      color: var(--fg-2);
+    }
+
+    .plan-features .check {
+      color: var(--success);
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .plan-features .cross {
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+
+    /* ─── Table ─── */
+    .table-container {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      margin-bottom: var(--space-8);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead {
+      background: var(--border-soft);
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      text-align: left;
+      padding: var(--space-3) var(--space-4);
+      color: var(--muted);
+    }
+
+    td {
+      padding: var(--space-3) var(--space-4);
+      border-bottom: 1px solid var(--border-soft);
+      font-size: var(--text-sm);
+    }
+
+    tr:hover td { background: var(--border-soft); }
+    tr:last-child td { border-bottom: none; }
+
+    /* ─── Badge ─── */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px var(--space-2);
+      border-radius: var(--radius-sm);
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+
+    .badge-start { background: #dbeafe; color: #1e40af; }
+    .badge-business { background: #dcfce7; color: #166534; }
+    .badge-premium { background: #fce7f3; color: #9f1239; }
+    .badge-active { background: #dcfce7; color: #166534; }
+    .badge-vencido { background: #fee2e2; color: #991b1b; }
+    .badge-prueba { background: #fef3c7; color: #92400e; }
+
+    /* ─── Modal ─── */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-6);
+    }
+
+    .modal.active { display: flex; }
+
+    .modal-content {
+      background: var(--surface);
+      border-radius: var(--radius-md);
+      max-width: 600px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      padding: var(--space-5) var(--space-6);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-title {
+      font-family: var(--font-display);
+      font-size: var(--text-lg);
+      font-weight: 600;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: var(--text-xl);
+      color: var(--muted);
+      cursor: pointer;
+      padding: var(--space-1);
+      line-height: 1;
+    }
+
+    .modal-close:hover { color: var(--fg); }
+
+    .modal-body { padding: var(--space-6); }
+
+    .modal-footer {
+      padding: var(--space-5) var(--space-6);
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: var(--space-3);
+      justify-content: flex-end;
+    }
+
+    /* ─── Form ─── */
+    .field {
+      margin-bottom: var(--space-5);
+    }
+
+    .field label {
+      display: block;
+      font-family: var(--font-display);
+      font-size: var(--text-sm);
+      font-weight: 500;
+      margin-bottom: var(--space-2);
+      color: var(--fg);
+    }
+
+    .field input,
+    .field select,
+    .field textarea {
+      width: 100%;
+      padding: var(--space-2) var(--space-3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      font-size: var(--text-sm);
+      font-family: var(--font-body);
+      color: var(--fg);
+      background: var(--surface);
+      transition: border-color var(--motion-fast);
+    }
+
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      outline: none;
+      border-color: var(--fg);
+      box-shadow: var(--focus-ring);
+    }
+
+    .field-help {
+      font-size: var(--text-xs);
+      color: var(--muted);
+      margin-top: var(--space-1);
+    }
+
+    /* ─── Timer ─── */
+    .timer {
+      font-family: var(--font-mono);
+      font-weight: 600;
+    }
+
+    .timer.normal { color: var(--success); }
+    .timer.warning { color: var(--warn); }
+    .timer.critical { color: var(--danger); }
+
+    /* ─── Comparison Table ─── */
+    .comparison {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+
+    .comparison table { table-layout: fixed; }
+
+    .comparison th:first-child,
+    .comparison td:first-child {
+      font-weight: 500;
+      text-align: left;
+      width: 40%;
+    }
+
+    .comparison th {
+      background: var(--border-soft);
+      text-align: center;
+      font-family: var(--font-display);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      text-transform: none;
+      padding: var(--space-4);
+    }
+
+    .comparison td {
+      text-align: center;
+      padding: var(--space-3);
+    }
+
+    .comparison .check { color: var(--success); font-size: var(--text-lg); }
+    .comparison .cross { color: var(--muted); font-size: var(--text-lg); }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 920px) {
+      .app { flex-direction: column; }
+      .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border); }
+      .stats { grid-template-columns: 1fr 1fr; }
+      .plan-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 640px) {
+      .stats { grid-template-columns: 1fr; }
+      .header { flex-direction: column; align-items: flex-start; gap: var(--space-3); }
+      .table-container { overflow-x: auto; }
+      table { min-width: 800px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="brand">Menús Digitales</div>
+      <nav class="nav">
+        <a href="dashboard.html">
+          <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+          Dashboard
+        </a>
+        <a href="multiempresa.html">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+          Multiempresa
+        </a>
+        <a href="usuarios-permisos.html">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Usuarios y Permisos
+        </a>
+        <a href="planes-suscripciones.html" class="active">
+          <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Planes y Suscripciones
+        </a>
+        <a href="#">
+          <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          Catálogo
+        </a>
+        <a href="#">
+          <svg class="icon" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/></svg>
+          Multimedia
+        </a>
+        <a href="#">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Idiomas
+        </a>
+        <a href="#">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Marketing
+        </a>
+        <a href="#">
+          <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6m8.66-11.66l-4.24 4.24M7.58 16.42l-4.24 4.24M1 12h6m6 0h6m-3.66 8.66l-4.24-4.24M7.58 7.58L3.34 3.34"/></svg>
+          IA
+        </a>
+        <a href="#">
+          <svg class="icon" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Estadísticas
+        </a>
+        <a href="#">
+          <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6v6H9z"/></svg>
+          Automatizaciones
+        </a>
+        <a href="#">
+          <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          Configuración
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main">
+      <div class="header">
+        <div>
+          <h1>Planes y Suscripciones</h1>
+          <p class="stat-meta" style="margin-top: 8px;" id="userRole">Super Administrador</p>
+        </div>
+        <div class="header-actions" id="adminActions">
+          <button class="btn btn-secondary" onclick="openModal('modalCrearPlan')">Crear Plan</button>
+        </div>
+      </div>
+
+      <!-- Stats Cards -->
+      <div class="stats">
+        <div class="stat-card">
+          <div class="stat-label">Plan Actual</div>
+          <div class="stat-value" id="statPlanActual">BUSINESS</div>
+          <div class="stat-meta">Activo desde hace 145 días</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Próximo vencimiento</div>
+          <div class="stat-value" id="statDiasRestantes">15 días</div>
+          <div class="stat-meta">Renovación: 22 Jun 2026</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Inversión mensual</div>
+          <div class="stat-value">R$ 300</div>
+          <div class="stat-meta">Último pago: 07 May 2026</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Próxima factura</div>
+          <div class="stat-value">R$ 300</div>
+          <div class="stat-meta">Débito automático activo</div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('tabResumen')">Resumen</button>
+        <button class="tab" onclick="switchTab('tabComparar')">Comparar Planes</button>
+        <button class="tab" onclick="switchTab('tabHistorial')">Historial</button>
+        <button class="tab" onclick="switchTab('tabGestionar')" id="tabGestionarBtn" style="display: none;">Gestionar (Admin)</button>
+      </div>
+
+      <!-- Tab: Resumen -->
+      <div id="tabResumen" class="tab-content active">
+        <h2 style="margin-bottom: 24px;">Tu plan actual</h2>
+
+        <div class="plan-grid">
+          <div class="plan-card recommended">
+            <div class="plan-badge">Tu plan</div>
+            <div class="plan-name">BUSINESS</div>
+            <div class="plan-price">R$ 300</div>
+            <div class="plan-period">por mes</div>
+
+            <ul class="plan-features">
+              <li><span class="check">✓</span> Menú digital completo</li>
+              <li><span class="check">✓</span> Hasta 3 idiomas</li>
+              <li><span class="check">✓</span> QR personalizado</li>
+              <li><span class="check">✓</span> Fotos y videos</li>
+              <li><span class="check">✓</span> Integración WhatsApp y redes</li>
+              <li><span class="check">✓</span> Generación de contenido con IA</li>
+              <li><span class="check">✓</span> Menú dinámico por horario</li>
+              <li><span class="check">✓</span> Analytics básico</li>
+              <li><span class="check">✓</span> Etiquetas inteligentes</li>
+              <li><span class="check">✓</span> Herramientas básicas de marketing</li>
+            </ul>
+
+            <button class="btn btn-secondary" style="width: 100%;" onclick="switchTab('tabComparar')">Ver otros planes</button>
+          </div>
+
+          <div class="stat-card" style="grid-column: span 2;">
+            <div class="stat-label">Tiempo restante de suscripción</div>
+            <div class="stat-value timer normal" id="timerResumen">15 días 14h 23m</div>
+            <div class="stat-meta" style="margin-top: 16px;">
+              <strong>Fecha de renovación:</strong> 22 de junio de 2026<br>
+              <strong>Estado:</strong> <span class="badge badge-active">Activo</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Comparar Planes -->
+      <div id="tabComparar" class="tab-content">
+        <h2 style="margin-bottom: 24px;">Comparar Planes</h2>
+
+        <div class="plan-grid">
+          <!-- START -->
+          <div class="plan-card">
+            <div class="plan-name">START</div>
+            <div class="plan-price">R$ 150</div>
+            <div class="plan-period">por mes</div>
+
+            <ul class="plan-features">
+              <li><span class="check">✓</span> Menú digital completo</li>
+              <li><span class="check">✓</span> Hasta 3 idiomas</li>
+              <li><span class="check">✓</span> QR personalizado</li>
+              <li><span class="check">✓</span> Fotos y videos</li>
+              <li><span class="check">✓</span> Integración WhatsApp y redes</li>
+              <li><span class="cross">×</span> Generación de contenido con IA</li>
+              <li><span class="cross">×</span> Menú dinámico por horario</li>
+              <li><span class="cross">×</span> Analytics básico</li>
+              <li><span class="cross">×</span> Etiquetas inteligentes</li>
+              <li><span class="cross">×</span> Herramientas de marketing</li>
+            </ul>
+
+            <button class="btn btn-secondary" style="width: 100%;" onclick="alert('Contactar soporte para cambiar a START')">Cambiar a START</button>
+          </div>
+
+          <!-- BUSINESS -->
+          <div class="plan-card recommended">
+            <div class="plan-badge">Recomendado</div>
+            <div class="plan-name">BUSINESS</div>
+            <div class="plan-price">R$ 300</div>
+            <div class="plan-period">por mes</div>
+
+            <ul class="plan-features">
+              <li><span class="check">✓</span> Todo lo de START</li>
+              <li><span class="check">✓</span> Generación de contenido con IA</li>
+              <li><span class="check">✓</span> Menú dinámico por horario</li>
+              <li><span class="check">✓</span> Analytics básico</li>
+              <li><span class="check">✓</span> Etiquetas inteligentes</li>
+              <li><span class="check">✓</span> Herramientas básicas de marketing</li>
+              <li><span class="cross">×</span> Calendario inteligente con IA</li>
+              <li><span class="cross">×</span> Publicaciones automáticas</li>
+              <li><span class="cross">×</span> Campañas promocionales avanzadas</li>
+              <li><span class="cross">×</span> Automatizaciones</li>
+            </ul>
+
+            <button class="btn btn-primary" style="width: 100%;" disabled>Tu plan actual</button>
+          </div>
+
+          <!-- PREMIUM -->
+          <div class="plan-card">
+            <div class="plan-name">PREMIUM</div>
+            <div class="plan-price">R$ 600</div>
+            <div class="plan-period">por mes</div>
+
+            <ul class="plan-features">
+              <li><span class="check">✓</span> Todo lo de BUSINESS</li>
+              <li><span class="check">✓</span> Calendario inteligente con IA</li>
+              <li><span class="check">✓</span> Publicaciones automáticas</li>
+              <li><span class="check">✓</span> Campañas promocionales avanzadas</li>
+              <li><span class="check">✓</span> Automatizaciones</li>
+              <li><span class="check">✓</span> Analytics avanzado</li>
+              <li><span class="check">✓</span> Herramientas avanzadas de crecimiento</li>
+              <li><span class="check">✓</span> Soporte prioritario 24/7</li>
+            </ul>
+
+            <button class="btn btn-primary" style="width: 100%;" onclick="openModal('modalUpgrade')">Actualizar a PREMIUM</button>
+          </div>
+        </div>
+
+        <h3 style="margin: 48px 0 24px;">Comparación detallada</h3>
+        <div class="comparison">
+          <table>
+            <thead>
+              <tr>
+                <th>Funcionalidad</th>
+                <th>START</th>
+                <th>BUSINESS</th>
+                <th>PREMIUM</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Menú digital completo</td>
+                <td class="check">✓</td>
+                <td class="check">✓</td>
+                <td class="check">✓</td>
+              </tr>
+              <tr>
+                <td>Idiomas</td>
+                <td>Hasta 3</td>
+                <td>Hasta 5</td>
+                <td>Ilimitado</td>
+              </tr>
+              <tr>
+                <td>Productos en catálogo</td>
+                <td>Hasta 50</td>
+                <td>Hasta 200</td>
+                <td>Ilimitado</td>
+              </tr>
+              <tr>
+                <td>QR personalizado</td>
+                <td class="check">✓</td>
+                <td class="check">✓</td>
+                <td class="check">✓</td>
+              </tr>
+              <tr>
+                <td>Fotos y videos</td>
+                <td class="check">✓</td>
+                <td class="check">✓</td>
+                <td class="check">✓</td>
+              </tr>
+              <tr>
+                <td>Integración WhatsApp</td>
+                <td class="check">✓</td>
+                <td class="check">✓</td>
+                <td class="check">✓</td>
+              </tr>
+              <tr>
+                <td>Generación IA (textos)</td>
+                <td class="cross">×</td>
+                <td class="check">✓</td>
+                <td class="check">✓</td>
+              </tr>
+              <tr>
+                <td>Generación IA (imágenes)</td>
+                <td class="cross">×</td>
+                <td class="cross">×</td>
+                <td class="check">✓</td>
+              </tr>
+              <tr>
+                <td>Menú dinámico por horario</td>
+                <td class="cross">×</td>
+                <td class="check">✓</td>
+                <td class="check">✓</td>
+              </tr>
+              <tr>
+                <td>Analytics</td>
+                <td class="cross">×</td>
+                <td>Básico</td>
+                <td>Avanzado</td>
+              </tr>
+              <tr>
+                <td>Etiquetas inteligentes</td>
+                <td class="cross">×</td>
+                <td class="check">✓</td>
+                <td class="check">✓</td>
+              </tr>
+              <tr>
+                <td>Herramientas de marketing</td>
+                <td class="cross">×</td>
+                <td>Básicas</td>
+                <td>Avanzadas</td>
+              </tr>
+              <tr>
+                <td>Calendario inteligente IA</td>
+                <td class="cross">×</td>
+                <td class="cross">×</td>
+                <td class="check">✓</td>
+              </tr>
+              <tr>
+                <td>Publicaciones automáticas</td>
+                <td class="cross">×</td>
+                <td class="cross">×</td>
+                <td class="check">✓</td>
+              </tr>
+              <tr>
+                <td>Campañas promocionales</td>
+                <td class="cross">×</td>
+                <td class="cross">×</td>
+                <td class="check">✓</td>
+              </tr>
+              <tr>
+                <td>Automatizaciones</td>
+                <td class="cross">×</td>
+                <td class="cross">×</td>
+                <td class="check">✓</td>
+              </tr>
+              <tr>
+                <td>Usuarios permitidos</td>
+                <td>1 (Dueño)</td>
+                <td>Hasta 3</td>
+                <td>Ilimitado</td>
+              </tr>
+              <tr>
+                <td>Soporte</td>
+                <td>Email</td>
+                <td>Email + Chat</td>
+                <td>24/7 Prioritario</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab: Historial -->
+      <div id="tabHistorial" class="tab-content">
+        <h2 style="margin-bottom: 24px;">Historial de Pagos y Cambios</h2>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Tipo</th>
+                <th>Descripción</th>
+                <th>Plan</th>
+                <th>Monto</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>07 May 2026</td>
+                <td>Pago</td>
+                <td>Renovación mensual BUSINESS</td>
+                <td><span class="badge badge-business">BUSINESS</span></td>
+                <td>R$ 300</td>
+                <td><span class="badge badge-active">Pagado</span></td>
+              </tr>
+              <tr>
+                <td>07 Abr 2026</td>
+                <td>Pago</td>
+                <td>Renovación mensual BUSINESS</td>
+                <td><span class="badge badge-business">BUSINESS</span></td>
+                <td>R$ 300</td>
+                <td><span class="badge badge-active">Pagado</span></td>
+              </tr>
+              <tr>
+                <td>15 Mar 2026</td>
+                <td>Cambio de Plan</td>
+                <td>Upgrade de START a BUSINESS</td>
+                <td><span class="badge badge-business">BUSINESS</span></td>
+                <td>R$ 150</td>
+                <td><span class="badge badge-active">Completado</span></td>
+              </tr>
+              <tr>
+                <td>07 Mar 2026</td>
+                <td>Pago</td>
+                <td>Renovación mensual START</td>
+                <td><span class="badge badge-start">START</span></td>
+                <td>R$ 150</td>
+                <td><span class="badge badge-active">Pagado</span></td>
+              </tr>
+              <tr>
+                <td>07 Feb 2026</td>
+                <td>Pago</td>
+                <td>Renovación mensual START</td>
+                <td><span class="badge badge-start">START</span></td>
+                <td>R$ 150</td>
+                <td><span class="badge badge-active">Pagado</span></td>
+              </tr>
+              <tr>
+                <td>12 Ene 2026</td>
+                <td>Activación</td>
+                <td>Primera suscripción - Plan START</td>
+                <td><span class="badge badge-start">START</span></td>
+                <td>R$ 150</td>
+                <td><span class="badge badge-active">Pagado</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab: Gestionar (Solo Super Admin) -->
+      <div id="tabGestionar" class="tab-content">
+        <h2 style="margin-bottom: 24px;">Gestión de Planes (Super Admin)</h2>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Plan</th>
+                <th>Precio</th>
+                <th>Usuarios Máx</th>
+                <th>Productos Máx</th>
+                <th>IA Texto</th>
+                <th>IA Imagen</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="badge badge-start">START</span></td>
+                <td>R$ 150</td>
+                <td>1</td>
+                <td>50</td>
+                <td class="cross">×</td>
+                <td class="cross">×</td>
+                <td><span class="badge badge-active">Activo</span></td>
+                <td>
+                  <button class="btn btn-secondary" style="font-size: 11px; padding: 4px 8px;">Editar</button>
+                </td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-business">BUSINESS</span></td>
+                <td>R$ 300</td>
+                <td>3</td>
+                <td>200</td>
+                <td class="check">✓</td>
+                <td class="cross">×</td>
+                <td><span class="badge badge-active">Activo</span></td>
+                <td>
+                  <button class="btn btn-secondary" style="font-size: 11px; padding: 4px 8px;">Editar</button>
+                </td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-premium">PREMIUM</span></td>
+                <td>R$ 600</td>
+                <td>∞</td>
+                <td>∞</td>
+                <td class="check">✓</td>
+                <td class="check">✓</td>
+                <td><span class="badge badge-active">Activo</span></td>
+                <td>
+                  <button class="btn btn-secondary" style="font-size: 11px; padding: 4px 8px;">Editar</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 style="margin: 48px 0 24px;">Feature Flags por Plan</h3>
+        <div class="comparison">
+          <table>
+            <thead>
+              <tr>
+                <th>Módulo / Funcionalidad</th>
+                <th>START</th>
+                <th>BUSINESS</th>
+                <th>PREMIUM</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Catálogo de Productos</strong></td>
+                <td>Hasta 50</td>
+                <td>Hasta 200</td>
+                <td>Ilimitado</td>
+              </tr>
+              <tr>
+                <td><strong>Multimedia</strong></td>
+                <td class="check">✓</td>
+                <td class="check">✓</td>
+                <td class="check">✓</td>
+              </tr>
+              <tr>
+                <td><strong>Idiomas</strong></td>
+                <td>Hasta 3</td>
+                <td>Hasta 5</td>
+                <td>Ilimitado</td>
+              </tr>
+              <tr>
+                <td><strong>Marketing → Campañas Básicas</strong></td>
+                <td class="cross">×</td>
+                <td class="check">✓</td>
+                <td class="check">✓</td>
+              </tr>
+              <tr>
+                <td><strong>Marketing → Campañas Avanzadas</strong></td>
+                <td class="cross">×</td>
+                <td class="cross">×</td>
+                <td class="check">✓</td>
+              </tr>
+              <tr>
+                <td><strong>IA → Generación de Texto</strong></td>
+                <td class="cross">×</td>
+                <td class="check">✓</td>
+                <td class="check">✓</td>
+              </tr>
+              <tr>
+                <td><strong>IA → Generación de Imágenes</strong></td>
+                <td class="cross">×</td>
+                <td class="cross">×</td>
+                <td class="check">✓</td>
+              </tr>
+              <tr>
+                <td><strong>Estadísticas → Básicas</strong></td>
+                <td class="cross">×</td>
+                <td class="check">✓</td>
+                <td class="check">✓</td>
+              </tr>
+              <tr>
+                <td><strong>Estadísticas → Avanzadas</strong></td>
+                <td class="cross">×</td>
+                <td class="cross">×</td>
+                <td class="check">✓</td>
+              </tr>
+              <tr>
+                <td><strong>Automatizaciones</strong></td>
+                <td class="cross">×</td>
+                <td class="cross">×</td>
+                <td class="check">✓</td>
+              </tr>
+              <tr>
+                <td><strong>Usuarios Permitidos</strong></td>
+                <td>1 (Dueño)</td>
+                <td>Hasta 3</td>
+                <td>Ilimitado</td>
+              </tr>
+              <tr>
+                <td><strong>Menú Dinámico por Horario</strong></td>
+                <td class="cross">×</td>
+                <td class="check">✓</td>
+                <td class="check">✓</td>
+              </tr>
+              <tr>
+                <td><strong>Calendario Inteligente IA</strong></td>
+                <td class="cross">×</td>
+                <td class="cross">×</td>
+                <td class="check">✓</td>
+              </tr>
+              <tr>
+                <td><strong>Publicaciones Automáticas</strong></td>
+                <td class="cross">×</td>
+                <td class="cross">×</td>
+                <td class="check">✓</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Modal: Upgrade a PREMIUM -->
+  <div class="modal" id="modalUpgrade">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Actualizar a PREMIUM</h3>
+        <button class="modal-close" onclick="closeModal('modalUpgrade')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="margin-bottom: 16px;">Estás a punto de actualizar tu plan de <strong>BUSINESS</strong> a <strong>PREMIUM</strong>.</p>
+
+        <div class="stat-card" style="margin-bottom: 16px;">
+          <div class="stat-label">Nuevo precio mensual</div>
+          <div class="stat-value">R$ 600</div>
+          <div class="stat-meta">Diferencia de +R$ 300 por mes</div>
+        </div>
+
+        <p style="margin-bottom: 16px;"><strong>Nuevas funcionalidades incluidas:</strong></p>
+        <ul style="margin-left: 24px; margin-bottom: 16px; list-style: disc;">
+          <li>Calendario inteligente con IA</li>
+          <li>Publicaciones automáticas</li>
+          <li>Campañas promocionales avanzadas</li>
+          <li>Automatizaciones completas</li>
+          <li>Analytics avanzado</li>
+          <li>Herramientas de crecimiento y fidelización</li>
+          <li>Soporte prioritario 24/7</li>
+          <li>Usuarios y productos ilimitados</li>
+        </ul>
+
+        <p style="font-size: 13px; color: var(--muted);">
+          <strong>Nota:</strong> El cambio será efectivo inmediatamente. Se te cobrará la diferencia prorrateada por los días restantes del ciclo actual.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('modalUpgrade')">Cancelar</button>
+        <button class="btn btn-primary" onclick="confirmarUpgrade()">Confirmar Actualización</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Crear Plan (Solo Super Admin) -->
+  <div class="modal" id="modalCrearPlan">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Crear Nuevo Plan</h3>
+        <button class="modal-close" onclick="closeModal('modalCrearPlan')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="formCrearPlan">
+          <div class="field">
+            <label>Nombre del Plan</label>
+            <input type="text" placeholder="ej: ENTERPRISE" required>
+          </div>
+
+          <div class="field">
+            <label>Precio Mensual (R$)</label>
+            <input type="number" placeholder="1200" required>
+          </div>
+
+          <div class="field">
+            <label>Usuarios Máximos</label>
+            <input type="number" placeholder="0 = ilimitado">
+          </div>
+
+          <div class="field">
+            <label>Productos Máximos</label>
+            <input type="number" placeholder="0 = ilimitado">
+          </div>
+
+          <div class="field">
+            <label>Idiomas Máximos</label>
+            <input type="number" placeholder="0 = ilimitado">
+          </div>
+
+          <div class="field">
+            <label style="display: flex; align-items: center; gap: 8px;">
+              <input type="checkbox" style="width: auto;"> Generación IA (Texto)
+            </label>
+          </div>
+
+          <div class="field">
+            <label style="display: flex; align-items: center; gap: 8px;">
+              <input type="checkbox" style="width: auto;"> Generación IA (Imágenes)
+            </label>
+          </div>
+
+          <div class="field">
+            <label style="display: flex; align-items: center; gap: 8px;">
+              <input type="checkbox" style="width: auto;"> Analytics Avanzado
+            </label>
+          </div>
+
+          <div class="field">
+            <label style="display: flex; align-items: center; gap: 8px;">
+              <input type="checkbox" style="width: auto;"> Automatizaciones
+            </label>
+          </div>
+
+          <div class="field">
+            <label style="display: flex; align-items: center; gap: 8px;">
+              <input type="checkbox" style="width: auto;"> Marketing Avanzado
+            </label>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('modalCrearPlan')">Cancelar</button>
+        <button class="btn btn-primary" onclick="crearPlan()">Crear Plan</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ─── User Role Detection ───
+    const isSuperAdmin = true; // Cambiar dinámicamente según autenticación
+
+    if (isSuperAdmin) {
+      document.getElementById('userRole').textContent = 'Super Administrador';
+      document.getElementById('adminActions').style.display = 'flex';
+      document.getElementById('tabGestionarBtn').style.display = 'block';
+    } else {
+      document.getElementById('userRole').textContent = 'Dueño del Negocio';
+      document.getElementById('adminActions').style.display = 'none';
+      document.getElementById('tabGestionarBtn').style.display = 'none';
+    }
+
+    // ─── Tab Switching ───
+    function switchTab(tabId) {
+      // Hide all tabs
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+      });
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+
+      // Show selected tab
+      document.getElementById(tabId).classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    // ─── Modal Handling ───
+    function openModal(modalId) {
+      document.getElementById(modalId).classList.add('active');
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('active');
+    }
+
+    // Close modal on outside click
+    window.onclick = function(event) {
+      if (event.target.classList.contains('modal')) {
+        event.target.classList.remove('active');
+      }
+    }
+
+    // ─── Timer Countdown ───
+    function updateTimers() {
+      const renewalDate = new Date('2026-06-22T00:00:00');
+      const now = new Date();
+      const diff = renewalDate - now;
+
+      if (diff <= 0) {
+        document.getElementById('timerResumen').textContent = 'Vencido';
+        document.getElementById('timerResumen').className = 'timer critical';
+        return;
+      }
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+      const timerText = `${days} días ${hours}h ${minutes}m`;
+      document.getElementById('timerResumen').textContent = timerText;
+
+      // Color based on time remaining
+      if (days <= 3) {
+        document.getElementById('timerResumen').className = 'timer critical';
+      } else if (days <= 7) {
+        document.getElementById('timerResumen').className = 'timer warning';
+      } else {
+        document.getElementById('timerResumen').className = 'timer normal';
+      }
+
+      // Update stat card
+      document.getElementById('statDiasRestantes').textContent = `${days} días`;
+    }
+
+    // Update timers every minute
+    updateTimers();
+    setInterval(updateTimers, 60000);
+
+    // ─── Confirm Upgrade ───
+    function confirmarUpgrade() {
+      // Simulación de actualización
+      alert('✓ Plan actualizado a PREMIUM. Las nuevas funcionalidades están disponibles inmediatamente.');
+      closeModal('modalUpgrade');
+
+      // Actualizar UI
+      document.getElementById('statPlanActual').textContent = 'PREMIUM';
+
+      // En producción: llamar a API para cambiar plan
+      // fetch('/api/empresas/:id/plan', { method: 'PUT', body: { plan: 'PREMIUM' } })
+    }
+
+    // ─── Crear Plan ───
+    function crearPlan() {
+      alert('✓ Plan creado correctamente. Los negocios ya pueden seleccionarlo.');
+      closeModal('modalCrearPlan');
+      document.getElementById('formCrearPlan').reset();
+
+      // En producción: llamar a API
+      // fetch('/api/planes', { method: 'POST', body: formData })
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,796 @@
+
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Onboarding · Menú Digital</title>
+  <style>
+    :root {
+      --bg:      #fafafa;
+      --surface: #ffffff;
+      --fg:      #0d1117;
+      --muted:   #6b7280;
+      --border:  #e5e7eb;
+      --accent:  #ffd21e;
+
+      --accent-soft: color-mix(in oklch, var(--accent) 14%, transparent);
+      --fg-soft:     color-mix(in oklch, var(--fg) 6%, transparent);
+      --success:     #16a34a;
+
+      --font-display: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      --font-body:    "Source Sans Pro", Inter, system-ui, -apple-system, sans-serif;
+
+      --fs-xs: 11px;
+      --fs-sm: 13px;
+      --fs-base: 15px;
+      --fs-lg: 17px;
+      --fs-xl: 20px;
+      --fs-2xl: 24px;
+      --fs-3xl: 32px;
+      --fs-4xl: 40px;
+
+      --space-xs: 6px;
+      --space-sm: 10px;
+      --space-md: 16px;
+      --space-lg: 24px;
+      --space-xl: 32px;
+      --space-2xl: 48px;
+
+      --radius: 10px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
+
+      --safe-top: env(safe-area-inset-top);
+      --safe-bottom: env(safe-area-inset-bottom);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--font-body);
+      font-size: var(--fs-base);
+      line-height: 1.5;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+      -webkit-tap-highlight-color: transparent;
+      overflow-x: hidden;
+    }
+    img, svg { display: block; max-width: 100%; }
+    button { font: inherit; cursor: pointer; border: none; background: none; padding: 0; -webkit-tap-highlight-color: transparent; }
+    p { text-wrap: pretty; margin: 0; }
+    h1, h2, h3 { text-wrap: balance; margin: 0; font-weight: 600; }
+
+    /* ──────────────────────────────────────────────────────────────
+     * 🧭 Layout global — dispositivo iOS
+     * ────────────────────────────────────────────────────────── */
+    .device-frame {
+      max-width: 430px;
+      margin: 0 auto;
+      background: var(--surface);
+      min-height: 100vh;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Status bar iOS */
+    .status-bar {
+      height: calc(44px + var(--safe-top));
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      padding: 0 var(--space-md) var(--space-xs);
+      font-size: var(--fs-xs);
+      font-weight: 600;
+      color: var(--fg);
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      position: relative;
+      z-index: 10;
+    }
+    .status-left, .status-right { display: flex; gap: 4px; align-items: center; }
+    .status-icon { width: 16px; height: 11px; }
+
+    /* Home indicator iOS */
+    .home-indicator {
+      position: fixed;
+      bottom: calc(var(--safe-bottom) + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      width: 134px;
+      height: 5px;
+      background: color-mix(in oklch, var(--fg) 30%, transparent);
+      border-radius: 999px;
+      z-index: 100;
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+     * 📱 Screens — Swipe horizontal con paginación
+     * ────────────────────────────────────────────────────────── */
+    .screen { display: none; }
+    .screen.active { display: flex; flex-direction: column; }
+
+    .screen-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 0 var(--space-lg);
+      overflow-y: auto;
+      padding-bottom: calc(var(--safe-bottom) + 140px);
+    }
+
+    /* Progress dots */
+    .progress-dots {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      padding: var(--space-lg) 0;
+    }
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--border);
+      transition: all 0.3s ease;
+    }
+    .dot.active {
+      background: var(--accent);
+      width: 24px;
+    }
+
+    /* Bottom actions — Fixed CTA */
+    .bottom-actions {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      max-width: 430px;
+      margin: 0 auto;
+      padding: var(--space-md) var(--space-lg) calc(var(--safe-bottom) + var(--space-lg));
+      background: linear-gradient(to top, var(--surface) 85%, transparent);
+      z-index: 50;
+    }
+    .btn-primary {
+      width: 100%;
+      padding: 16px;
+      background: var(--fg);
+      color: var(--surface);
+      font-size: var(--fs-lg);
+      font-weight: 600;
+      border-radius: var(--radius-lg);
+      transition: transform 0.1s ease, opacity 0.15s ease;
+      letter-spacing: -0.01em;
+    }
+    .btn-primary:active { transform: scale(0.97); }
+    .btn-primary:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .btn-secondary {
+      width: 100%;
+      padding: 14px;
+      background: transparent;
+      color: var(--muted);
+      font-size: var(--fs-base);
+      font-weight: 500;
+      border-radius: var(--radius);
+      margin-top: var(--space-sm);
+      transition: color 0.15s ease;
+    }
+    .btn-secondary:active { color: var(--fg); }
+
+    /* ──────────────────────────────────────────────────────────────
+     * 🎨 Screen 1 — Bienvenida
+     * ────────────────────────────────────────────────────────── */
+    .welcome-hero {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: var(--space-2xl) 0;
+    }
+    .welcome-visual {
+      width: 240px;
+      height: 240px;
+      margin-bottom: var(--space-2xl);
+      background: linear-gradient(135deg, var(--accent-soft), var(--fg-soft));
+      border-radius: var(--radius-xl);
+      display: grid;
+      place-items: center;
+      font-family: var(--font-display);
+      font-size: 72px;
+    }
+    .welcome-title {
+      font-size: var(--fs-4xl);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      margin-bottom: var(--space-md);
+    }
+    .welcome-subtitle {
+      font-size: var(--fs-xl);
+      color: var(--muted);
+      line-height: 1.4;
+      max-width: 320px;
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+     * 🎨 Screen 2 — Beneficios (3 cards con iconos)
+     * ────────────────────────────────────────────────────────── */
+    .benefits-header {
+      padding-top: var(--space-2xl);
+      margin-bottom: var(--space-lg);
+    }
+    .benefits-title {
+      font-size: var(--fs-3xl);
+      font-weight: 700;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+      margin-bottom: var(--space-sm);
+    }
+    .benefits-subtitle {
+      font-size: var(--fs-lg);
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .benefits-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+      margin-bottom: var(--space-xl);
+    }
+    .benefit-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg);
+      display: flex;
+      gap: var(--space-md);
+    }
+    .benefit-icon {
+      width: 56px;
+      height: 56px;
+      flex-shrink: 0;
+      background: var(--accent-soft);
+      border-radius: var(--radius);
+      display: grid;
+      place-items: center;
+      font-size: 28px;
+    }
+    .benefit-content {
+      flex: 1;
+    }
+    .benefit-title {
+      font-size: var(--fs-lg);
+      font-weight: 600;
+      margin-bottom: var(--space-xs);
+      letter-spacing: -0.01em;
+    }
+    .benefit-desc {
+      font-size: var(--fs-base);
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+     * 🎨 Screen 3 — Permisos (notificaciones)
+     * ────────────────────────────────────────────────────────── */
+    .permission-screen {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      text-align: center;
+      padding: var(--space-2xl) 0;
+    }
+    .permission-visual {
+      width: 200px;
+      height: 200px;
+      margin: 0 auto var(--space-2xl);
+      background: linear-gradient(135deg, var(--accent), #f59e0b);
+      border-radius: var(--radius-xl);
+      display: grid;
+      place-items: center;
+      font-size: 80px;
+      box-shadow: 0 20px 60px color-mix(in oklch, var(--accent) 40%, transparent);
+    }
+    .permission-title {
+      font-size: var(--fs-3xl);
+      font-weight: 700;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+      margin-bottom: var(--space-md);
+    }
+    .permission-desc {
+      font-size: var(--fs-lg);
+      color: var(--muted);
+      line-height: 1.5;
+      margin-bottom: var(--space-lg);
+    }
+    .permission-features {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg);
+      text-align: left;
+    }
+    .permission-item {
+      display: flex;
+      gap: var(--space-md);
+      padding: var(--space-sm) 0;
+    }
+    .permission-item:not(:last-child) {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: var(--space-md);
+      margin-bottom: var(--space-sm);
+    }
+    .check-icon {
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+      background: var(--success);
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      color: white;
+      font-size: 14px;
+    }
+    .permission-text {
+      flex: 1;
+      font-size: var(--fs-base);
+      line-height: 1.5;
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+     * 🎨 Screen 4 — Personalización (preferencias dietéticas)
+     * ────────────────────────────────────────────────────────── */
+    .preferences-header {
+      padding-top: var(--space-2xl);
+      margin-bottom: var(--space-lg);
+    }
+    .preferences-title {
+      font-size: var(--fs-3xl);
+      font-weight: 700;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+      margin-bottom: var(--space-sm);
+    }
+    .preferences-subtitle {
+      font-size: var(--fs-lg);
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .preferences-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-md);
+      margin-bottom: var(--space-xl);
+    }
+    .preference-chip {
+      padding: var(--space-lg) var(--space-md);
+      background: var(--bg);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      text-align: center;
+      transition: all 0.15s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+    .preference-chip:active { transform: scale(0.97); }
+    .preference-chip.selected {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+    }
+    .preference-chip-icon {
+      font-size: 32px;
+      margin-bottom: var(--space-xs);
+    }
+    .preference-chip-label {
+      font-size: var(--fs-sm);
+      font-weight: 600;
+      line-height: 1.3;
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+     * 🎨 Screen 5 — Call to Action final
+     * ────────────────────────────────────────────────────────── */
+    .cta-screen {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      text-align: center;
+      padding: var(--space-2xl) 0;
+    }
+    .cta-visual {
+      width: 260px;
+      height: 260px;
+      margin: 0 auto var(--space-2xl);
+      background: linear-gradient(135deg, var(--accent), #f59e0b);
+      border-radius: var(--radius-xl);
+      display: grid;
+      place-items: center;
+      font-size: 120px;
+      box-shadow: 0 24px 80px color-mix(in oklch, var(--accent) 50%, transparent);
+      animation: float 3s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
+    }
+    .cta-title {
+      font-size: var(--fs-4xl);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      margin-bottom: var(--space-md);
+    }
+    .cta-subtitle {
+      font-size: var(--fs-xl);
+      color: var(--muted);
+      line-height: 1.4;
+      margin-bottom: var(--space-2xl);
+    }
+    .cta-features {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+      text-align: left;
+    }
+    .cta-feature {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      padding: var(--space-md);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+    .cta-feature-icon {
+      font-size: 24px;
+    }
+    .cta-feature-text {
+      font-size: var(--fs-base);
+      font-weight: 500;
+    }
+
+    /* Skip button — top right */
+    .skip-btn {
+      position: absolute;
+      top: calc(var(--safe-top) + 56px);
+      right: var(--space-lg);
+      padding: 8px 16px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: var(--fs-sm);
+      font-weight: 600;
+      color: var(--muted);
+      z-index: 20;
+      transition: all 0.15s ease;
+    }
+    .skip-btn:active {
+      transform: scale(0.94);
+      color: var(--fg);
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+     * 🧰 JavaScript interactions
+     * ────────────────────────────────────────────────────────── */
+  </style>
+</head>
+<body>
+  <div class="device-frame">
+    <!-- Status bar iOS -->
+    <div class="status-bar">
+      <div class="status-left">
+        <span>9:41</span>
+      </div>
+      <div class="status-right">
+        <svg class="status-icon" fill="currentColor" viewBox="0 0 16 11"><rect width="14" height="11" rx="2.5"/><path d="M15 4v3c.6 0 1-.4 1-1V5c0-.6-.4-1-1-1z"/></svg>
+      </div>
+    </div>
+
+    <!-- Skip button (visible en todas excepto última) -->
+    <button class="skip-btn" id="skipBtn">Saltar</button>
+
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         Screen 1 — Bienvenida
+         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <div class="screen active" data-screen="1">
+      <div class="screen-container">
+        <div class="welcome-hero">
+          <div class="welcome-visual">🍽️</div>
+          <h1 class="welcome-title">Bienvenido a tu mesa digital</h1>
+          <p class="welcome-subtitle">Explora el menú, personaliza tu pedido y disfruta sin esperas</p>
+        </div>
+
+        <div class="progress-dots">
+          <div class="dot active"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+        </div>
+      </div>
+
+      <div class="bottom-actions">
+        <button class="btn-primary" onclick="nextScreen()">Comenzar</button>
+      </div>
+    </div>
+
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         Screen 2 — Beneficios
+         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <div class="screen" data-screen="2">
+      <div class="screen-container">
+        <div class="benefits-header">
+          <h2 class="benefits-title">Tu experiencia mejorada</h2>
+          <p class="benefits-subtitle">Todo lo que necesitas para una comida perfecta</p>
+        </div>
+
+        <div class="benefits-list">
+          <div class="benefit-card">
+            <div class="benefit-icon">📸</div>
+            <div class="benefit-content">
+              <h3 class="benefit-title">Fotos reales de cada plato</h3>
+              <p class="benefit-desc">Visualiza exactamente lo que vas a pedir antes de ordenar</p>
+            </div>
+          </div>
+
+          <div class="benefit-card">
+            <div class="benefit-icon">⚡</div>
+            <div class="benefit-content">
+              <h3 class="benefit-title">Pedido instantáneo</h3>
+              <p class="benefit-desc">Ordena directamente desde tu móvil sin esperar al mesero</p>
+            </div>
+          </div>
+
+          <div class="benefit-card">
+            <div class="benefit-icon">🎯</div>
+            <div class="benefit-content">
+              <h3 class="benefit-title">Personalización total</h3>
+              <p class="benefit-desc">Modifica ingredientes, tamaños y extras según tus preferencias</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="progress-dots">
+          <div class="dot"></div>
+          <div class="dot active"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+        </div>
+      </div>
+
+      <div class="bottom-actions">
+        <button class="btn-primary" onclick="nextScreen()">Continuar</button>
+        <button class="btn-secondary" onclick="prevScreen()">Atrás</button>
+      </div>
+    </div>
+
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         Screen 3 — Permisos (Notificaciones)
+         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <div class="screen" data-screen="3">
+      <div class="screen-container">
+        <div class="permission-screen">
+          <div class="permission-visual">🔔</div>
+          <h2 class="permission-title">Mantente informado</h2>
+          <p class="permission-desc">Recibe actualizaciones sobre tu pedido en tiempo real</p>
+
+          <div class="permission-features">
+            <div class="permission-item">
+              <div class="check-icon">✓</div>
+              <p class="permission-text">Estado de tu pedido actualizado al instante</p>
+            </div>
+            <div class="permission-item">
+              <div class="check-icon">✓</div>
+              <p class="permission-text">Avisos cuando tu platillo esté listo</p>
+            </div>
+            <div class="permission-item">
+              <div class="check-icon">✓</div>
+              <p class="permission-text">Ofertas y promociones exclusivas</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="progress-dots">
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot active"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+        </div>
+      </div>
+
+      <div class="bottom-actions">
+        <button class="btn-primary" onclick="nextScreen()">Activar notificaciones</button>
+        <button class="btn-secondary" onclick="nextScreen()">Ahora no</button>
+      </div>
+    </div>
+
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         Screen 4 — Preferencias dietéticas
+         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <div class="screen" data-screen="4">
+      <div class="screen-container">
+        <div class="preferences-header">
+          <h2 class="preferences-title">Personaliza tu menú</h2>
+          <p class="preferences-subtitle">Selecciona tus preferencias alimenticias (opcional)</p>
+        </div>
+
+        <div class="preferences-grid">
+          <button class="preference-chip" onclick="togglePreference(this)">
+            <div class="preference-chip-icon">🥬</div>
+            <div class="preference-chip-label">Vegetariano</div>
+          </button>
+          <button class="preference-chip" onclick="togglePreference(this)">
+            <div class="preference-chip-icon">🌱</div>
+            <div class="preference-chip-label">Vegano</div>
+          </button>
+          <button class="preference-chip" onclick="togglePreference(this)">
+            <div class="preference-chip-icon">🌾</div>
+            <div class="preference-chip-label">Sin gluten</div>
+          </button>
+          <button class="preference-chip" onclick="togglePreference(this)">
+            <div class="preference-chip-icon">🥛</div>
+            <div class="preference-chip-label">Sin lactosa</div>
+          </button>
+          <button class="preference-chip" onclick="togglePreference(this)">
+            <div class="preference-chip-icon">🌶️</div>
+            <div class="preference-chip-label">Picante</div>
+          </button>
+          <button class="preference-chip" onclick="togglePreference(this)">
+            <div class="preference-chip-icon">🥜</div>
+            <div class="preference-chip-label">Sin frutos secos</div>
+          </button>
+        </div>
+
+        <div class="progress-dots">
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot active"></div>
+          <div class="dot"></div>
+        </div>
+      </div>
+
+      <div class="bottom-actions">
+        <button class="btn-primary" onclick="nextScreen()">Continuar</button>
+        <button class="btn-secondary" onclick="nextScreen()">Omitir</button>
+      </div>
+    </div>
+
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         Screen 5 — CTA Final
+         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <div class="screen" data-screen="5">
+      <div class="screen-container">
+        <div class="cta-screen">
+          <div class="cta-visual">✨</div>
+          <h1 class="cta-title">¡Todo listo!</h1>
+          <p class="cta-subtitle">Comienza a explorar el menú y realiza tu primer pedido</p>
+
+          <div class="cta-features">
+            <div class="cta-feature">
+              <div class="cta-feature-icon">🍕</div>
+              <div class="cta-feature-text">Más de 50 platillos disponibles</div>
+            </div>
+            <div class="cta-feature">
+              <div class="cta-feature-icon">⏱️</div>
+              <div class="cta-feature-text">Pedidos en menos de 2 minutos</div>
+            </div>
+            <div class="cta-feature">
+              <div class="cta-feature-icon">💳</div>
+              <div class="cta-feature-text">Pago seguro y dividir cuenta</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="progress-dots">
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot active"></div>
+        </div>
+      </div>
+
+      <div class="bottom-actions">
+        <button class="btn-primary" onclick="completeOnboarding()">Explorar menú</button>
+      </div>
+    </div>
+
+    <!-- Home indicator iOS -->
+    <div class="home-indicator"></div>
+  </div>
+
+  <script>
+    let currentScreen = 1;
+    const totalScreens = 5;
+
+    function updateScreen() {
+      // Hide all screens
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      // Show current screen
+      document.querySelector(`.screen[data-screen="${currentScreen}"]`).classList.add('active');
+
+      // Update dots
+      document.querySelectorAll('.dot').forEach((dot, i) => {
+        dot.classList.toggle('active', i === currentScreen - 1);
+      });
+
+      // Hide skip button on last screen
+      const skipBtn = document.getElementById('skipBtn');
+      skipBtn.style.display = currentScreen === totalScreens ? 'none' : 'block';
+
+      // Smooth scroll to top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function nextScreen() {
+      if (currentScreen < totalScreens) {
+        currentScreen++;
+        updateScreen();
+      }
+    }
+
+    function prevScreen() {
+      if (currentScreen > 1) {
+        currentScreen--;
+        updateScreen();
+      }
+    }
+
+    function togglePreference(chip) {
+      chip.classList.toggle('selected');
+    }
+
+    function completeOnboarding() {
+      alert('¡Bienvenido! Redirigiendo al menú principal...');
+      // En producción: window.location.href = '/menu';
+    }
+
+    // Skip button
+    document.getElementById('skipBtn').addEventListener('click', () => {
+      currentScreen = totalScreens;
+      updateScreen();
+    });
+
+    // Swipe gesture support (opcional — touch events)
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    document.addEventListener('touchstart', e => {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+
+    document.addEventListener('touchend', e => {
+      touchEndX = e.changedTouches[0].screenX;
+      handleSwipe();
+    });
+
+    function handleSwipe() {
+      const swipeThreshold = 50;
+      if (touchEndX < touchStartX - swipeThreshold) {
+        // Swipe left — next
+        nextScreen();
+      }
+      if (touchEndX > touchStartX + swipeThreshold) {
+        // Swipe right — prev
+        prevScreen();
+      }
+    }
+
+    // Initialize
+    updateScreen();
+  </script>
+</body>
+</html>

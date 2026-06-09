@@ -1,0 +1,488 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Recuperar Contraseña · Plataforma SaaS Menús Digitales</title>
+<style>
+  :root {
+    --bg: #fafafa;
+    --surface: #ffffff;
+    --fg: #0d1117;
+    --fg-2: #374151;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --border-soft: #f3f4f6;
+    --accent: #ffd21e;
+    --accent-on: #0d1117;
+    --accent-hover: #f59e0b;
+    --success: #16a34a;
+    --warn: #f59e0b;
+    --danger: #dc2626;
+
+    --font-display: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --font-body: "Source Sans Pro", Inter, system-ui, -apple-system, sans-serif;
+
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-6: 24px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--bg);
+    color: var(--fg);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-6);
+    line-height: 1.6;
+  }
+
+  .recovery-container {
+    width: 100%;
+    max-width: 420px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 48px 40px;
+    box-shadow: 0 2px 8px rgba(13, 17, 23, 0.08);
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--fg-2);
+    text-decoration: none;
+    margin-bottom: 24px;
+    font-weight: 500;
+  }
+
+  .back-link:hover {
+    color: var(--fg);
+  }
+
+  .back-link svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .icon-area {
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  .icon-circle {
+    width: 72px;
+    height: 72px;
+    background: var(--border-soft);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .icon-circle svg {
+    width: 32px;
+    height: 32px;
+    stroke: var(--fg);
+  }
+
+  .recovery-header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
+  .recovery-header h1 {
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--fg);
+    margin-bottom: 12px;
+    letter-spacing: -0.01em;
+  }
+
+  .recovery-header p {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .field label {
+    font-family: var(--font-display);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--fg);
+    letter-spacing: 0.02em;
+  }
+
+  .field input {
+    width: 100%;
+    height: 48px;
+    padding: 0 var(--space-4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    font-size: 15px;
+    font-family: var(--font-body);
+    color: var(--fg);
+    background: var(--surface);
+    transition: border-color 120ms ease-out;
+  }
+
+  .field input:focus {
+    outline: none;
+    border-color: var(--fg);
+    box-shadow: 0 0 0 3px rgba(13, 17, 23, 0.1);
+  }
+
+  .field input::placeholder {
+    color: var(--muted);
+  }
+
+  .field.has-error input {
+    border-color: var(--danger);
+  }
+
+  .error-msg {
+    font-size: 12px;
+    color: var(--danger);
+    display: none;
+  }
+
+  .field.has-error .error-msg {
+    display: block;
+  }
+
+  .btn-primary {
+    width: 100%;
+    height: 52px;
+    background: var(--fg);
+    color: var(--surface);
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 15px;
+    font-weight: 600;
+    font-family: var(--font-display);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    transition: background-color 120ms ease-out;
+    margin-top: var(--space-2);
+  }
+
+  .btn-primary:hover {
+    background: var(--fg-2);
+  }
+
+  .btn-primary:disabled {
+    background: var(--muted);
+    cursor: not-allowed;
+  }
+
+  .spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .message {
+    padding: var(--space-3);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    display: none;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+  }
+
+  .message.show {
+    display: flex;
+  }
+
+  .message.success {
+    background: color-mix(in oklab, var(--success), transparent 90%);
+    color: var(--success);
+    border: 1px solid color-mix(in oklab, var(--success), transparent 70%);
+  }
+
+  .message.error {
+    background: color-mix(in oklab, var(--danger), transparent 90%);
+    color: var(--danger);
+    border: 1px solid color-mix(in oklab, var(--danger), transparent 70%);
+  }
+
+  .info-box {
+    background: var(--border-soft);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: var(--space-4);
+    font-size: 13px;
+    color: var(--fg-2);
+    line-height: 1.6;
+    margin-top: var(--space-4);
+  }
+
+  .success-state {
+    display: none;
+    text-align: center;
+  }
+
+  .success-state.show {
+    display: block;
+  }
+
+  .success-icon {
+    width: 64px;
+    height: 64px;
+    background: color-mix(in oklab, var(--success), transparent 90%);
+    border-radius: 50%;
+    margin: 0 auto 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .success-icon svg {
+    width: 32px;
+    height: 32px;
+    stroke: var(--success);
+  }
+
+  .success-state h2 {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--fg);
+    margin-bottom: 12px;
+  }
+
+  .success-state p {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--fg);
+    text-decoration: none;
+    transition: background-color 120ms;
+  }
+
+  .btn-secondary:hover {
+    background: var(--border-soft);
+  }
+
+  @media (max-width: 480px) {
+    .recovery-container {
+      padding: 32px 24px;
+    }
+
+    .recovery-header h1 {
+      font-size: 20px;
+    }
+  }
+
+  .hidden {
+    display: none !important;
+  }
+</style>
+</head>
+<body>
+
+<div class="recovery-container">
+  <a href="login.html" class="back-link">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M19 12H5M12 19l-7-7 7-7"/>
+    </svg>
+    Volver al inicio de sesión
+  </a>
+
+  <div id="formState">
+    <div class="icon-area">
+      <div class="icon-circle">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="recovery-header">
+      <h1>Recuperar Contraseña</h1>
+      <p>Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña</p>
+    </div>
+
+    <div id="messageArea"></div>
+
+    <form class="form" id="recoveryForm">
+      <div class="field" id="emailField">
+        <label for="email">CORREO ELECTRÓNICO</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          placeholder="tu@email.com"
+          autocomplete="email"
+          required
+        />
+        <span class="error-msg">Por favor ingresa un correo electrónico válido</span>
+      </div>
+
+      <button type="submit" class="btn-primary" id="recoveryButton">
+        <span id="buttonText">Enviar enlace de recuperación</span>
+      </button>
+    </form>
+
+    <div class="info-box">
+      <strong>Nota de seguridad:</strong> El enlace de recuperación será válido por 1 hora. Si no lo recibes, revisa tu carpeta de spam o solicita uno nuevo.
+    </div>
+  </div>
+
+  <div id="successState" class="success-state">
+    <div class="success-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+        <polyline points="22 4 12 14.01 9 11.01"/>
+      </svg>
+    </div>
+
+    <h2>Correo enviado</h2>
+    <p>
+      Hemos enviado un enlace de recuperación a tu correo electrónico.
+      Por favor revisa tu bandeja de entrada y sigue las instrucciones.
+    </p>
+
+    <a href="login.html" class="btn-secondary">Volver al inicio de sesión</a>
+
+    <div class="info-box" style="margin-top: 24px;">
+      ¿No recibiste el correo? Revisa tu carpeta de spam o
+      <a href="#" id="resendLink" style="color: var(--fg); font-weight: 600;">solicita uno nuevo</a>.
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  function validateEmail(email) {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  }
+
+  function showFieldError(fieldId, show) {
+    const field = document.getElementById(fieldId);
+    if (show) {
+      field.classList.add('has-error');
+    } else {
+      field.classList.remove('has-error');
+    }
+  }
+
+  function showMessage(text, type) {
+    const messageArea = document.getElementById('messageArea');
+    messageArea.innerHTML = `
+      <div class="message ${type} show">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          ${type === 'success'
+            ? '<path d="M20 6L9 17l-5-5"/>'
+            : '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>'
+          }
+        </svg>
+        <span>${text}</span>
+      </div>
+    `;
+  }
+
+  const recoveryForm = document.getElementById('recoveryForm');
+  const recoveryButton = document.getElementById('recoveryButton');
+  const buttonText = document.getElementById('buttonText');
+  const formState = document.getElementById('formState');
+  const successState = document.getElementById('successState');
+
+  recoveryForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    showFieldError('emailField', false);
+    document.getElementById('messageArea').innerHTML = '';
+
+    const email = document.getElementById('email').value.trim();
+
+    if (!email || !validateEmail(email)) {
+      showFieldError('emailField', true);
+      showMessage('Por favor ingresa un correo electrónico válido', 'error');
+      return;
+    }
+
+    // Simulate recovery email sending
+    recoveryButton.disabled = true;
+    buttonText.innerHTML = '<div class="spinner"></div><span>Enviando...</span>';
+
+    setTimeout(function() {
+      // In production, this would call your password recovery API
+      console.log('Recovery email sent to:', email);
+
+      // Show success state
+      formState.classList.add('hidden');
+      successState.classList.add('show');
+
+      recoveryButton.disabled = false;
+      buttonText.textContent = 'Enviar enlace de recuperación';
+
+    }, 1500);
+  });
+
+  // Resend link
+  document.getElementById('resendLink').addEventListener('click', function(e) {
+    e.preventDefault();
+    successState.classList.remove('show');
+    formState.classList.remove('hidden');
+    showMessage('Puedes solicitar un nuevo enlace de recuperación', 'success');
+  });
+
+})();
+</script>
+
+</body>
+</html>

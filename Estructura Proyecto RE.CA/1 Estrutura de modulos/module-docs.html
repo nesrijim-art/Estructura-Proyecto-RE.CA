@@ -1,0 +1,777 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Documentación de Módulos — SaaS Menús Digitales</title>
+<style>
+:root{
+  --bg:#0d1117;--s:#161b22;--s2:#21262d;--bd:#30363d;
+  --fg:#e6edf3;--mu:#8b949e;
+  --blue:#58a6ff;--green:#3fb950;--orange:#f0883e;
+  --purple:#bc8cff;--red:#ff7b72;--yellow:#e3b341;--gray:#8b949e;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;background:var(--bg);color:var(--fg);
+  font-family:-apple-system,'SF Pro Text',system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;font-size:14px;overflow:hidden}
+
+/* HEADER */
+#hd{position:fixed;top:0;left:0;right:0;height:48px;background:var(--s);
+  border-bottom:1px solid var(--bd);display:flex;align-items:center;
+  padding:0 16px;gap:12px;z-index:200}
+#hd h1{font-size:12px;font-weight:600;white-space:nowrap}
+.sep{width:1px;height:20px;background:var(--bd)}
+.badge{font-size:10px;font-family:ui-monospace,monospace;color:var(--green);
+  border:1px solid rgba(63,185,80,.35);padding:2px 8px;border-radius:100px}
+#search-wrap{flex:1;max-width:280px;position:relative}
+#search{width:100%;background:var(--s2);border:1px solid var(--bd);
+  border-radius:6px;padding:5px 10px 5px 30px;font-size:12px;color:var(--fg);
+  font-family:inherit;outline:none}
+#search:focus{border-color:var(--blue)}
+#search::placeholder{color:var(--mu)}
+#search-icon{position:absolute;left:9px;top:50%;transform:translateY(-50%);
+  font-size:11px;color:var(--mu);pointer-events:none}
+.count-badge{margin-left:auto;font-size:11px;font-family:ui-monospace,monospace;color:var(--mu)}
+#mod-count{color:var(--fg)}
+
+/* LAYOUT */
+#layout{display:flex;height:calc(100vh - 48px);margin-top:48px}
+
+/* SIDEBAR */
+#sb{width:250px;flex-shrink:0;border-right:1px solid var(--bd);
+  overflow-y:auto;background:var(--s)}
+#sb::-webkit-scrollbar{width:4px}
+#sb::-webkit-scrollbar-track{background:transparent}
+#sb::-webkit-scrollbar-thumb{background:var(--bd);border-radius:4px}
+
+.layer-group{border-bottom:1px solid var(--bd)}
+.layer-header{padding:10px 12px 6px;font-size:9px;font-family:ui-monospace,monospace;
+  text-transform:uppercase;letter-spacing:.12em;display:flex;align-items:center;gap:6px}
+.layer-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.mod-item{display:flex;align-items:center;gap:8px;padding:7px 12px 7px 16px;
+  cursor:pointer;transition:background .1s;font-size:12px;color:var(--mu);
+  border-left:2px solid transparent}
+.mod-item:hover{background:var(--s2);color:var(--fg)}
+.mod-item.active{background:var(--s2);color:var(--fg);border-left-color:var(--blue)}
+.mod-item .mi-name{font-weight:500}
+.mod-item .mi-sub{font-size:10px;font-family:ui-monospace,monospace;opacity:.5;margin-left:auto;white-space:nowrap}
+.mod-item.hidden{display:none}
+
+/* MAIN CONTENT */
+#main{flex:1;overflow-y:auto;padding:28px 32px}
+#main::-webkit-scrollbar{width:6px}
+#main::-webkit-scrollbar-track{background:transparent}
+#main::-webkit-scrollbar-thumb{background:var(--bd);border-radius:4px}
+
+/* EMPTY STATE */
+#empty{display:none;flex-direction:column;align-items:center;justify-content:center;
+  height:100%;color:var(--mu);gap:12px;text-align:center}
+#empty.show{display:flex}
+#empty .e-icon{font-size:32px;opacity:.3}
+#empty .e-title{font-size:14px;font-weight:600;color:var(--fg)}
+#empty .e-sub{font-size:12px}
+
+/* MODULE HEADER */
+#mod-header{margin-bottom:28px}
+.mod-breadcrumb{font-size:10px;font-family:ui-monospace,monospace;color:var(--mu);
+  margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.mod-breadcrumb .bc-layer{padding:2px 7px;border-radius:3px;font-size:9px;
+  text-transform:uppercase;letter-spacing:.08em}
+.mod-title{font-size:26px;font-weight:700;letter-spacing:-.02em;margin-bottom:4px}
+.mod-sub-label{font-size:12px;font-family:ui-monospace,monospace;color:var(--mu);
+  display:flex;align-items:center;gap:8px}
+.mod-id{opacity:.5}
+
+/* SECTION GRID */
+.sec-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.sec-full{margin-bottom:16px}
+
+/* SECTION CARD */
+.sec{background:var(--s);border:1px solid var(--bd);border-radius:10px;padding:18px}
+.sec-label{font-size:9px;font-family:ui-monospace,monospace;text-transform:uppercase;
+  letter-spacing:.12em;color:var(--mu);margin-bottom:10px;padding-bottom:8px;
+  border-bottom:1px solid var(--bd)}
+.sec-text{font-size:13px;line-height:1.75;color:var(--fg)}
+.tag-list{display:flex;flex-wrap:wrap;gap:5px}
+.tag{font-size:11px;font-family:ui-monospace,monospace;padding:4px 9px;
+  border-radius:4px;background:var(--s2);color:var(--mu);border:1px solid var(--bd);
+  line-height:1.4}
+.tag.mod-ref{cursor:pointer;transition:all .12s}
+.tag.mod-ref:hover{color:var(--blue);border-color:rgba(88,166,255,.4)}
+.item-list{list-style:none;display:flex;flex-direction:column;gap:6px}
+.item-list li{font-size:12px;color:var(--fg);padding:7px 10px;
+  background:var(--s2);border:1px solid var(--bd);border-radius:6px;
+  display:flex;align-items:flex-start;gap:8px;line-height:1.5}
+.item-list li::before{content:'▸';font-size:9px;color:var(--mu);flex-shrink:0;margin-top:3px}
+
+/* USE CASES */
+.uc-list{display:flex;flex-direction:column;gap:10px}
+.uc{background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:12px 14px}
+.uc-title{font-size:12px;font-weight:600;margin-bottom:5px;display:flex;align-items:center;gap:8px}
+.uc-num{width:20px;height:20px;border-radius:50%;background:var(--s);
+  font-size:10px;font-family:ui-monospace,monospace;display:grid;place-items:center;
+  flex-shrink:0;border:1px solid var(--bd)}
+.uc-desc{font-size:12px;color:var(--mu);line-height:1.65;padding-left:28px}
+
+/* FLOW */
+.flow-list{display:flex;flex-direction:column;gap:0}
+.flow-step{display:flex;gap:12px;position:relative}
+.flow-step:not(:last-child)::before{content:'';position:absolute;left:15px;
+  top:32px;bottom:-4px;width:1px;background:var(--bd)}
+.flow-num{width:30px;height:30px;border-radius:50%;background:var(--s2);
+  border:1px solid var(--bd);font-size:11px;font-family:ui-monospace,monospace;
+  display:grid;place-items:center;flex-shrink:0}
+.flow-content{padding:5px 0 16px;font-size:12px;color:var(--fg);line-height:1.65}
+
+/* WELCOME */
+#welcome{display:none;flex-direction:column;align-items:center;justify-content:center;
+  height:100%;text-align:center;gap:16px}
+#welcome.show{display:flex}
+#welcome .w-icon{font-size:40px;opacity:.15}
+#welcome .w-title{font-size:18px;font-weight:700;color:var(--fg)}
+#welcome .w-sub{font-size:13px;color:var(--mu);max-width:360px;line-height:1.6}
+.w-stats{display:flex;gap:24px;margin-top:8px}
+.w-stat{text-align:center}
+.w-stat .ws-n{font-size:24px;font-weight:700;font-family:ui-monospace,monospace}
+.w-stat .ws-l{font-size:11px;color:var(--mu)}
+</style>
+</head>
+<body>
+
+<header id="hd">
+  <h1>SaaS Menús Digitales — Documentación de Módulos</h1>
+  <div class="sep"></div>
+  <span class="badge">31 módulos</span>
+  <div id="search-wrap">
+    <span id="search-icon">⌕</span>
+    <input id="search" type="text" placeholder="Buscar módulo..." autocomplete="off">
+  </div>
+  <span class="count-badge"><span id="mod-count">31</span> / 31</span>
+</header>
+
+<div id="layout">
+  <nav id="sb" id="sidebar"></nav>
+  <main id="main">
+    <div id="welcome" class="show">
+      <div class="w-icon">⬡</div>
+      <div class="w-title">Documentación Funcional Completa</div>
+      <div class="w-sub">Selecciona un módulo del panel izquierdo para ver su documentación detallada.</div>
+      <div class="w-stats">
+        <div class="w-stat"><div class="ws-n" style="color:var(--blue)">5</div><div class="ws-l">Presentación</div></div>
+        <div class="w-stat"><div class="ws-n" style="color:var(--purple)">3</div><div class="ws-l">Gateway</div></div>
+        <div class="w-stat"><div class="ws-n" style="color:var(--green)">6</div><div class="ws-l">Núcleo</div></div>
+        <div class="w-stat"><div class="ws-n" style="color:var(--orange)">6</div><div class="ws-l">Negocio</div></div>
+        <div class="w-stat"><div class="ws-n" style="color:var(--red)">6</div><div class="ws-l">Datos</div></div>
+        <div class="w-stat"><div class="ws-n" style="color:var(--gray)">5</div><div class="ws-l">Infra</div></div>
+      </div>
+    </div>
+    <div id="mod-view" style="display:none">
+      <div id="mod-header"></div>
+      <div id="mod-body"></div>
+    </div>
+    <div id="empty"><div class="e-icon">⊘</div><div class="e-title">Sin resultados</div><div class="e-sub">Intenta con otro término de búsqueda.</div></div>
+  </main>
+</div>
+
+<script>
+const LAYERS = {
+  presentation:{label:'Presentación',color:'var(--blue)',hex:'#58a6ff'},
+  gateway:{label:'Gateway',color:'var(--purple)',hex:'#bc8cff'},
+  core:{label:'Núcleo',color:'var(--green)',hex:'#3fb950'},
+  business:{label:'Negocio',color:'var(--orange)',hex:'#f0883e'},
+  data:{label:'Datos',color:'var(--red)',hex:'#ff7b72'},
+  infra:{label:'Infraestructura',color:'var(--gray)',hex:'#8b949e'},
+};
+
+const MODS = [
+  // ── PRESENTATION ───────────────────────────────────────────────────────────
+  {id:'menu-viewer',name:'Menu Viewer',sub:'Customer PWA',layer:'presentation',
+   objetivo:'Proveer al cliente final una interfaz web progresiva (PWA) para visualizar y navegar el menú digital del negocio, accesible via QR o URL directa, sin instalación de app nativa.',
+   funcion:'Renderiza el árbol de categorías y productos del tenant activo, gestiona el carrito de compra en sesión, envía pedidos al Order Engine y refleja el tema visual configurado por el negocio.',
+   administra:['Sesión anónima o autenticada del cliente final','Estado del carrito de compra en memoria (sessionStorage)','Preferencias de idioma, filtros y vista activa','Caché local del menú via Service Worker (soporte offline parcial)'],
+   consume:['Menú estructurado del Menu Engine (via API Gateway + CDN)','Tema visual compilado del tenant (CDN + Edge Cache)','Token de sesión (Auth Middleware)','Contexto de mesa y zona (QR Code Service via URL params)'],
+   entrega:['Pedidos confirmados al Order Engine via API Gateway','Eventos de interacción y navegación al Event Bus','Métricas de sesión (tiempo en menú, productos vistos) al Analytics Engine'],
+   modifica:['CDN + Edge Cache — actualiza contenido cacheado al invalidar menú','Menu Engine — propaga cambios de menú en tiempo real','Auth Middleware — gestiona apertura y cierre de sesión'],
+   consulta:['Analytics Engine — consulta comportamiento del usuario para reportes','Audit & Compliance — registro de accesos al menú'],
+   casos:[
+     {t:'Escaneo y visualización',d:'Cliente escanea QR en mesa → URL decodifica tenant_id + table_id → API Gateway resuelve tenant → CDN sirve menú cacheado → cliente navega categorías y productos con tema del restaurante.'},
+     {t:'Gestión del carrito y pedido',d:'Cliente selecciona platos con variantes y modificadores → carrito gestionado en memoria → cliente revisa resumen → confirma pedido → payload enviado al Order Engine → número de orden recibido y mostrado.'},
+     {t:'Menú offline parcial',d:'Cliente con señal intermitente → Service Worker detecta falla de red → sirve versión cacheada del menú → cliente puede navegar sin interrupción → pedido enviado al recuperar conexión.'}
+   ],
+   flujo:['QR escaneado → URL con tenant_id + table_id decodificada','API Gateway recibe request → Auth Middleware emite sesión','CDN Edge verifica caché del menú del tenant → HIT: respuesta directa / MISS: fetch a Menu Engine','Tema visual del tenant cargado desde CDN Edge','Interfaz renderizada → cliente navega y añade al carrito','Cliente confirma pedido → payload enviado al Order Engine','Order Engine valida y confirma → número de pedido devuelto al cliente','Eventos de sesión publicados al Event Bus → Analytics Engine los consume']},
+
+  {id:'tenant-portal',name:'Admin Portal',sub:'Tenant Dashboard',layer:'presentation',
+   objetivo:'Centro de control operacional para el propietario o administrador del restaurante, permitiendo gestionar menú, pedidos en tiempo real, analíticas, usuarios del equipo y configuración del negocio.',
+   funcion:'CRUD completo del menú, gestión de pedidos activos con actualización de estado, visualización de reportes analíticos, administración de usuarios del tenant y configuración de branding y notificaciones.',
+   administra:['Configuración del panel del operador (filtros activos, vistas preferidas)','Sesión autenticada del tenant admin o editor'],
+   consume:['Menú activo con estructura completa (Menu Engine)','Pedidos activos en tiempo real via WebSocket (Order Engine)','Reportes y métricas (Analytics Engine)','Usuarios del tenant (IAM Service)','Configuración del negocio y plan activo (Tenant Orchestrator)','Assets multimedia (Media Manager)'],
+   entrega:['Cambios de menú (crear/editar/eliminar productos) al Menu Engine','Actualizaciones de estado de pedidos al Order Engine','Configuraciones del tenant al Tenant Orchestrator','Archivos de imagen al Media Manager'],
+   modifica:['Auth Middleware — controla sesión y permisos por rol','Tenant Orchestrator — limita funciones disponibles según plan del tenant'],
+   consulta:['Analytics Engine — actividad del operador para reportes','Audit & Compliance — registro de todas las acciones administrativas'],
+   casos:[
+     {t:'Gestión de menú',d:'Admin agrega nuevo producto con foto, precio, variantes de tamaño y alérgenos → Menu Engine persiste → CDN invalida caché → menú del cliente refleja cambio en menos de 10 segundos.'},
+     {t:'Gestión de pedidos en tiempo real',d:'Pedido nuevo llega via WebSocket → Admin Portal lo muestra en lista de activos → operador marca estado "En preparación" → Order Engine actualiza → cliente recibe notificación.'},
+     {t:'Configuración de branding',d:'Admin actualiza logo y colores del negocio → White-label Engine compila nuevo tema → CDN Edge lo distribuye → todas las interfaces del tenant reflejan el nuevo branding.'}
+   ],
+   flujo:['Admin autenticado → JWT con claims de rol tenant_admin emitido','Tenant Orchestrator entrega contexto: plan, límites, sucursales activas','Panel carga menú activo, pedidos en curso y métricas resumen','Acción del admin → validación de permisos en Auth Middleware → módulo correspondiente recibe el comando','Cambio persistido en Tenant Database → evento al Event Bus','Módulos afectados actualizan estado (CDN invalida, Analytics registra)','Auditoría registrada en Audit & Compliance con actor, acción y timestamp']},
+
+  {id:'branch-app',name:'Branch Manager',sub:'Gestor de Sucursal',layer:'presentation',
+   objetivo:'Interfaz operacional acotada al scope de una sucursal específica, para que gestores locales administren disponibilidad de productos, pedidos y horarios sin acceso a datos de otras sucursales.',
+   funcion:'Gestión de disponibilidad local de productos (overrides por sucursal), vista de pedidos filtrados por sucursal, configuración de horarios locales y alertas operacionales de la unidad.',
+   administra:['Estado de disponibilidad de productos en la sucursal activa','Configuración de horarios y turnos de la sucursal','Pedidos activos de la sucursal filtrados por branch_id'],
+   consume:['Menú base del tenant con overrides de sucursal (Menu Engine)','Pedidos filtrados por branch_id (Order Engine)','Usuarios asignados a la sucursal (IAM Service)','Configuración de la sucursal (Tenant Orchestrator)'],
+   entrega:['Overrides de disponibilidad de productos al Menu Engine (scope: sucursal)','Actualizaciones de estado de pedidos al Order Engine','Eventos de operación de sucursal al Event Bus → Analytics Engine'],
+   modifica:['Tenant Orchestrator — define qué funciones tiene habilitadas la sucursal','Auth Middleware — permisos acotados al branch_id específico'],
+   consulta:['Analytics Engine — métricas de rendimiento por sucursal','Monitoring — alertas operacionales de la sucursal'],
+   casos:[
+     {t:'Override de disponibilidad',d:'Chef indica que el salmón se agotó en esta sucursal → Branch Manager marca el producto como no disponible (override local) → Menu Viewer en esa URL/QR oculta el producto sin afectar otras sucursales.'},
+     {t:'Gestión de pedidos local',d:'Mesero ve lista de pedidos activos de la sucursal → marca pedido #42 como entregado → Order Engine actualiza → Analytics registra tiempo de entrega de la sucursal.'},
+     {t:'Horario especial',d:'Gestor configura menú de desayuno activo solo hasta las 11am los fines de semana en esta sucursal → Menu Engine aplica la regla con contexto de branch_id.'}
+   ],
+   flujo:['Login con JWT que incluye claim branch_id específico (scope limitado)','Tenant Orchestrator entrega configuración de la sucursal','Menu Engine filtra árbol con overrides aplicados para esta sucursal','Gestor realiza acción → Auth Middleware valida que el branch_id del JWT coincide con el recurso','Cambio enviado al módulo correspondiente con branch_id en el payload','Evento publicado al Event Bus → Analytics Engine procesa métricas por sucursal','Cambio no afecta otras sucursales del mismo tenant']},
+
+  {id:'superadmin',name:'SuperAdmin Console',sub:'Plataforma SaaS',layer:'presentation',
+   objetivo:'Dashboard global de administración de toda la plataforma SaaS multi-tenant, para el equipo operador del SaaS (propietario de la plataforma).',
+   funcion:'Gestión del ciclo de vida completo de todos los tenants, monitoreo de salud de la plataforma, administración de planes y facturación global, configuración de límites del sistema y acceso a auditoría.',
+   administra:['Vista consolidada de todos los tenants y su estado','Configuración global del sistema (plans, features flags, límites)','Alertas operacionales del SaaS'],
+   consume:['Datos de todos los tenants (Tenant Orchestrator)','Métricas de salud del sistema (Monitoring & Alerting)','Reportes financieros (Billing & Plans)','Logs de auditoría (Audit & Compliance)','Uso de recursos del sistema (Analytics Engine)'],
+   entrega:['Configuraciones de tenant al Tenant Orchestrator','Ajustes de plan al Billing & Plans','Políticas globales a Config & Secrets'],
+   modifica:['Solo usuarios con rol superadmin autenticados con MFA pueden modificar la consola y sus configuraciones'],
+   consulta:['Monitoring & Alerting — salud de la plataforma','Audit & Compliance — investigación de incidentes globales','Todos los módulos — para intervención administrativa'],
+   casos:[
+     {t:'Onboarding de nuevo tenant',d:'Nueva pizzería se registra → SuperAdmin verifica y aprueba → Tenant Orchestrator crea contexto completo → IAM Service inicializa rol admin → credenciales enviadas al nuevo tenant admin.'},
+     {t:'Suspensión por impago',d:'Billing detecta impago persistente → SuperAdmin revisa historial → confirma suspensión → Tenant Orchestrator marca tenant como suspended → todas sus interfaces muestran aviso → datos preservados 30 días.'},
+     {t:'Monitoreo de plataforma',d:'SuperAdmin ve dashboard con: uptime de módulos, latencia de API, tenants activos, MRR del SaaS, top tenants por uso y alertas abiertas en tiempo real.'}
+   ],
+   flujo:['SuperAdmin autenticado con MFA → JWT con rol superadmin de máximo privilegio','Vista global carga: resumen de tenants, salud del sistema, métricas financieras','Acción de gestión → módulo destino recibe comando con contexto de superadmin','Cambio auditado automáticamente en Audit & Compliance con justificación','Monitoring & Alerting recibe evento de cambio de configuración global']},
+
+  {id:'partner-sdk',name:'Partner API / SDK',sub:'Integraciones externas',layer:'presentation',
+   objetivo:'Superficie de integración pública y documentada para que terceros (apps de delivery, POS, ERPs) conecten sus sistemas con la plataforma de menús digitales.',
+   funcion:'Expone endpoints de lectura de menú, webhooks de pedidos y configuración de integraciones via API keys autenticadas, con rate limiting y sandboxing por tenant.',
+   administra:['API keys de partners por tenant','Webhooks configurados y sus endpoints destino','Logs de uso de API por partner','Configuración de sandboxing y entorno de testing'],
+   consume:['Menú del tenant (Menu Engine via API Gateway)','Autenticación de API key (Auth Middleware)','Eventos de pedidos para webhooks (Event Bus)','Configuración de integraciones (Integration Hub)'],
+   entrega:['Datos de menú a sistemas externos en formato JSON documentado','Eventos de pedidos via webhooks a sistemas del partner','Métricas de uso de API al Analytics Engine'],
+   modifica:['Tenant Admin — configura sus propias API keys e integraciones','SuperAdmin Console — gestiona API keys globales y conectores','Integration Hub — orquesta la conectividad bidireccional'],
+   consulta:['Audit & Compliance — uso de API y accesos','Analytics Engine — tráfico y uso por partner'],
+   casos:[
+     {t:'Integración con delivery',d:'App de delivery consulta el menú del restaurante via GET /v1/menu/{tenant} cada 10 minutos → sincroniza precios y disponibilidad automáticamente.'},
+     {t:'POS conectado',d:'Sistema POS envía pedidos directamente via POST /v1/orders con API key → Order Engine los procesa igual que pedidos del Menu Viewer → confirmación retornada al POS.'},
+     {t:'Webhook de pedido',d:'Pedido completado en la plataforma → Partner SDK dispara webhook al ERP del restaurante con payload del pedido → ERP confirma recepción → evento registrado en Audit.'}
+   ],
+   flujo:['Sistema externo llama a API Gateway con API key en header Authorization','Auth Middleware valida la API key → identifica tenant + partner + permisos','Rate Limiter en CDN Edge verifica cuota del partner (requests/min)','Request enrutado al módulo destino (Menu Engine, Order Engine)','Respuesta retornada al sistema externo con datos del tenant aislados','Evento de uso registrado en Analytics y Audit & Compliance']},
+
+  // ── GATEWAY ────────────────────────────────────────────────────────────────
+  {id:'api-gateway',name:'API Gateway',sub:'Load Balancer + Router',layer:'gateway',
+   objetivo:'Punto de entrada único y orquestador de todo el tráfico dinámico entrante al sistema, garantizando enrutamiento correcto, seguridad centralizada y observabilidad de cada request.',
+   funcion:'Enruta peticiones HTTP/S a módulos destino, aplica rate limiting por tenant/IP, transforma payloads según versión de API, gestiona circuit breakers y centraliza el logging de accesos.',
+   administra:['Tabla de rutas por endpoint, versión y método HTTP','Reglas de rate limiting por tenant, IP y endpoint','Configuración de circuit breakers por módulo destino','Políticas de CORS y headers de seguridad'],
+   consume:['Tokens JWT o API keys de los requests (Auth Middleware)','Reglas de enrutamiento configuradas','Respuestas de módulos core y business','Métricas de latencia y error rate de backends'],
+   entrega:['Requests enrutados a módulos internos con headers enriquecidos (tenant_id, trace_id)','Respuestas transformadas a clientes con headers apropiados','Logs de acceso con trace_id al Monitoring & Alerting','Métricas de latencia y throughput al Monitoring'],
+   modifica:['Solo CI/CD Pipeline puede modificar la configuración del Gateway via despliegues controlados'],
+   consulta:['Todos los módulos de presentación y Partner SDK consumen a través del Gateway','Cache Layer — para rate limiting distribuido'],
+   casos:[
+     {t:'Enrutamiento de menú',d:'GET /v1/menu/{tenant_id} → Gateway valida JWT con Auth Middleware → aplica rate limit → enruta a Menu Engine → respuesta retornada al cliente con headers de caché.'},
+     {t:'Rate limiting',d:'Tenant alcanza límite de 1000 req/min → Gateway detecta → devuelve HTTP 429 con Retry-After header → protege backends de sobrecarga → evento registrado en Monitoring.'},
+     {t:'Circuit breaker',d:'Order Engine responde con latencia > 5s repetidamente → Circuit breaker se abre → Gateway devuelve respuesta degradada → Monitoring alerta al equipo de infra.'}
+   ],
+   flujo:['Request HTTP/S entrante (tráfico dinámico, el estático ya fue filtrado por CDN)','Auth Middleware verifica JWT o API key → contexto de seguridad retornado','Rate Limiter consulta Cache Layer → verifica cuota del tenant/IP','Circuit breaker verifica health del módulo destino','Request forwarded con headers enriquecidos: tenant_id, user_id, trace_id, timestamp','Respuesta recibida del módulo → transformada según versión de API (v1, v2)','Respuesta retornada al cliente con headers HTTP correctos','Log de acceso emitido al Monitoring (latencia, status, trace_id, tenant_id)']},
+
+  {id:'cdn-edge',name:'CDN + Edge Cache',sub:'Cloudflare / AWS CloudFront',layer:'gateway',
+   objetivo:'Distribuir contenido estático y dinámico cacheado en nodos de borde de red globales, minimizando latencia para clientes en cualquier geografía y reduciendo carga en los backends de origen.',
+   funcion:'Cachea menús, imágenes, assets y respuestas de API frecuentes; gestiona TTL por tipo de recurso; invalida entradas de caché ante actualizaciones; protege el origen contra ataques DDoS con WAF integrado.',
+   administra:['Reglas de caché por path, tenant y tipo de recurso','TTL por recurso (menús: 30s, imágenes: 24h, assets estáticos: 7d)','Keys de invalidación por tenant/recurso','Certificados TLS y renovación automática','Reglas WAF para protección contra ataques'],
+   consume:['Archivos de Object Storage para assets estáticos','Respuestas dinámicas del API Gateway (para caché de API)','Señales de invalidación del Event Bus via workers de borde','Políticas de caché configuradas en Config & Secrets'],
+   entrega:['Respuestas cacheadas a clientes finales en <50ms desde nodo más cercano','Requests de cache-miss forwarded al API Gateway','Métricas de hit-rate, latencia y tráfico al Monitoring','Protección DDoS absorbida en el borde sin impacto a los backends'],
+   modifica:['Menu Engine — publica evento de menú actualizado → CDN invalida caché del tenant','Media Manager — invalida assets al actualizar imágenes','CI/CD Pipeline — purga total de caché en despliegues mayores'],
+   consulta:['Menu Viewer, QR Code Service, Partner SDK — contenido de menús e imágenes','Admin Portal — assets de dashboard e interfaz'],
+   casos:[
+     {t:'Alta concurrencia',d:'1000 clientes abren el menú simultáneamente → CDN Edge sirve desde caché distribuida → 0 requests llegan al Menu Engine → latencia < 50ms para todos los clientes.'},
+     {t:'Invalidación de caché',d:'Chef desactiva un plato en Admin Portal → Menu Engine publica evento → worker del CDN recibe señal de invalidación → siguiente request del cliente trae dato actualizado desde Menu Engine.'},
+     {t:'Protección ante ataque',d:'Ataque volumétrico DDoS a la plataforma → WAF del CDN absorbe el tráfico malicioso en el borde → backends protegidos → servicio ininterrumpido para clientes legítimos.'}
+   ],
+   flujo:['Request HTTP llega al nodo edge geográficamente más cercano al cliente','Verificar cache key (hash de tenant_id + path + query params relevantes)','HIT: devolver respuesta cacheada con headers Cache-Control → fin del flujo','MISS: forward request al API Gateway en región de origen','Respuesta recibida → evaluar si es cacheable (según headers y reglas)','Almacenar en caché con TTL apropiado al tipo de recurso','Devolver respuesta al cliente','Event Bus suscripción: worker de borde escucha eventos de invalidación por tenant/recurso']},
+
+  {id:'auth-middleware',name:'Auth Middleware',sub:'JWT + API Keys',layer:'gateway',
+   objetivo:'Validar y autorizar cada petición entrante al sistema, garantizando que solo identidades legítimas con los permisos correctos accedan a cada recurso del tenant correcto.',
+   funcion:'Verifica tokens JWT, valida API keys de partners, evalúa permisos RBAC del usuario según su rol y tenant, y emite contexto de seguridad enriquecido a todos los módulos del sistema.',
+   administra:['Claves de verificación JWT (rotadas via Config & Secrets)','Blacklist de tokens revocados en Cache Layer','Reglas RBAC por rol y recurso','Estado de sesiones activas por usuario'],
+   consume:['JWT o API key del header Authorization de cada request','Clave pública de verificación JWT (Config & Secrets)','Árbol de roles y permisos del usuario (IAM Service)','Blacklist de tokens revocados (Cache Layer)'],
+   entrega:['Contexto de autenticación enriquecido: user_id, tenant_id, branch_id, roles, permisos — a todos los módulos','Eventos de login/logout/token-revocado al Event Bus','Logs de autenticación (éxito y fallo) al Monitoring & Alerting y Audit & Compliance'],
+   modifica:['IAM Service — actualiza árbol de roles y permisos en tiempo real','Config & Secrets — rota claves de firma JWT con soporte de transición'],
+   consulta:['API Gateway — validación de cada request antes de enrutar','Todos los módulos que requieren verificación de identidad antes de ejecutar una acción'],
+   casos:[
+     {t:'Login y emisión de JWT',d:'Tenant Admin envía credenciales → Auth Middleware valida hash → consulta IAM Service → emite JWT signed con claims de tenant_id, roles y permisos → Admin Portal accede a recursos del tenant.'},
+     {t:'Token expirado y refresh',d:'Cliente presenta JWT expirado → Auth Middleware devuelve 401 con indicación → cliente usa refresh token → nuevo JWT emitido sin requerir nueva contraseña → sesión transparente para el usuario.'},
+     {t:'Acceso cross-tenant bloqueado',d:'Tenant B intenta acceder a datos del Tenant A modificando el tenant_id en el request → Auth Middleware detecta mismatch entre JWT claim y recurso solicitado → request rechazado con 403 → evento de anomalía registrado en Audit.'}
+   ],
+   flujo:['Request recibido con header Authorization (Bearer JWT o Api-Key)','Extraer token → verificar firma criptográfica con clave pública (Config & Secrets)','Verificar campos estándar: exp (expiración), iss (emisor), aud (audiencia)','Verificar que el token no esté en blacklist (Cache Layer)','Consultar IAM Service para permisos actualizados del usuario','Evaluar permisos RBAC contra el recurso y acción solicitada','Enriquecer request con contexto de seguridad (tenant_id, user_id, roles, branch_id)','Autorizar (forward al módulo destino) o rechazar (403/401) el acceso','Log de resultado emitido al Monitoring y Audit & Compliance']},
+
+  // ── CORE ──────────────────────────────────────────────────────────────────
+  {id:'iam-service',name:'IAM Service',sub:'Identity & Access Mgmt',layer:'core',
+   objetivo:'Centralizar la gestión de todas las identidades, roles y políticas de acceso del sistema, tanto para usuarios de la plataforma SaaS como para el equipo operador interno.',
+   funcion:'CRUD de usuarios por tenant, asignación y revocación de roles, gestión de invitaciones por email, políticas de contraseña y MFA, soporte de SSO y federación de identidad externa.',
+   administra:['Perfiles de usuario (nombre, email, tenant_id, branch_id, estado)','Credenciales hasheadas (bcrypt, sin almacenar texto plano)','Roles asignados por usuario, tenant y sucursal','Historial de acceso y cambios de permisos','Invitaciones pendientes con tokens de expiración','Políticas de contraseña y configuración de MFA'],
+   consume:['Configuración de roles disponibles por plan (Tenant Orchestrator)','Solicitudes de validación de permisos (Auth Middleware)','Notificaciones de invitación (Notification Hub)','Eventos de auditoría para cambios de acceso'],
+   entrega:['Árbol de roles y permisos al Auth Middleware para cada validación','Lista de usuarios del tenant al Admin Portal','Eventos de cambio de acceso (usuario creado/modificado/desactivado) al Event Bus → Audit & Compliance'],
+   modifica:['Admin Portal — gestiona usuarios del propio tenant (invitar, editar, desactivar)','SuperAdmin Console — gestión global de cuentas y accesos a nivel plataforma'],
+   consulta:['Auth Middleware — consulta permisos en cada validación de request','Admin Portal — lista y gestión de usuarios','Branch Manager App — usuarios asignados a la sucursal','Notification Hub — obtiene contactos (email) para enviar notificaciones'],
+   casos:[
+     {t:'Invitación de usuario',d:'Dueño invita a cajero con rol Operador → IAM genera token de invitación → Notification Hub envía email → cajero acepta y crea contraseña → Auth Middleware ya puede validar sus credenciales.'},
+     {t:'Desactivación de empleado',d:'Admin desactiva cuenta de empleado despedido → IAM marca usuario como inactivo → evento al Event Bus → Auth Middleware agrega token activo del usuario a blacklist (Cache Layer) → acceso revocado en menos de 30 segundos.'},
+     {t:'Escalada de permisos auditada',d:'Editor solicita rol de Admin → SuperAdmin aprueba → IAM actualiza árbol de permisos → Audit & Compliance registra: quién solicitó, quién aprobó, fecha y justificación.'}
+   ],
+   flujo:['Acción recibida: crear/modificar/desactivar usuario','Validar permisos del solicitante via Auth Middleware (¿puede gestionar usuarios?)','Ejecutar operación sobre Tenant Database (partición del tenant)','Si es invitación: generar token → publicar evento → Notification Hub envía email de invitación','Si es desactivación: publicar evento → Auth Middleware invalida tokens activos via blacklist en Cache Layer','Si es cambio de rol: árbol de permisos actualizado → disponible para Auth Middleware inmediatamente','Evento de auditoría publicado al Event Bus → Audit & Compliance registra el cambio']},
+
+  {id:'tenant-service',name:'Tenant Orchestrator',sub:'Multi-tenant Core',layer:'core',
+   objetivo:'Gestionar la estructura multi-empresa del sistema, garantizando aislamiento completo de datos y configuración entre tenants, y orquestar el ciclo de vida de cada empresa cliente.',
+   funcion:'CRUD de tenants y sucursales, asignación y actualización de planes, configuración de límites de uso (productos, usuarios, pedidos/mes, almacenamiento), provisioning al crear y deprovision al eliminar un tenant.',
+   administra:['Registro maestro de tenants (nombre, plan, estado, región, timezone)','Configuración de sucursales por tenant','Límites de uso por plan (productos_max, usuarios_max, pedidos_mes, storage_gb)','Metadatos del negocio (tipo, país, sector)','Estado del tenant (activo, suspended, deleted)'],
+   consume:['Plan de suscripción activo y estado de pago (Billing & Plans)','Métricas de uso actual (Analytics Engine) para validar contra límites','Configuración global del sistema (Config & Secrets)'],
+   entrega:['Contexto completo del tenant a todos los módulos del sistema: tenant_id, plan, límites, sucursales, configuración','Eventos de lifecycle del tenant al Event Bus: tenant.created, tenant.suspended, tenant.deleted'],
+   modifica:['SuperAdmin Console — CRUD completo de tenants','Billing & Plans — actualiza límites de plan al detectar cambio de suscripción'],
+   consulta:['Todos los módulos del sistema consultan el tenant context en cada petición para validar scope y límites'],
+   casos:[
+     {t:'Onboarding de nuevo tenant',d:'Nueva pizzería se registra → SuperAdmin confirma → Tenant Orchestrator crea contexto → Tenant Database inicializa partición → IAM Service configura rol admin → Notification Hub envía credenciales → tenant operativo en menos de 60 segundos.'},
+     {t:'Control de límites',d:'Restaurante intenta crear producto #101 con plan Starter (límite 100) → Admin Portal consulta límite → Tenant Orchestrator devuelve error límite_alcanzado → Admin Portal muestra alerta y opción de upgrade al plan Pro.'},
+     {t:'Suspensión por impago',d:'Billing notifica impago no resuelto → Tenant Orchestrator marca tenant como suspended → Event Bus propaga el evento → todos los módulos de presentación del tenant muestran pantalla de suspensión → datos preservados 30 días.'}
+   ],
+   flujo:['Request de creación de tenant recibida del SuperAdmin','Validar datos del negocio, plan seleccionado y pago inicial confirmado por Billing','Crear registro del tenant en Tenant Database con estado pending','Inicializar partición lógica y configurar límites del plan','Publicar evento tenant.created al Event Bus','IAM Service recibe evento → inicializa rol de Tenant Admin','Notification Hub recibe evento → envía credenciales al nuevo Tenant Admin','Tenant marcado como activo → ahora accesible para todos los módulos']},
+
+  {id:'menu-service',name:'Menu Engine',sub:'Core Business Logic',layer:'core',
+   objetivo:'Módulo central de toda la lógica de negocio del contenido del menú: categorías, productos, variantes, precios, disponibilidad, horarios y programación automática.',
+   funcion:'CRUD completo de la estructura del menú con soporte de variantes y modificadores, programación de disponibilidad por horario y temporada, overrides de disponibilidad por sucursal, y versioning del menú.',
+   administra:['Categorías y subcategorías con orden y visibilidad','Productos (nombre, descripción, precio, alérgenos, etiquetas, posición)','Variantes de producto (tamaño, cocción, presentación) con precios diferenciados','Modificadores y extras (con precio adicional, límites de selección)','Disponibilidad por horario (días de semana + rango de horas)','Overrides de disponibilidad por sucursal','Historial de versiones del menú para auditoría y rollback'],
+   consume:['Contexto del tenant y límites de plan (Tenant Orchestrator)','URLs de imágenes de productos (Media Manager)','Permisos del usuario solicitante (Auth Middleware via API Gateway)'],
+   entrega:['Árbol de menú estructurado al Menu Viewer, Admin Portal, Partner SDK y QR Code Service','Menú indexado al Search & Discovery Service (para indexación)','Eventos de cambio (menu.updated) al Event Bus → CDN invalida caché, Search reindexado, Analytics registra'],
+   modifica:['Admin Portal — edición manual completa del menú','Branch Manager App — overrides locales de disponibilidad (scope: sucursal)','Integration Hub — sincronización automática con POS externo','SuperAdmin Console — intervención global en casos de soporte'],
+   consulta:['Menu Viewer, Admin Portal, Branch Manager — árbol de menú actual','Analytics Engine — estructura del menú para enriquecer reportes','Search & Discovery — contenido para indexación','QR Code Service — menú asociado a cada QR'],
+   casos:[
+     {t:'Nuevo producto',d:'Chef crea "Pizza Trufa Negra" con precio, foto, variantes de tamaño y alérgenos → Menu Engine valida límite de productos del plan → persiste → evento al Event Bus → CDN invalida caché del tenant → producto disponible para clientes en menos de 10 segundos.'},
+     {t:'Menú de temporada',d:'Menú navideño programado para activarse el 1 de diciembre a las 00:00 → Menu Engine lo activa automáticamente via tarea programada → ninguna intervención manual necesaria.'},
+     {t:'Override de sucursal',d:'Sucursal Centro reporta que el salmón se agotó → Branch Manager aplica override de disponibilidad (scope: branch_id) → Menu Viewer en esa sucursal oculta el producto → otras sucursales no se ven afectadas.'}
+   ],
+   flujo:['Request de acción sobre menú recibida (crear/modificar/eliminar)','Validar identidad y permisos del actor via Auth Middleware','Verificar límites del plan con Tenant Orchestrator (productos, categorías)','Validar integridad de datos (precios positivos, variantes bien formadas, referencia a Media Manager válida)','Persistir cambio en Tenant Database con incremento de versión del menú','Publicar evento menu.updated al Event Bus con payload del cambio','Event Bus notifica en paralelo: CDN Edge (invalidar caché), Search Service (reindexar), Analytics Engine (registrar)','Retornar confirmación al módulo solicitante']},
+
+  {id:'media-service',name:'Media Manager',sub:'Assets & Images',layer:'core',
+   objetivo:'Centralizar el almacenamiento, procesamiento y distribución de todos los archivos multimedia del sistema: imágenes de productos, logos de tenants, iconos y videos de menú.',
+   funcion:'Recepción de uploads, compresión automática, generación de múltiples resoluciones, organización por tenant, gestión de cuota de almacenamiento y distribución via CDN Edge.',
+   administra:['Archivos multimedia por tenant (imágenes JPEG/WebP/PNG, videos MP4)','Metadatos de cada archivo (nombre, tamaño, formato, dimensiones, hash, tenant_id)','Cuota de almacenamiento usada vs disponible por tenant','Organización en carpetas por tenant, tipo y fecha','Asociación de archivos con productos y categorías'],
+   consume:['Archivos crudos del Admin Portal (upload multipart)','Políticas de transformación (compresión target, dimensiones por plataforma)','Límites de almacenamiento del plan del tenant (Tenant Orchestrator)','Object Storage para persistencia de objetos binarios'],
+   entrega:['URLs optimizadas de assets al CDN Edge y Menu Engine','Thumbnails a Admin Portal y Menu Viewer','Metadatos de archivo al módulo solicitante'],
+   modifica:['Admin Portal — upload, renombrar y eliminar assets del propio tenant','SuperAdmin Console — moderación global de contenido inapropiado'],
+   consulta:['Menu Engine — URLs de imágenes para productos y categorías','Admin Portal — galería de assets para gestión','Menu Viewer — imágenes de productos vía CDN Edge','Display Controller — imágenes para pantallas del local'],
+   casos:[
+     {t:'Subida de foto de plato',d:'Chef sube imagen de 8MB en Admin Portal → Media Manager valida tipo y tamaño → comprime → genera versiones de 400px, 800px y 1200px → almacena en Object Storage → URL disponible en CDN en menos de 3 segundos.'},
+     {t:'Cuota alcanzada',d:'Restaurante supera 500MB del plan Starter → Media Manager bloquea el upload → devuelve error con cuota_excedida y uso actual → Admin Portal muestra alerta de upgrade de plan.'},
+     {t:'Purga de tenant eliminado',d:'Tenant eliminado → workflow de offboarding → Media Manager purga todos los objetos del bucket del tenant en Object Storage → cuota liberada → auditoría del proceso registrada.'}
+   ],
+   flujo:['Admin sube archivo via Admin Portal → API Gateway recibe multipart/form-data','Media Manager valida tipo MIME y tamaño máximo según plan del tenant','Verificar cuota disponible del tenant (Tenant Orchestrator)','Procesar imagen: comprimir hasta target de calidad (85%) + generar versiones 400/800/1200px','Guardar todas las versiones en Object Storage en bucket del tenant','Registrar metadatos en Tenant Database (key del objeto, tenant_id, dimensiones, tamaño)','Propagar URLs al CDN Edge para pre-warming del caché','Retornar URL canónica y variantes al Admin Portal']},
+
+  {id:'qr-service',name:'QR Code Service',sub:'Generador & Tracker',layer:'core',
+   objetivo:'Generar, gestionar y trackear los códigos QR que vinculan el mundo físico (mesas, zonas, puntos de venta) con el menú digital del tenant.',
+   funcion:'Generación de QR únicos por mesa y zona con URL encoding del contexto, tracking de escaneos en tiempo real y métricas de uso por código QR.',
+   administra:['Registro de códigos QR por tenant (ID, mesa, zona, URL destino, estado activo/inactivo)','Contadores de escaneos totales y por período por QR','Configuración de parámetros de contexto (mesa_id, zona_id, branch_id)'],
+   consume:['Contexto del tenant y sucursal (Tenant Orchestrator)','URL base del Menu Viewer del tenant','Configuración de mesas y zonas del Admin Portal'],
+   entrega:['Imagen del código QR en PNG (300px) y SVG (escalable) descargable','URL de destino del menú con contexto embebido','Eventos de escaneo al Event Bus → Analytics Engine'],
+   modifica:['Admin Portal — crear, editar y desactivar QRs','Branch Manager App — gestión local de mesas y QRs activos'],
+   consulta:['Menu Viewer — decoding de parámetros al escanear','Analytics Engine — métricas de uso y escaneos por QR','Admin Portal — gestión y descarga de QRs'],
+   casos:[
+     {t:'Setup inicial del restaurante',d:'Admin crea 20 QRs, uno por mesa → los descarga como PDF → los imprime y coloca en las mesas → cada QR lleva contexto de mesa_id para que los pedidos lleguen con la mesa correcta.'},
+     {t:'Tracking de tráfico',d:'Analytics Engine reporta que la Mesa 5 tiene 3x más escaneos que otras → dueño investiga y descubre que está en el mejor lugar del restaurante → redistribuye la decoración del menú para aprovechar ese punto.'},
+     {t:'QR de vitrina',d:'Restaurante crea QR genérico sin mesa_id para pegar en la vitrina exterior → clientes pueden ver el menú desde la calle antes de entrar.'}
+   ],
+   flujo:['Admin configura mesa o zona en Admin Portal','QR Service genera URL única: {base_url}/m/{tenant_id}?t={table_id}&z={zone_id}&b={branch_id}','URL codificada en imagen QR: formato PNG 300px + SVG escalable','QR registrado en Tenant Database con estado activo','Admin descarga e imprime el QR → lo ubica físicamente en el local','Cliente escanea → Menu Viewer decoda los parámetros de la URL → carga menú con contexto de mesa','Evento de escaneo publicado al Event Bus → Analytics Engine registra (tenant, qr_id, timestamp, mesa)']},
+
+  {id:'display-service',name:'Display Controller',sub:'Smart Screens',layer:'core',
+   objetivo:'Gestionar la visualización del menú en pantallas digitales del local (menús de pared, pantallas de cocina, displays de espera) con sincronización en tiempo real.',
+   funcion:'Sincronización del menú activo con pantallas digitales conectadas, gestión de playlists de contenido por pantalla y respuesta a cambios del menú en tiempo real via WebSocket.',
+   administra:['Registro de pantallas por tenant y sucursal (ID, nombre, tipo, estado de conexión)','Configuración de playlist por pantalla (qué categorías y productos mostrar, duración de rotación)','Estado de conexión y última actividad de cada pantalla'],
+   consume:['Menú activo (Menu Engine) para sincronización de contenido','Assets multimedia (Media Manager via CDN Edge)','Configuración de pantallas del Admin Portal','Eventos de cambio de menú (Event Bus) para actualización en tiempo real'],
+   entrega:['Contenido renderizado a pantallas conectadas via WebSocket','Estado de salud de pantallas al Admin Portal y Monitoring','Eventos de visualización (impresiones por producto) al Analytics Engine'],
+   modifica:['Admin Portal — registrar pantallas y configurar sus playlists','Branch Manager App — ajustes locales de visualización en la sucursal'],
+   consulta:['Analytics Engine — impresiones de productos en pantalla para medir exposición','Monitoring — estado de conectividad de pantallas'],
+   casos:[
+     {t:'Pantalla de cocina',d:'Pedidos nuevos aparecen automáticamente en la pantalla de la cocina via WebSocket → el personal de cocina ve los pedidos ordenados por hora de llegada → los marca como listos desde la pantalla táctil.'},
+     {t:'Menú digital de pared',d:'Pantalla HD en el restaurante muestra categorías del menú con rotación automática de fotos de productos → cuando el admin cambia un precio, la pantalla se actualiza en menos de 5 segundos sin reinicio.'},
+     {t:'Display de espera',d:'Pantalla en sala de espera muestra tiempo estimado de espera del turno actual y las promociones del día configuradas por el admin.'}
+   ],
+   flujo:['Pantalla registrada en Admin Portal → Display Controller asigna ID único','Pantalla conecta a Display Controller via WebSocket (conexión persistente)','Controller envía configuración de playlist inicial (qué mostrar y en qué orden)','Pantalla renderiza ciclo de rotación del menú configurado','Evento de cambio de menú llega via Event Bus → Controller notifica pantallas afectadas via WebSocket','Pantallas actualizan contenido en caliente sin reinicio → cambio visible en menos de 5 segundos','Eventos de visualización (qué se mostró y por cuánto tiempo) enviados al Analytics Engine'],},
+
+  // ── BUSINESS ──────────────────────────────────────────────────────────────
+  {id:'analytics-service',name:'Analytics Engine',sub:'Business Intelligence',layer:'business',
+   objetivo:'Transformar el volumen de eventos operacionales de la plataforma en inteligencia accionable para cada tenant y para el operador del SaaS globalmente.',
+   funcion:'Procesa y agrega eventos del Event Bus, genera reportes de ventas, tendencias de productos, comportamiento de usuarios, métricas de uso de plataforma y alertas basadas en umbrales configurados.',
+   administra:['Eventos procesados y agregados (por tenant, tiempo, producto, sucursal, QR)','Reportes guardados y programados por tenant','Configuración de alertas y KPIs por tenant','Métricas globales del SaaS para el SuperAdmin'],
+   consume:['Eventos del Event Bus: pedido.completado, menu.visto, qr.escaneado, usuario.logueado, menú.actualizado, etc.','Datos maestros del Menu Engine y Tenant Orchestrator para enriquecer eventos','Configuración de alertas definida por el Tenant Admin'],
+   entrega:['Reportes y dashboards al Admin Portal y SuperAdmin Console','Alertas al Notification Hub cuando un threshold es superado','Métricas de uso de recursos al Billing & Plans para facturación por uso','Datos procesados al Analytics Store para persistencia'],
+   modifica:['Ningún módulo modifica el Analytics Engine directamente — es un consumidor de eventos y fuente de reportes de solo lectura'],
+   consulta:['Admin Portal — dashboards y reportes del negocio','SuperAdmin Console — métricas del SaaS','Notification Hub — alertas basadas en métricas','Billing & Plans — consumo de recursos para facturación'],
+   casos:[
+     {t:'Análisis de conversión',d:'Admin ve que "Pizza Margherita" tiene 400 vistas pero solo 80 pedidos (20% conversión) → decide bajar el precio un 10% → Analytics muestra mejora en conversión la semana siguiente.'},
+     {t:'Alerta de caída de ventas',d:'Sistema detecta 40% menos pedidos en los últimos 30 minutos comparado al mismo horario de la semana anterior → alerta automática enviada al Tenant Admin via Notification Hub con resumen del período.'},
+     {t:'Reporte mensual automático',d:'Cada primer día del mes → reporte generado automáticamente con ventas totales, productos top 10, horas pico, escaneos de QR y comparativa vs mes anterior → entregado por email al Tenant Admin.'}
+   ],
+   flujo:['Evento llega al Event Bus con tipo analítico y payload estructurado','Analytics Engine consume el evento → parsing y validación del schema','Enriquecimiento: agrega contexto de Menu Engine (nombre del producto) y Tenant Orchestrator (nombre del tenant)','Agregar métricas en Analytics Store por dimensiones (tiempo, producto, sucursal, usuario)','Evaluar reglas de alerta configuradas por el tenant → si threshold superado: trigger a Notification Hub','Dashboard del Admin Portal consulta Analytics Engine → datos actualizados en tiempo real (delay máximo 60 segundos)']},
+
+  {id:'notification-service',name:'Notification Hub',sub:'Comunicaciones',layer:'business',
+   objetivo:'Centralizar y orquestar todas las comunicaciones del sistema hacia usuarios operadores y clientes finales a través de múltiples canales de mensajería.',
+   funcion:'Envío de notificaciones por email, SMS, push, WebSocket en tiempo real y webhooks según tipo de evento y preferencias del receptor, con templates personalizables por tenant.',
+   administra:['Templates de mensajes por tenant y tipo de evento (onboarding, pedido, alerta, factura, invitación)','Cola de envíos pendientes con prioridad','Historial de notificaciones enviadas (resultado, timestamp, canal)','Preferencias de canal por usuario (email, SMS, push)','Configuración de proveedores externos de mensajería por tenant'],
+   consume:['Eventos del Event Bus que requieren notificación al suscriptor correspondiente','Templates personalizados por tenant en la Tenant Database','Contactos del usuario: email, teléfono (IAM Service)','Canales habilitados por plan del tenant (Tenant Orchestrator)','Credenciales de proveedores de mensajería (Config & Secrets)'],
+   entrega:['Mensajes enviados a canales externos: SendGrid (email), Twilio (SMS), FCM (push), WhatsApp API','Confirmaciones de entrega y fallos al Event Bus','Métricas de apertura y click al Analytics Engine'],
+   modifica:['Admin Portal — configura templates de mensajes y preferencias de notificación del tenant','SuperAdmin Console — configura proveedores globales de mensajería'],
+   consulta:['Analytics Engine — métricas de eficacia de comunicaciones','Order Engine — estado de notificaciones de pedidos','Audit & Compliance — historial de comunicaciones enviadas'],
+   casos:[
+     {t:'Confirmación de pedido',d:'Cliente confirma pedido → Order Engine publica evento → Notification Hub envía SMS de confirmación al cliente Y push notification al tablet de cocina en menos de 2 segundos.'},
+     {t:'Secuencia de onboarding',d:'Nuevo tenant creado → Notification Hub envía email de bienvenida → al día 3 sin actividad: email de ayuda con tutorial → al día 7: llamada de onboarding programada.'},
+     {t:'Alerta financiera',d:'Analytics detecta caída de ventas → Notification Hub envía email al Tenant Admin con resumen: "Tus ventas bajaron 30% esta semana vs la semana anterior".'}
+   ],
+   flujo:['Evento llega del Event Bus con tipo y payload completo','Identificar tipo de notificación → seleccionar template del tenant (o default global)','Personalizar contenido con datos del payload (nombre, pedido, monto, link)','Consultar IAM Service para obtener contacto del destinatario (email, teléfono)','Seleccionar canal según preferencias del usuario y canales habilitados del tenant','Encolar mensaje y enviar al proveedor externo correspondiente (SendGrid/Twilio/FCM)','Proveedor confirma entrega o reporta fallo → registrar resultado en historial','En fallo: reintentar hasta 3 veces con backoff exponencial → si persiste: dead-letter queue','Métrica de envío publicada al Analytics Engine']},
+
+  {id:'billing-service',name:'Billing & Plans',sub:'Subscriptions SaaS',layer:'business',
+   objetivo:'Gestionar el modelo de monetización de la plataforma SaaS: planes de suscripción, cobros recurrentes, facturación, períodos de gracia y ciclo de vida de la relación comercial con cada tenant.',
+   funcion:'Procesamiento de cobros periódicos, gestión del ciclo de vida de suscripciones (upgrade/downgrade), emisión de facturas, control de acceso según estado de pago y notificación de cambios al Tenant Orchestrator.',
+   administra:['Suscripciones activas por tenant (plan, fechas, estado)','Historial completo de pagos y sus resultados','Facturas emitidas con líneas de detalle','Métodos de pago registrados (tokenizados, no PCI-sensible directamente)','Catálogo de planes y precios del SaaS','Períodos de gracia activos'],
+   consume:['Plan y estado actual del tenant (Tenant Orchestrator)','Métricas de uso real (Analytics Engine) para facturación por uso si aplica','Método de pago tokenizado del tenant','Credenciales del proveedor de pago (Config & Secrets)'],
+   entrega:['Estado de suscripción actualizado al Tenant Orchestrator (activo/suspendido)','Facturas y confirmaciones de pago al Notification Hub','Reportes financieros y MRR al SuperAdmin Console','Eventos de billing al Event Bus → Analytics Engine registra para reportes'],
+   modifica:['Tenant Admin via Admin Portal — cambiar plan o método de pago','SuperAdmin Console — ajustes manuales de suscripción en casos de soporte'],
+   consulta:['Tenant Orchestrator — estado del plan para configurar límites','Admin Portal — historial de facturas y estado de suscripción','SuperAdmin Console — reportes financieros del SaaS','Analytics Engine — consumo de recursos para facturación por uso'],
+   casos:[
+     {t:'Cobro mensual exitoso',d:'Fecha de renovación → sistema intenta cargo automático → éxito: factura emitida → Notification Hub envía email de confirmación → suscripción renovada → Tenant Orchestrator actualizado con nueva fecha de vencimiento.'},
+     {t:'Upgrade de plan',d:'Restaurante pasa de Starter a Pro → diferencia prorrateada del mes calculada y cobrada → nuevos límites activos inmediatamente → Tenant Orchestrator actualizado → Admin Portal refleja nuevas capacidades.'},
+     {t:'Flujo de pago fallido',d:'Cargo fallido → período de gracia de 72 horas activado → 3 emails recordatorios enviados por Notification Hub → si no regulariza: tenant suspendido → datos preservados 30 días → aviso de eliminación inminente.'}
+   ],
+   flujo:['Trigger de cobro: cron de renovación o evento de cambio de plan','Consultar método de pago tokenizado del tenant','Calcular monto: precio del plan ± prorrateo si hubo cambio de plan','Ejecutar cargo via proveedor de pago (Stripe) con credenciales de Config & Secrets','Éxito: generar factura → publicar evento billing.paid → Notification Hub envía confirmación → renovar suscripción → Tenant Orchestrator actualizado','Fallo: registrar intento → activar período de gracia → publicar evento billing.failed → Notification Hub inicia secuencia de recordatorios','Si no regulariza en plazo: publicar evento tenant.payment_failed → Tenant Orchestrator suspende el tenant','Evento de billing publicado al Event Bus → Analytics Engine registra para reportes del SuperAdmin']},
+
+  {id:'integration-hub',name:'Integration Hub',sub:'POS / Webhooks / ERP',layer:'business',
+   objetivo:'Orquestar la conectividad bidireccional entre la plataforma de menús y los sistemas externos del tenant: POS, ERP, plataformas de delivery y sistemas de reservas.',
+   funcion:'Gestiona conectores de integraciones prediseñadas para POS populares, webhooks configurables, sincronización bidireccional de menús y pedidos, y transformación de formatos de datos entre sistemas.',
+   administra:['Configuración de integraciones activas por tenant (credenciales, endpoints, mapeos de campos)','Historial de sincronizaciones con resultado y timestamp','Estado de salud de cada integración (activa/error/desconectada)','Webhooks configurados y sus endpoints destino'],
+   consume:['Eventos del Event Bus (pedidos, cambios de menú) para propagar a sistemas externos','Respuestas de sistemas externos para sincronización inversa','Credenciales de integración (Config & Secrets)'],
+   entrega:['Datos de pedidos y menú a sistemas externos en el formato requerido','Eventos de sincronización completada al Event Bus','Métricas de integración al Analytics Engine y Monitoring'],
+   modifica:['Admin Portal — configurar y activar integraciones del tenant','SuperAdmin Console — gestión del catálogo de conectores disponibles para todos los tenants'],
+   consulta:['Admin Portal — estado e historial de las integraciones','Analytics Engine — volumen de tráfico por integración','Audit & Compliance — historial de sincronizaciones para trazabilidad'],
+   casos:[
+     {t:'Sincronización con POS',d:'Pedido completado en la plataforma → Integration Hub detecta evento via Event Bus → transforma payload al formato del POS del restaurante → envía via HTTP POST → POS confirma recepción → resultado registrado.'},
+     {t:'Actualización de precios desde ERP',d:'ERP del restaurante envía actualización de precios via webhook → Integration Hub recibe → mapea campos al formato de Menu Engine → Menu Engine actualiza precios → menú digital refleja cambio automáticamente.'},
+     {t:'Sincronización con delivery',d:'App de delivery consulta menú del restaurante via API → Integration Hub sirve datos en el formato del partner → delivery muestra menú sincronizado → pedidos del delivery entran al Order Engine via Partner SDK.'}
+   ],
+   flujo:['Evento relevante recibido del Event Bus (pedido.completado, menu.actualizado)','Identificar integraciones activas del tenant suscritas a ese tipo de evento','Transformar payload al formato requerido por el sistema destino (mapeo configurado)','Enviar al endpoint externo via HTTP POST o WebSocket con credenciales de Config & Secrets','Recibir confirmación del sistema externo → registrar resultado (éxito/fallo/timeout)','En fallo: reintentar con backoff exponencial (3 intentos) → si persiste: alerta al Admin Portal y Monitoring','Métrica de integración publicada al Monitoring y Analytics Engine']},
+
+  {id:'audit-service',name:'Audit & Compliance',sub:'Trazabilidad',layer:'business',
+   objetivo:'Garantizar trazabilidad completa e inmutable de todas las acciones administrativas y sensibles del sistema para cumplimiento normativo, resolución de incidentes y confianza de los tenants.',
+   funcion:'Registra permanentemente todas las acciones críticas (quién, qué, cuándo, desde dónde, resultado), genera reportes de auditoría y detecta anomalías de comportamiento.',
+   administra:['Log de auditoría inmutable: actor_id, tenant_id, acción, recurso, timestamp, IP, resultado, user_agent','Configuración de qué tipos de eventos son auditables','Reportes de auditoría generados y su período de cobertura','Alertas de anomalías detectadas'],
+   consume:['Eventos de tipo audit.* publicados por todos los módulos al Event Bus','Contexto de usuario y sesión embebido en cada evento (Auth Middleware lo enriquece)','Eventos de seguridad del sistema para detección de anomalías'],
+   entrega:['Registros inmutables al Audit Log Store (append-only, sin UPDATE ni DELETE posible)','Reportes de auditoría al SuperAdmin Console y Admin Portal (scope del propio tenant)','Alertas de anomalías al Monitoring & Alerting y Notification Hub'],
+   modifica:['Ningún módulo puede modificar o eliminar registros de auditoría ya escritos — el diseño es append-only por garantía de integridad'],
+   consulta:['SuperAdmin Console — investigación de incidentes globales','Admin Portal — historial de acciones de su propio tenant','Monitoring & Alerting — correlación de eventos de seguridad','Config & Secrets — auditoría de accesos a secretos'],
+   casos:[
+     {t:'Investigación de incidente',d:'Precio de producto modificado sin autorización aparente → Admin consulta log de auditoría → identifica que fue el editor Juan a las 14:32 desde IP 192.168.1.10 usando el Admin Portal → evidencia para acción disciplinaria.'},
+     {t:'Reporte de compliance',d:'Auditor externo solicita evidencia de quién accedió a datos de clientes en los últimos 90 días → Audit & Compliance genera reporte filtrado por tenant y tipo de recurso en minutos con firma de integridad.'},
+     {t:'Detección de anomalía cross-tenant',d:'Tenant Admin de Tenant A intenta acceder a datos de Tenant B modificando IDs → Auth Middleware bloquea el acceso → evento de anomalía publicado → Audit & Compliance alerta al SuperAdmin inmediatamente.'}
+   ],
+   flujo:['Módulo realiza acción sensible → publica evento audit.{tipo} al Event Bus con payload: actor_id, tenant_id, acción, resource_id, timestamp, IP, resultado','Audit Service consume el evento del Event Bus → parsing y validación','Enriquecer registro con: user_agent, session_id, geoIP del actor','Escribir registro inmutable al Audit Log Store (INSERT, nunca UPDATE o DELETE)','Evaluar reglas de anomalía sobre el registro → si patrón sospechoso detectado: alerta al Monitoring y Notification Hub','Registro indexado y accesible para consultas autorizadas con filtros de tiempo, actor y recurso']},
+
+  {id:'search-service',name:'Search & Discovery',sub:'Búsqueda en Menús',layer:'business',
+   objetivo:'Proveer capacidades de búsqueda rápida y semántica sobre el contenido de los menús, mejorando la experiencia del cliente final para encontrar productos específicos en menús extensos.',
+   funcion:'Indexa el contenido del menú por tenant, responde queries con typo-tolerance y búsqueda facetada, mantiene el índice sincronizado con cambios del menú y provee sugerencias de autocompletado.',
+   administra:['Índice de búsqueda por tenant (colección en Search Index)','Configuración de ranking y relevancia por tenant','Sinónimos personalizados por tenant (ej: "marga" → "margherita")','Índices de autocompletado por término frecuente'],
+   consume:['Menú estructurado de Menu Engine para indexación inicial','Eventos menu.updated del Event Bus para reindexación incremental','Queries de búsqueda del Menu Viewer con parámetros de filtro'],
+   entrega:['Resultados de búsqueda rankeados con typo-tolerance al Menu Viewer','Sugerencias de autocompletado en tiempo real','Facets y conteos de resultados por categoría/alérgeno/precio','Métricas de búsqueda (queries, resultados, clicks) al Analytics Engine'],
+   modifica:['Menu Engine — actualiza el índice al cambiar el menú via Event Bus (fuente única de verdad)'],
+   consulta:['Menu Viewer — búsqueda del cliente final','Partner SDK — búsqueda programática de productos','Admin Portal — testing y configuración de búsqueda'],
+   casos:[
+     {t:'Búsqueda con typo-tolerance',d:'Cliente escribe "pizaa" → Search & Discovery identifica distancia de edición 1 → devuelve resultados de "pizza" rankeados por popularidad → cliente selecciona su producto sin frustración.'},
+     {t:'Filtro por restricciones',d:'Cliente con celiaquía selecciona filtro "sin gluten" → Search devuelve solo los productos etiquetados con esa restricción en el menú del restaurante → resultados precisos en menos de 10ms.'},
+     {t:'Reindexación incremental',d:'Admin agrega nuevo producto → Menu Engine publica evento → Search Service consume → genera documento de índice → upsert en Search Index → producto buscable en menos de 5 segundos.'}
+   ],
+   flujo:['Query de búsqueda recibida del Menu Viewer con tenant_id, query y filtros','Cache Layer verificado para queries frecuentes → HIT: respuesta directa en menos de 5ms','MISS: query enviada al Search Index con collection_id del tenant','Search Index aplica: tokenización + typo-tolerance + filtros de facets + ranking de relevancia','Resultados rankeados retornados al Search Service','Respuesta almacenada en Cache Layer con TTL corto (30 segundos)','Retornada al Menu Viewer con resultados y metadatos de facets','Métrica de búsqueda publicada al Event Bus → Analytics Engine registra']},
+
+  // ── DATA ──────────────────────────────────────────────────────────────────
+  {id:'tenant-db',name:'Tenant Database',sub:'PostgreSQL multi-tenant',layer:'data',
+   objetivo:'Persistencia principal y fuente de verdad del sistema para todos los datos estructurados, con aislamiento lógico garantizado entre tenants y garantías ACID en todas las transacciones.',
+   funcion:'Almacena y gestiona datos transaccionales de todos los módulos con transacciones ACID, réplicas de lectura para queries analíticos y backups automatizados con RTO y RPO definidos.',
+   administra:['Tenants, sucursales y configuraciones (Tenant Orchestrator)','Usuarios, roles e invitaciones (IAM Service)','Menús, categorías, productos, variantes y modificadores (Menu Engine)','Pedidos activos e historial de pedidos (Order Engine)','Suscripciones, pagos y facturas (Billing & Plans)','Metadatos de assets multimedia (Media Manager)','Configuración de QRs y pantallas (QR Code Service, Display Controller)'],
+   consume:['Comandos de escritura de módulos core y business via sus capas de repositorio','Queries de lectura de módulos que requieren datos frescos (no cacheados)'],
+   entrega:['Registros persistidos con confirmación ACID al módulo solicitante','Datos disponibles en réplica de lectura para Analytics Engine','Eventos de cambio via triggers o CDC al Event Bus para sincronización downstream'],
+   modifica:['Cada módulo core y business opera sobre sus propias tablas aisladas a través de su capa de repositorio: Menu Engine, Tenant Orchestrator, IAM Service, Order Engine, Billing & Plans, Media Manager'],
+   consulta:['Cache Layer — pre-warming de caché al iniciar','Analytics Engine — via réplica de lectura para queries analíticos','Todos los módulos core — via su capa de repositorio para datos no cacheados'],
+   casos:[
+     {t:'Transacción de pedido',d:'Pedido creado con 5 items y 3 modificadores → transacción única garantiza que todos los registros se crean correctamente o ninguno (ACID) → no puede haber pedido sin items ni items sin pedido.'},
+     {t:'Aislamiento de tenant',d:'Query de Tenant A nunca puede retornar filas de Tenant B — el tenant_id está presente en todas las queries y validado a nivel de repositorio como precondición de toda operación.'},
+     {t:'Backup y recuperación',d:'Backup incremental cada hora → en caso de fallo catastrófico, recuperación a cualquier punto de los últimos 7 días con máximo 1 hora de pérdida de datos (RPO = 1h, RTO = 2h).'}
+   ],
+   flujo:['Módulo genera operación de escritura (INSERT/UPDATE/DELETE)','Capa de repositorio del módulo añade tenant_id al WHERE y VALUES automáticamente','Transacción abierta → operación ejecutada con locks apropiados','Constraints de integridad validados (foreign keys, unique, check)','Transacción confirmada (COMMIT) → confirmación retornada al módulo','Réplica de escritura sincronizada en tiempo real (streaming replication)','Cache Layer invalidado para las entradas afectadas por el cambio','Réplica de lectura disponible para Analytics Engine con delay de milisegundos']},
+
+  {id:'cache-layer',name:'Cache Layer',sub:'Redis / Valkey',layer:'data',
+   objetivo:'Reducir latencia de respuesta y carga sobre la Tenant Database mediante almacenamiento en memoria de datos frecuentemente consultados, con invalidación inteligente ante cambios.',
+   funcion:'Cachea menús activos, sesiones de usuario, resultados de búsquedas, respuestas de API costosas y contadores de rate limiting; gestiona TTL e invalidación por señales del Event Bus.',
+   administra:['Pares clave-valor en memoria con TTL diferenciado por tipo de dato','Políticas de eviction (LRU para menús, no-evict para sesiones activas)','JWT blacklist para tokens revocados','Contadores de rate limiting por tenant/IP/endpoint (con ventana de tiempo)','Estadísticas de hit-rate por categoría de dato'],
+   consume:['Datos de Tenant Database en caso de cache-miss','Señales de invalidación del Event Bus por tenant y recurso afectado','Políticas de TTL configuradas por tipo de recurso','Tokens JWT para gestión de blacklist (Auth Middleware)'],
+   entrega:['Respuestas en caché en menos de 5ms a módulos solicitantes','Estado de sesión al Auth Middleware para validación rápida de JWT','Estado de rate limiting al API Gateway para decisiones en tiempo real','Métricas de hit-rate y uso de memoria al Monitoring & Alerting'],
+   modifica:['Event Bus — publica señales de invalidación cuando un dato fuente cambia','Tenant Database — fuente de datos al producirse un cache-miss','Auth Middleware — gestiona blacklist de tokens revocados'],
+   consulta:['API Gateway — rate limiting distribuido en tiempo real','Auth Middleware — validación rápida de JWT y blacklist','Menu Engine — menú activo cacheado por tenant','Search & Discovery — resultados de queries frecuentes'],
+   casos:[
+     {t:'Menú de alta demanda',d:'500 clientes consultan el mismo menú simultáneamente → Cache Layer responde en 3ms desde memoria para los 499 requests tras el primero → 0 queries a Tenant Database → latencia mínima para todos.'},
+     {t:'Sesión JWT cacheada',d:'Auth Middleware cachea resultado de validación de JWT durante 60 segundos → requests subsecuentes del mismo token no consultan la base de datos → validación en microsegundos.'},
+     {t:'Rate limiting distribuido',d:'API Gateway consulta Cache Layer por contador de requests del tenant en los últimos 60 segundos → decisión de permitir o rechazar en menos de 1ms → escalable a múltiples instancias del Gateway.'}
+   ],
+   flujo:['Módulo solicita dato con cache key específica (ej: menu:{tenant_id}:active)','Cache Layer verifica si la key existe en memoria → HIT: retornar valor en menos de 5ms → fin','MISS: módulo consulta Tenant Database → obtiene dato fresco','Módulo almacena en Cache Layer con TTL apropiado (menú: 30s, sesión: 15min, rate-limit: 60s)','Retorna dato al solicitante','Event Bus notifica cambio relevante (ej: menu.updated para tenant X)','Cache Layer invalida la key afectada: DEL menu:{tenant_id}:active','Siguiente request produce cache-miss → dato fresco cargado de la base de datos']},
+
+  {id:'object-storage',name:'Object Storage',sub:'S3 / Cloudflare R2',layer:'data',
+   objetivo:'Almacenamiento persistente, escalable y con alta durabilidad para todos los archivos binarios del sistema: imágenes, videos, backups y exports, con acceso controlado por tenant.',
+   funcion:'Guarda y sirve archivos binarios con control de acceso por bucket/tenant, gestiona políticas de retención y ciclo de vida de objetos, y genera URLs firmadas de acceso temporal seguro.',
+   administra:['Objetos almacenados organizados en buckets por tenant','Metadatos de objetos (key, tamaño, content-type, tenant_id, created_at)','Políticas de ACL por bucket (privado, público via CDN)','Políticas de retención y ciclo de vida (TTL, archivado en cold storage)','Cuotas de almacenamiento por bucket/tenant'],
+   consume:['Archivos procesados de Media Manager para persistencia','Backups comprimidos de Tenant Database (workflow nocturno)','Logs comprimidos de Monitoring para archivado','Configuración de políticas de bucket (Tenant Orchestrator)'],
+   entrega:['URLs firmadas de acceso temporal (assets: 24h, backups: 1h) al Media Manager y CDN Edge','Objetos descargados ante requests autorizados directos','Metadatos de objeto al Media Manager para registro y verificación'],
+   modifica:['Media Manager — write y delete de assets del tenant','CI/CD Pipeline — artefactos de build y backups de configuración','Monitoring — write de backups y logs archivados'],
+   consulta:['CDN Edge — fetch de assets para cachear en nodos de borde','Media Manager — listar y verificar existencia de assets','Monitoring — logs y backups archivados para análisis'],
+   casos:[
+     {t:'Asset de producto',d:'Media Manager sube imagen procesada en 3 versiones → almacenadas en bucket del tenant con key predecible → CDN Edge las cachea automáticamente → servidas globalmente en menos de 50ms.'},
+     {t:'Backup automático',d:'Cada noche a las 2am → Tenant Database exporta snapshot comprimido → enviado a Object Storage en bucket de backups con política de retención de 30 días → archivado en cold storage tras 30 días.'},
+     {t:'Purga de tenant eliminado',d:'Tenant eliminado → workflow de offboarding → Object Storage elimina todos los objetos del bucket del tenant en batch → almacenamiento liberado → proceso auditado en Audit & Compliance.'}
+   ],
+   flujo:['Media Manager solicita almacenar archivo con metadata del tenant','Object Storage valida permisos: bucket del tenant + rol del solicitante','Objeto almacenado con key única: {tenant_id}/{tipo}/{uuid}.{ext}','Política de ciclo de vida evaluada (TTL, archivado si aplica)','URL firmada generada con expiración apropiada al caso de uso','URL retornada al solicitante (Media Manager)','Media Manager propaga URL al CDN Edge para pre-warming del caché','CDN Edge cachea el objeto → disponible globalmente para el Menu Viewer']},
+
+  {id:'search-index',name:'Search Index',sub:'Typesense / Elasticsearch',layer:'data',
+   objetivo:'Motor de búsqueda de alta performance especializado en el contenido de menús, con tolerancia a errores tipográficos y búsqueda facetada sobre colecciones multi-tenant.',
+   funcion:'Mantiene colecciones de documentos indexados por tenant, ejecuta queries con ranking por relevancia y typo-tolerance, soporta búsqueda facetada y actualización incremental del índice.',
+   administra:['Colecciones de documentos de productos por tenant (con todos sus atributos buscables)','Configuración de schema de búsqueda: campos buscables, filtrables y ordenables','Configuración de ranking y relevancia (boosts por campo)','Índices de autocompletado por prefijo'],
+   consume:['Documentos de productos de Menu Engine para indexación (via Search & Discovery Service)','Comandos de upsert y delete de documentos (via Search & Discovery Service)','Queries de búsqueda del Search & Discovery Service'],
+   entrega:['Resultados de búsqueda rankeados con typo-tolerance al Search & Discovery Service','Sugerencias de autocompletado','Facets y conteos de resultados por atributo','Metadatos de performance de la query (tiempo de ejecución, número de resultados)'],
+   modifica:['Search & Discovery Service — único escritor: operaciones de indexación, reindexación y configuración de colecciones'],
+   consulta:['Search & Discovery Service — único consumidor directo de queries de búsqueda'],
+   casos:[
+     {t:'Búsqueda con typo-tolerance',d:'Query "pizaa margharita" → Search Index identifica distancia de edición 1 en ambas palabras → devuelve documentos de "Pizza Margherita" rankeados por popularidad del producto.'},
+     {t:'Búsqueda facetada',d:'Cliente filtra por categoría "Ensaladas" + alérgeno "sin lactosa" + precio menor a 15 → Search Index aplica ambos filtros en paralelo → resultados precisos con conteos de facets en menos de 10ms.'},
+     {t:'Reindexación incremental',d:'Admin modifica descripción de producto → Menu Engine publica evento → Search & Discovery genera documento actualizado → upsert en Search Index → producto con nueva descripción buscable en menos de 5 segundos.'}
+   ],
+   flujo:['Search & Discovery Service recibe query del Menu Viewer con tenant_id','Query enviada al Search Index con collection_id del tenant como namespace','Search Index aplica: tokenización del query → cálculo de distancia de edición → ranking por relevancia → filtros de facets','Resultados rankeados retornados al Search Service en menos de 10ms','Para indexación: Menu Engine actualiza → Search Service genera documento JSON → upsert en collection del tenant','Search Index confirma escritura → documento inmediatamente buscable sin rebuild del índice completo']},
+
+  {id:'analytics-store',name:'Analytics Store',sub:'ClickHouse / TimescaleDB',layer:'data',
+   objetivo:'Almacenamiento especializado y optimizado para datos analíticos de series temporales y eventos de alta cardinalidad, completamente separado de la base de datos transaccional.',
+   funcion:'Persiste eventos analíticos procesados, métricas pre-agregadas y series temporales de uso, optimizando para queries analíticos de lectura intensiva sobre grandes volúmenes de datos.',
+   administra:['Tablas de eventos particionadas por tiempo y tenant (pedidos, vistas, escaneos, interacciones)','Métricas pre-agregadas por tenant/día/semana/mes para queries rápidos','Series temporales de uso de la plataforma para el SuperAdmin','Política de retención: eventos granulares 90 días → agregados por siempre'],
+   consume:['Eventos procesados del Analytics Engine (única fuente de escritura, por batches)','Queries analíticos del Analytics Engine para generación de reportes'],
+   entrega:['Resultados de queries analíticos al Analytics Engine (que los entrega al Admin Portal)','Datos de uso para facturación al Billing & Plans via Analytics Engine','Estadísticas globales del SaaS al SuperAdmin Console via Analytics Engine'],
+   modifica:['Analytics Engine — único escritor del Analytics Store, inserta por batches cada 10 segundos'],
+   consulta:['Analytics Engine — único consumidor de queries analíticos'],
+   casos:[
+     {t:'Reporte de ventas del mes',d:'Admin consulta ventas de los últimos 30 días → Analytics Engine query al Analytics Store sobre tabla de pedidos particionada → resultado en menos de 1 segundo sobre millones de eventos agregados.'},
+     {t:'Consulta de tendencias globales',d:'SuperAdmin analiza tendencias de adopción de todos los tenants en los últimos 6 meses → query sobre agregados mensuales en Analytics Store → respuesta en menos de 3 segundos sobre datos históricos de toda la plataforma.'},
+     {t:'Retención y purga de datos',d:'Eventos granulares de interacción con más de 90 días → purga automática para cumplimiento → agregados mensuales preservados indefinidamente → historial de reportes intacto.'}
+   ],
+   flujo:['Analytics Engine procesa evento del Event Bus → normaliza al formato de columna del store','Acumulación de eventos en batch en memoria del Analytics Engine (cada 10 segundos)','Escritura por batch al Analytics Store para eficiencia de inserción','Datos particionados por tenant_id + fecha para aislamiento y performance','Query de reporte recibida del Analytics Engine → SQL analítico ejecutado sobre columnas comprimidas','Resultado retornado al Analytics Engine → formateado y entregado al Admin Portal']},
+
+  {id:'audit-log-store',name:'Audit Log Store',sub:'Inmutable / Append-only',layer:'data',
+   objetivo:'Almacenamiento permanente e inmutable de todos los registros de auditoría del sistema, garantizando integridad de la cadena de eventos para cumplimiento legal y resolución de incidentes.',
+   funcion:'Persiste registros de auditoría en modo append-only (sin UPDATE ni DELETE posible), mantiene integridad criptográfica de la cadena de registros y provee búsqueda eficiente para investigaciones.',
+   administra:['Registros de auditoría inmutables con firma criptográfica (actor, acción, recurso, timestamp, resultado)','Índices de búsqueda por actor_id, tenant_id, resource_id y rango de tiempo','Política de retención legal: mínimo 7 años para registros de acceso a datos de usuarios','Hash de cada registro encadenado con el hash del registro anterior (cadena de integridad)'],
+   consume:['Registros de auditoría del Audit & Compliance Service (única fuente de escritura, modo INSERT-only)','Queries de consulta del Audit Service, SuperAdmin Console y Admin Portal'],
+   entrega:['Registros de auditoría al Audit Service para reportes e investigaciones','Evidencia de trazabilidad exportable (CSV, JSON) al SuperAdmin Console y Admin Portal','Verificación de integridad: hash de cada registro confirma que no fue modificado'],
+   modifica:['Solo el Audit & Compliance Service puede escribir — en modo append-only exclusivamente. Ningún otro módulo ni usuario tiene capacidad de modificar o eliminar registros existentes'],
+   consulta:['Audit & Compliance Service — consultas e investigación','SuperAdmin Console — investigaciones globales con scope completo','Admin Portal — historial de acciones del propio tenant (scope limitado)'],
+   casos:[
+     {t:'Investigación forense',d:'Incidente de acceso no autorizado reportado → SuperAdmin filtra el Audit Log por tenant_id + rango de tiempo → reconstruye línea de tiempo completa de acciones → identifica al actor, los recursos accedidos y el alcance del incidente.'},
+     {t:'Cumplimiento GDPR',d:'Regulador solicita evidencia de quién accedió a datos personales del usuario X en los últimos 12 meses → Audit & Compliance genera reporte filtrado → exportado con firma de integridad → entregado al regulador.'},
+     {t:'Verificación de integridad',d:'Auditor externo verifica que ningún registro ha sido modificado → calcula hash de cada registro y lo compara con el encadenado → cadena completa verificada → certificado de integridad emitido.'}
+   ],
+   flujo:['Audit & Compliance Service genera registro completo con todos los campos requeridos','Calcular hash SHA-256 del contenido del registro + hash del registro anterior (cadena)','INSERT en Audit Log Store — solo INSERT, sin UPDATE ni DELETE posibles a nivel de base de datos','Índices secundarios actualizados para búsqueda por actor_id, tenant_id, resource_id, timestamp','Confirmación retornada al Audit Service','Queries de consulta recibidas → búsqueda por índices → resultados retornados en modo lectura únicamente','Exportación: registros serializados a JSON/CSV con firma de integridad para entrega a auditores']},
+
+  // ── INFRA ─────────────────────────────────────────────────────────────────
+  {id:'k8s',name:'Container Orchestration',sub:'Kubernetes / ECS',layer:'infra',
+   objetivo:'Orquestar el ciclo de vida de todos los contenedores del sistema garantizando alta disponibilidad, escalado automático basado en carga y recuperación ante fallos sin intervención manual.',
+   funcion:'Gestiona despliegue de módulos en contenedores, escalado horizontal automático (HPA), health checks con recuperación, balanceo de carga interno, gestión de red entre servicios y rolling updates sin downtime.',
+   administra:['Definiciones de workload: Deployments, Services, ConfigMaps, Secrets (refs a Config & Secrets Manager)','Estado de salud de todos los pods y contenedores activos','Políticas de escalado automático (HPA) por CPU/memoria/requests-per-second','Configuración de red interna del cluster (service mesh)'],
+   consume:['Imágenes de contenedor del registry (publicadas por CI/CD Pipeline)','Métricas de carga de cada módulo para decisiones de escalado (CPU, memoria, latencia)','Configuración de infraestructura del Config & Secrets Manager (sin secretos embebidos)'],
+   entrega:['Módulos del sistema desplegados y disponibles en sus endpoints internos','Eventos de salud y escalado al Monitoring & Alerting','Estado del cluster al SuperAdmin Console via Monitoring'],
+   modifica:['CI/CD Pipeline — envía instrucciones de despliegue de nuevas versiones','Monitoring & Alerting — puede trigger escalado emergente basado en métricas de alerta'],
+   consulta:['Monitoring & Alerting — estado de pods, réplicas activas y métricas de contenedores','CI/CD Pipeline — verificar estado de salud post-despliegue'],
+   casos:[
+     {t:'Escalado automático bajo carga',d:'Evento especial → tráfico del Menu Viewer aumenta 10x → HPA detecta CPU del Menu Engine al 80% → escala de 3 a 12 réplicas en 90 segundos → latencia se mantiene estable para todos los clientes.'},
+     {t:'Recuperación automática',d:'Pod del Order Engine crashea por error inesperado → Kubernetes detecta fallo en health check → reinicia el pod automáticamente en 15 segundos → sin downtime observable para los usuarios activos.'},
+     {t:'Rolling update sin downtime',d:'Nueva versión del Menu Engine desplegada → rolling update: nueva versión lanzada instancia por instancia → health check pasa: tráfico dirigido a nueva instancia, instancia anterior terminada → servicio ininterrumpido.'}
+   ],
+   flujo:['CI/CD Pipeline publica nueva imagen al registry y envía instrucción de despliegue al Orchestration','Container Orchestration inicia rolling update: una instancia a la vez','Nueva instancia inicia → health check de liveness (¿está corriendo?) y readiness (¿puede recibir tráfico?)','Health check pasa: tráfico de Kubernetes Service dirigido a nueva instancia → instancia anterior drenada y terminada','Health check falla: rollback automático al Deployment anterior → CI/CD Pipeline notificado','HPA monitorea métricas cada 15 segundos → ajusta réplicas según políticas de escalado','Eventos de ciclo de vida (scaled-up, pod-failed, deployment-complete) publicados al Monitoring & Alerting']},
+
+  {id:'event-bus',name:'Event Bus',sub:'Apache Kafka / RabbitMQ',layer:'infra',
+   objetivo:'Proveer comunicación asíncrona, desacoplada y con garantía de entrega entre todos los módulos del sistema, habilitando una arquitectura orientada a eventos escalable y resiliente.',
+   funcion:'Recibe, persiste y enruta eventos de módulos productores a módulos suscriptores; garantiza entrega at-least-once; gestiona dead-letter queues para eventos no procesados y permite replay de eventos.',
+   administra:['Topics por tipo de evento: menu.updated, order.completed, tenant.created, billing.paid, qr.scanned, etc.','Suscripciones de consumer groups por topic (cada módulo tiene su grupo)','Offsets de procesamiento por consumer group y partición','Dead-letter queues para eventos que no pudieron ser procesados','Políticas de retención de eventos (7 días de retención por defecto, configurable)'],
+   consume:['Eventos publicados por todos los módulos productores: Menu Engine, Order Engine, Billing & Plans, IAM Service, Tenant Orchestrator, Auth Middleware, Analytics Engine, etc.'],
+   entrega:['Eventos a módulos suscriptores con garantía de entrega: Analytics Engine, Notification Hub, Cache Layer, CDN Edge, Search & Discovery, Audit & Compliance, Display Controller, Integration Hub','Eventos en dead-letter queue al Monitoring & Alerting para alerta','Capacidad de replay: módulos pueden reprocesar eventos históricos'],
+   modifica:['Todos los módulos productores publican eventos — no modifican la configuración del Event Bus en runtime','Solo CI/CD Pipeline puede modificar la configuración (topics, retención, particiones) via despliegues'],
+   consulta:['Todos los módulos suscriptores son consumidores: Analytics Engine, Notification Hub, Cache Layer, Audit & Compliance, Search & Discovery, CDN Edge, Display Controller, Integration Hub'],
+   casos:[
+     {t:'Propagación de cambio de menú',d:'Menu Engine publica "menu.updated" → en paralelo y sin coupling: CDN Edge invalida caché, Search Index reindexado, Analytics Engine registra el cambio, Display Controller actualiza pantallas → cada consumidor procesa a su propio ritmo.'},
+     {t:'Pipeline de pedido completado',d:'Order Engine publica "order.completed" → Notification Hub avisa al cliente, Analytics registra para reporte, Billing registra para facturación, Integration Hub sincroniza con POS → todo desacoplado, Order Engine no llama a ningún módulo directamente.'},
+     {t:'Resiliencia ante fallos',d:'Notification Hub cae por 2 horas → los eventos de notificación se acumulan en el Event Bus (retención de 7 días) → Notification Hub se recupera → procesa los mensajes pendientes automáticamente → cero pérdida de notificaciones.'}
+   ],
+   flujo:['Módulo productor genera evento con: topic, payload estructurado, tenant_id, trace_id, timestamp','Event Bus valida schema del payload → persiste en log distribuido con durabilidad garantizada','Enrutar a todos los consumer groups suscritos al topic','Cada consumidor recibe el evento en su partición asignada → procesa de forma independiente','Consumidor confirma procesamiento exitoso (ACK/COMMIT del offset)','En fallo del consumidor: evento reintentado automáticamente hasta max-retry configurado','Superado max-retry: evento movido a dead-letter queue → Monitoring & Alerting genera alerta','Dead-letter queue revisable por el equipo para diagnóstico y replay manual']},
+
+  {id:'cicd',name:'CI/CD Pipeline',sub:'GitHub Actions / ArgoCD',layer:'infra',
+   objetivo:'Automatizar el ciclo completo de construcción, prueba y despliegue de todos los módulos del sistema, garantizando calidad de código, seguridad y despliegues sin downtime.',
+   funcion:'Orquesta el build de contenedores, ejecución de tests en múltiples niveles, análisis de seguridad de dependencias, despliegue con estrategia blue-green o rolling y rollback automático ante fallos.',
+   administra:['Configuración de pipelines por módulo y repositorio (workflows YAML)','Historial de despliegues: qué versión está activa en cada entorno','Artefactos de build (imágenes de contenedor versionadas en el registry)','Configuración de entornos (staging, producción) con sus variables'],
+   consume:['Código fuente del repositorio (push/merge a rama protegida)','Variables de entorno y secretos de Config & Secrets Manager (sin almacenar secretos en el repositorio)','Resultado de health checks post-despliegue del Container Orchestration','Reportes de seguridad del scanner de dependencias'],
+   entrega:['Imágenes de contenedor versionadas al registry de artefactos','Instrucciones de despliegue al Container Orchestration','Eventos de despliegue (inicio, éxito, fallo, rollback) al Monitoring & Alerting','Notificaciones de resultado del pipeline al equipo de desarrollo via Notification Hub'],
+   modifica:['DevOps team — configura y mantiene los pipelines','Config & Secrets Manager — provee credenciales necesarias para el build y despliegue'],
+   consulta:['Monitoring & Alerting — estado e historial de despliegues','SuperAdmin Console — historial de versiones desplegadas por módulo'],
+   casos:[
+     {t:'Despliegue de feature',d:'Merge a main → pipeline inicia automáticamente → tests unitarios + integración → análisis de vulnerabilidades → build de imagen → despliegue en staging → smoke tests → aprobación → despliegue en producción → health check → notificación al equipo.'},
+     {t:'Hotfix urgente',d:'Bug crítico en producción → rama de hotfix → pipeline exprés (solo tests críticos y de regresión) → aprobación rápida → despliegue en producción en menos de 8 minutos.'},
+     {t:'Rollback automático',d:'Despliegue del Order Engine en producción → health check detecta error rate > 5% → Container Orchestration hace rollback automático al Deployment anterior → equipo notificado con logs del fallo.'}
+   ],
+   flujo:['Push o merge de código detectado → pipeline iniciado automáticamente','Build: construcción de imagen de contenedor con versión semántica','Tests nivel 1: unitarios → nivel 2: integración → nivel 3: end-to-end (en staging)','Security scan: análisis de dependencias con vulnerabilidades conocidas (CVE database)','Si todos los gates pasan: build de imagen de producción → push al registry con tag de versión','Despliegue en staging → smoke tests automáticos de rutas críticas','Aprobación (manual para producción o automática según configuración del módulo)','Despliegue en producción via Container Orchestration (rolling update o blue-green)','Health check post-despliegue durante 5 minutos → éxito: pipeline completado / fallo: rollback automático','Evento de despliegue publicado al Monitoring y notificación al equipo vía Notification Hub']},
+
+  {id:'monitoring',name:'Monitoring & Alerting',sub:'Observability Stack',layer:'infra',
+   objetivo:'Proveer observabilidad total del sistema: métricas en tiempo real, logs centralizados, trazas distribuidas de requests y alertas operacionales para garantizar el SLA de la plataforma.',
+   funcion:'Agrega métricas de todos los módulos, centraliza logs estructurados, correlaciona trazas de requests distribuidos via trace_id, evalúa reglas de alerta y notifica al equipo ante incidentes.',
+   administra:['Series temporales de métricas: CPU, memoria, latencia P50/P99, error rate, throughput por módulo y tenant','Logs estructurados indexados con búsqueda full-text','Trazas distribuidas de requests: cadena de llamadas entre módulos correlacionada por trace_id','Reglas de alerta con umbrales, silencios y escalado','Historial de incidentes con SLA calculado'],
+   consume:['Métricas emitidas por todos los módulos del sistema (push via agente sidecar)','Logs estructurados en stream centralizado (stdout de contenedores)','Eventos de ciclo de vida del Container Orchestration (pods, escalados, despliegues)','Eventos de despliegue del CI/CD Pipeline','Configuración de alertas y umbrales del SuperAdmin Console'],
+   entrega:['Dashboards de salud en tiempo real al SuperAdmin Console y equipo DevOps','Alertas a canales configurados: Slack, PagerDuty, email via Notification Hub','Reportes de SLA mensuales y postmortem de incidentes','Datos de health al Container Orchestration para decisiones de escalado'],
+   modifica:['SuperAdmin Console — configura reglas de alerta, umbrales y canales de notificación','CI/CD Pipeline — registra eventos de despliegue como anotaciones en métricas'],
+   consulta:['SuperAdmin Console — dashboard operacional de la plataforma','DevOps team — investigación de incidentes y performance','Audit & Compliance — correlación de eventos de seguridad con logs operacionales'],
+   casos:[
+     {t:'Alerta de latencia',d:'API Gateway registra P99 de latencia > 2 segundos durante 3 minutos consecutivos → Monitoring activa alerta → notificación enviada al canal de Slack del equipo de infra en menos de 30 segundos con contexto del módulo afectado.'},
+     {t:'Traza de error',d:'Usuario reporta error en su pedido → DevOps busca el trace_id en el log del cliente → reconstruye cadena completa de llamadas entre API Gateway, Auth Middleware, Order Engine y Tenant Database → identifica timeout en Tenant Database en 2 minutos.'},
+     {t:'Reporte de SLA',d:'SuperAdmin consulta uptime del mes → Monitoring calcula: 99.94% basado en alertas de downtime registradas → reporte PDF generado automáticamente con detalle de incidentes y su duración.'}
+   ],
+   flujo:['Todos los módulos emiten métricas cada 15 segundos via agente sidecar (Prometheus exporter)','Logs de contenedores recolectados en stream → parseados → indexados (Elasticsearch/Loki)','Traza distribuida: cada request tiene trace_id propagado en headers → cada módulo emite span → Monitoring correlaciona la cadena completa','Métricas agregadas por dimensión (módulo, tenant, endpoint, tiempo) → almacenadas en serie temporal','Reglas de alerta evaluadas cada 15 segundos sobre métricas en tiempo real','Si threshold superado: alerta deduplicada → enrutada al canal correcto (Slack/PagerDuty/email)','Dashboard actualizado en tiempo real con delay máximo de 30 segundos']},
+
+  {id:'secret-manager',name:'Config & Secrets',sub:'HashiCorp Vault / AWS SM',layer:'infra',
+   objetivo:'Gestionar de forma segura toda la configuración sensible del sistema: claves criptográficas, credenciales de proveedores y configuración por entorno, con acceso controlado y rotación automática.',
+   funcion:'Almacena y provee secretos bajo demanda a módulos autorizados con identidad verificada; gestiona rotación automática de claves JWT y credenciales; audita cada acceso a secretos.',
+   administra:['Claves de firma y verificación JWT (con rotación automática cada 24 horas)','Credenciales del proveedor de pago (Stripe, tokens tokenizados)','Credenciales de proveedores de mensajería (SendGrid, Twilio, FCM)','Credenciales de conexión a Tenant Database y otros datastores','API keys de servicios de infraestructura (CDN, Object Storage)','Configuración por entorno: staging vs producción (endpoints, feature flags)'],
+   consume:['Requests de secretos de módulos autorizados con identidad de pod verificada (Kubernetes service account)','Configuración de políticas de acceso por módulo','Eventos de rotación programada y trigger de rotación de emergencia'],
+   entrega:['Secretos dinámicos con TTL corto (1h para credenciales, 24h para claves estáticas) a módulos autorizados','Claves JWT rotadas al Auth Middleware con período de transición (2 claves activas durante la transición)','Auditoria de cada acceso a secretos al Audit & Compliance Service'],
+   modifica:['Solo el equipo de DevOps con acceso privilegiado + MFA puede modificar secretos — todos los cambios son auditados automáticamente'],
+   consulta:['Auth Middleware — claves de firma/verificación JWT','Billing & Plans — credenciales del proveedor de pago','Notification Hub — credenciales de proveedores de mensajería','Integration Hub — credenciales de integraciones externas','CI/CD Pipeline — secretos necesarios para el build y despliegue','Tenant Database — credenciales de conexión al servicio de base de datos'],
+   casos:[
+     {t:'Rotación automática de clave JWT',d:'Cada 24 horas → Config & Secrets genera nuevo par de claves JWT → Auth Middleware recibe nueva clave de verificación → período de transición de 1 hora donde ambas claves son válidas → tokens existentes siguen siendo válidos → clave anterior revocada → rotación transparente para usuarios.'},
+     {t:'Acceso de nuevo módulo desplegado',d:'CI/CD despliega nueva instancia del Order Engine → pod solicita credencial de Tenant Database → Config & Secrets verifica identidad del pod via Kubernetes service account token → entrega credencial dinámica con TTL de 1 hora → pod la cachea localmente → renueva automáticamente antes de expirar.'},
+     {t:'Auditoría de acceso a secretos',d:'Auditor solicita qué servicios han accedido a las credenciales de Stripe en el último mes → Config & Secrets retorna log completo: módulo, pod ID, timestamp, IP, resultado de cada acceso → exportado a Audit & Compliance para reporte.'}
+   ],
+   flujo:['Módulo arranca → solicita secreto a Config & Secrets con identidad de pod (Kubernetes service account JWT)','Config & Secrets verifica la identidad del pod contra el cluster de Kubernetes','Evalúa política de acceso: ¿este módulo con este rol tiene permiso para este secreto?','Acceso autorizado → entrega secreto con TTL corto (1h para credenciales)','Módulo cachea el secreto localmente hasta TTL → al expirar, renueva automáticamente sin downtime','Rotación programada: Config & Secrets genera nueva versión → notifica a módulos que la usan → período de transición donde ambas versiones son válidas → versión anterior revocada','Todo acceso (solicitud, entrega, renovación, fallo) registrado en log de auditoría → enviado al Audit & Compliance Service']}
+];
+
+// ── RENDER ─────────────────────────────────────────────────────────────────
+
+function buildSidebar() {
+  const sb = document.getElementById('sb');
+  const layerOrder = ['presentation','gateway','core','business','data','infra'];
+  layerOrder.forEach(lk => {
+    const l = LAYERS[lk];
+    const mods = MODS.filter(m => m.layer === lk);
+    const group = document.createElement('div');
+    group.className = 'layer-group';
+    group.innerHTML = `<div class="layer-header">
+      <span class="layer-dot" style="background:${l.hex}"></span>
+      <span style="color:${l.hex}">${l.label}</span>
+    </div>`;
+    mods.forEach(m => {
+      const item = document.createElement('div');
+      item.className = 'mod-item';
+      item.dataset.id = m.id;
+      item.innerHTML = `<span class="mi-name">${m.name}</span><span class="mi-sub">${m.sub}</span>`;
+      item.addEventListener('click', () => selectMod(m.id));
+      group.appendChild(item);
+    });
+    sb.appendChild(group);
+  });
+}
+
+function selectMod(id) {
+  const m = MODS.find(x => x.id === id);
+  if (!m) return;
+  document.querySelectorAll('.mod-item').forEach(el => el.classList.remove('active'));
+  const item = document.querySelector(`.mod-item[data-id="${id}"]`);
+  if (item) { item.classList.add('active'); item.scrollIntoView({block:'nearest'}); }
+  const l = LAYERS[m.layer];
+  document.getElementById('welcome').classList.remove('show');
+  document.getElementById('empty').classList.remove('show');
+  const mv = document.getElementById('mod-view');
+  mv.style.display = 'block';
+
+  document.getElementById('mod-header').innerHTML = `
+    <div class="mod-breadcrumb">
+      <span class="bc-layer" style="background:${l.hex}22;color:${l.hex}">${l.label}</span>
+      <span>›</span><span>${m.name}</span>
+    </div>
+    <div class="mod-title">${m.name}</div>
+    <div class="mod-sub-label"><span>${m.sub}</span><span class="mod-id">/ ${m.id}</span></div>`;
+
+  const body = document.getElementById('mod-body');
+  body.innerHTML = `
+    <div class="sec-grid">
+      ${sec('Objetivo',m.objetivo,'text')}
+      ${sec('Función',m.funcion,'text')}
+    </div>
+    <div class="sec-grid">
+      ${sec('Datos que administra',m.administra,'list')}
+      ${sec('Datos que consume',m.consume,'list')}
+    </div>
+    <div class="sec-grid">
+      ${sec('Datos que entrega',m.entrega,'list')}
+      <div class="sec-grid" style="grid-column:auto;display:block">
+        ${sec('Módulos que pueden modificarlo',m.modifica,'tags')}
+        <div style="height:12px"></div>
+        ${sec('Módulos que pueden consultarlo',m.consulta,'tags')}
+      </div>
+    </div>
+    <div class="sec-full">${sec('Casos de uso',m.casos,'cases')}</div>
+    <div class="sec-full">${sec('Flujo interno',m.flujo,'flow')}</div>`;
+
+  body.querySelectorAll('.tag.mod-ref').forEach(tag => {
+    tag.addEventListener('click', () => {
+      const found = MODS.find(x => tag.textContent.toLowerCase().includes(x.name.toLowerCase().split(' ')[0]));
+      if (found) selectMod(found.id);
+    });
+  });
+
+  document.getElementById('main').scrollTop = 0;
+  location.hash = id;
+}
+
+function sec(label, data, type) {
+  let content = '';
+  if (type === 'text') {
+    content = `<p class="sec-text">${data}</p>`;
+  } else if (type === 'list') {
+    content = `<ul class="item-list">${data.map(d=>`<li>${d}</li>`).join('')}</ul>`;
+  } else if (type === 'tags') {
+    content = `<div class="tag-list">${data.map(d=>`<span class="tag mod-ref">${d}</span>`).join('')}</div>`;
+  } else if (type === 'cases') {
+    content = `<div class="uc-list">${data.map((c,i)=>`<div class="uc"><div class="uc-title"><span class="uc-num">${i+1}</span>${c.t}</div><div class="uc-desc">${c.d}</div></div>`).join('')}</div>`;
+  } else if (type === 'flow') {
+    content = `<div class="flow-list">${data.map((s,i)=>`<div class="flow-step"><div class="flow-num">${String(i+1).padStart(2,'0')}</div><div class="flow-content">${s}</div></div>`).join('')}</div>`;
+  }
+  return `<div class="sec"><div class="sec-label">${label}</div>${content}</div>`;
+}
+
+// SEARCH
+document.getElementById('search').addEventListener('input', function() {
+  const q = this.value.toLowerCase().trim();
+  let visible = 0;
+  document.querySelectorAll('.mod-item').forEach(el => {
+    const name = el.querySelector('.mi-name').textContent.toLowerCase();
+    const sub = el.querySelector('.mi-sub').textContent.toLowerCase();
+    const show = !q || name.includes(q) || sub.includes(q);
+    el.classList.toggle('hidden', !show);
+    if (show) visible++;
+  });
+  document.getElementById('mod-count').textContent = visible;
+  const empty = visible === 0 && !document.getElementById('welcome').classList.contains('show');
+  document.getElementById('empty').classList.toggle('show', visible === 0);
+});
+
+buildSidebar();
+if (location.hash) {
+  const id = location.hash.slice(1);
+  if (MODS.find(m => m.id === id)) selectMod(id);
+}
+</script>
+</body>
+</html>
