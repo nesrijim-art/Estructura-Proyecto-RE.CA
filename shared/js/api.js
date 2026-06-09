@@ -40,6 +40,19 @@ async function request(path, options = {}) {
 }
 
 export const api = {
+  multiempresa: {
+    stats:          ()             => request('/multiempresa/stats'),
+    listar:         (params = {})  => {
+      const qs = new URLSearchParams(
+        Object.entries(params).filter(([, v]) => v !== '' && v != null)
+      ).toString();
+      return request('/multiempresa/empresas' + (qs ? '?' + qs : ''));
+    },
+    obtener:        (id)           => request(`/multiempresa/empresas/${id}`),
+    crear:          (body)         => request('/multiempresa/empresas',               { method: 'POST', body: JSON.stringify(body) }),
+    cambiarEstado:  (id, estado)   => request(`/multiempresa/empresas/${id}/estado`,  { method: 'PUT',  body: JSON.stringify({ estado }) }),
+    guardarNotas:   (id, notas)    => request(`/multiempresa/empresas/${id}/notas`,   { method: 'PUT',  body: JSON.stringify({ notas_soporte: notas }) }),
+  },
   planes: {
     list:        ()              => request('/planes'),
     miPlan:      ()              => request('/planes/mi-plan'),

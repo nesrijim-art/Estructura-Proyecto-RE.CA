@@ -1,0 +1,1226 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Multiempresa · RE.CA</title>
+<link rel="manifest" href="/manifest.json" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Source+Sans+Pro:wght@400;600&display=swap" />
+<link rel="stylesheet" href="/shared/css/design-tokens.css" />
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--fg);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.6;
+}
+
+/* ─── Top bar ────────────────────────────────────────────────────────────── */
+.topbar {
+  height: 56px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 var(--space-6);
+  gap: var(--space-4);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  flex-shrink: 0;
+}
+.topbar-brand {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--fg);
+  text-decoration: none;
+}
+.topbar-sep { flex: 1; }
+.topbar-actions { display: flex; align-items: center; gap: var(--space-3); }
+
+.btn {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 7px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--fg);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.12s;
+  text-decoration: none;
+}
+.btn:hover { background: var(--border-soft); }
+.btn-primary { background: var(--accent); color: var(--accent-on); border-color: var(--accent); }
+.btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+.btn-danger { background: none; border-color: var(--danger); color: var(--danger); }
+.btn-danger:hover { background: color-mix(in oklab, var(--danger), transparent 90%); }
+
+/* ─── Impersonation banner ───────────────────────────────────────────────── */
+.imp-banner {
+  background: #7c3aed;
+  color: white;
+  padding: 8px var(--space-6);
+  font-size: 13px;
+  font-family: var(--font-display);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.imp-banner button {
+  margin-left: auto;
+  background: rgba(255,255,255,.15);
+  color: white;
+  border: 1px solid rgba(255,255,255,.3);
+  padding: 4px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: 12px;
+}
+.imp-banner button:hover { background: rgba(255,255,255,.25); }
+
+/* ─── Page ───────────────────────────────────────────────────────────────── */
+.page {
+  flex: 1;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  padding: var(--space-6);
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-6);
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+.page-title {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--fg);
+}
+
+/* ─── Stats ──────────────────────────────────────────────────────────────── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+}
+.stat-label {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.stat-value {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--fg);
+  letter-spacing: -0.02em;
+}
+.stat-sub { font-size: 12px; margin-top: 4px; color: var(--muted); }
+.stat-sub.warn    { color: var(--warn); }
+.stat-sub.danger  { color: var(--danger); }
+.stat-sub.success { color: var(--success); }
+
+/* ─── Filters ────────────────────────────────────────────────────────────── */
+.filters {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+  display: flex;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+.filter-group { display: flex; flex-direction: column; gap: 4px; min-width: 180px; }
+.filter-label {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.filter-select, .filter-input {
+  font-family: var(--font-body);
+  font-size: 13px;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--fg);
+  height: 36px;
+}
+.filter-select:focus, .filter-input:focus { outline: none; border-color: var(--fg); }
+
+/* ─── Table ──────────────────────────────────────────────────────────────── */
+.table-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  overflow-x: auto;
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  min-width: 900px;
+}
+.table thead { background: var(--border-soft); border-bottom: 1px solid var(--border); }
+.table th {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-align: left;
+  padding: 10px 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.table td {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border-soft);
+  color: var(--fg-2);
+  vertical-align: middle;
+}
+.table tbody tr:last-child td { border-bottom: none; }
+.table tbody tr:hover td { background: var(--border-soft); }
+.td-name { font-weight: 600; color: var(--fg); }
+.td-mono { font-family: var(--font-display); font-size: 11px; color: var(--muted); }
+
+/* ─── Badges ─────────────────────────────────────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+.badge-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+.badge-activo     { background: #dcfce7; color: var(--success); }
+.badge-prueba     { background: #fff4cc; color: #ca8a04; }
+.badge-suspendido { background: #fee2e2; color: var(--danger); }
+.badge-cancelado  { background: var(--border-soft); color: var(--muted); }
+.badge-start    { background: #dbeafe; color: #2563eb; }
+.badge-business { background: #fce7f3; color: #db2777; }
+.badge-premium  { background: #f3e8ff; color: #9333ea; }
+
+/* ─── Countdown ──────────────────────────────────────────────────────────── */
+.countdown {
+  display: flex;
+  gap: 6px;
+  font-family: var(--font-display);
+  font-size: 11px;
+}
+.cd-unit { display: flex; flex-direction: column; align-items: center; gap: 1px; }
+.cd-val { font-size: 13px; font-weight: 600; color: var(--fg); }
+.cd-lbl { font-size: 9px; color: var(--muted); text-transform: uppercase; }
+.countdown.warning .cd-val { color: var(--warn); }
+.countdown.critical .cd-val { color: var(--danger); }
+.countdown.expired .cd-val  { color: var(--danger); }
+.cd-expired { font-family: var(--font-display); font-size: 11px; font-weight: 600; color: var(--danger); }
+
+/* ─── Action buttons ─────────────────────────────────────────────────────── */
+.actions { display: flex; gap: 4px; }
+.btn-icon {
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--fg-2);
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+  padding: 0;
+}
+.btn-icon:hover { background: var(--border-soft); color: var(--fg); }
+.btn-icon svg { width: 14px; height: 14px; }
+.btn-icon-access:hover { background: color-mix(in oklab,#7c3aed,transparent 88%); border-color: #7c3aed; color: #7c3aed; }
+.btn-icon-danger:hover { background: color-mix(in oklab,var(--danger),transparent 88%); border-color: var(--danger); color: var(--danger); }
+
+/* ─── Empty / Loading ────────────────────────────────────────────────────── */
+.empty { text-align: center; padding: 48px 24px; color: var(--muted); font-size: 14px; }
+
+/* ─── Pagination ─────────────────────────────────────────────────────────── */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4);
+  border-top: 1px solid var(--border);
+  font-size: 13px;
+  color: var(--muted);
+}
+.pagination-btns { display: flex; gap: 4px; }
+
+/* ─── Message bar ────────────────────────────────────────────────────────── */
+.msg-bar {
+  padding: 10px var(--space-5);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  display: none;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: var(--space-4);
+}
+.msg-bar.show { display: flex; }
+.msg-bar.success { background: color-mix(in oklab,var(--success),transparent 88%); color: var(--success); border: 1px solid color-mix(in oklab,var(--success),transparent 70%); }
+.msg-bar.error   { background: color-mix(in oklab,var(--danger),transparent 88%);  color: var(--danger);  border: 1px solid color-mix(in oklab,var(--danger),transparent 70%); }
+
+/* ─── Modal ──────────────────────────────────────────────────────────────── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  width: 100%;
+  max-width: 520px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.2);
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+}
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-5) var(--space-6);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.modal-title {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--fg);
+}
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: var(--muted);
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px;
+}
+.modal-close:hover { color: var(--fg); }
+.modal-body { padding: var(--space-5) var(--space-6); overflow-y: auto; flex: 1; }
+.modal-footer {
+  padding: var(--space-4) var(--space-6);
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: var(--space-3);
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+
+/* ─── Modal info rows ────────────────────────────────────────────────────── */
+.info-rows { display: flex; flex-direction: column; gap: 0; margin-bottom: var(--space-4); }
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-soft);
+}
+.info-row:last-child { border-bottom: none; }
+.info-key {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.info-val { font-weight: 600; color: var(--fg); font-size: 13px; }
+.info-note {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+  background: var(--border-soft);
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+}
+
+/* ─── Form ───────────────────────────────────────────────────────────────── */
+.form { display: flex; flex-direction: column; gap: var(--space-4); }
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field label {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--fg);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.field input, .field select, .field textarea {
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-family: var(--font-body);
+  color: var(--fg);
+  background: var(--surface);
+  transition: border-color 0.12s;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  outline: none;
+  border-color: var(--fg);
+}
+.field.has-error input, .field.has-error select { border-color: var(--danger); }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+.field textarea { resize: vertical; min-height: 80px; font-size: 13px; }
+.field-sep { border: none; border-top: 1px solid var(--border-soft); margin: 4px 0; }
+.field-hint { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.modal-msg { font-size: 13px; padding: 8px 12px; border-radius: var(--radius-sm); display: none; margin-bottom: var(--space-3); }
+.modal-msg.show { display: block; }
+.modal-msg.error { background: color-mix(in oklab,var(--danger),transparent 90%); color: var(--danger); }
+.modal-msg.success { background: color-mix(in oklab,var(--success),transparent 90%); color: var(--success); }
+
+.spinner { width: 14px; height: 14px; border: 2px solid rgba(0,0,0,.15); border-top-color: currentColor; border-radius: 50%; animation: spin .7s linear infinite; display: inline-block; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─── Responsive ─────────────────────────────────────────────────────────── */
+@media (max-width: 1024px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px) {
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .filters { flex-direction: column; }
+  .filter-group { min-width: 100%; }
+  .page-header { flex-direction: column; align-items: flex-start; }
+  .field-row { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<nav class="topbar">
+  <a href="/app/dashboard/" class="topbar-brand">RE.CA</a>
+  <div class="topbar-sep"></div>
+  <div class="topbar-actions">
+    <a href="/app/dashboard/" class="btn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Dashboard
+    </a>
+    <a href="/app/planes/" class="btn">Planes</a>
+  </div>
+</nav>
+
+<div class="imp-banner" id="impBanner" style="display:none">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+  <span id="impText">Accediendo como empresa</span>
+  <button id="stopImp">Salir de empresa</button>
+</div>
+
+<main class="page">
+  <div class="page-header">
+    <h1 class="page-title">Multiempresa</h1>
+    <button class="btn btn-primary" id="btnNuevoNegocio">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Nuevo Negocio
+    </button>
+  </div>
+
+  <div id="msgBar" class="msg-bar"></div>
+
+  <!-- Stats -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Total de Negocios</div>
+      <div class="stat-value" id="sTotal">—</div>
+      <div class="stat-sub" id="sTotalSub"></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Activos</div>
+      <div class="stat-value" id="sActivos">—</div>
+      <div class="stat-sub success" id="sActivosSub"></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">En Prueba</div>
+      <div class="stat-value" id="sPrueba">—</div>
+      <div class="stat-sub warn" id="sPruebaSub"></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Suspendidos</div>
+      <div class="stat-value" id="sSuspendidos">—</div>
+      <div class="stat-sub danger" id="sSuspendidosSub"></div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters">
+    <div class="filter-group">
+      <label class="filter-label">Plan</label>
+      <select class="filter-select" id="filterPlan">
+        <option value="">Todos los planes</option>
+        <option value="start">Start</option>
+        <option value="business">Business</option>
+        <option value="premium">Premium</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label class="filter-label">Estado</label>
+      <select class="filter-select" id="filterEstado">
+        <option value="">Todos los estados</option>
+        <option value="activo">Activo</option>
+        <option value="prueba">En Prueba</option>
+        <option value="suspendido">Suspendido</option>
+      </select>
+    </div>
+    <div class="filter-group" style="flex:1;min-width:220px">
+      <label class="filter-label">Búsqueda</label>
+      <input type="text" class="filter-input" id="filterQ" placeholder="Nombre o ciudad..." />
+    </div>
+    <button class="btn" id="btnLimpiar">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+      Limpiar
+    </button>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Negocio</th>
+          <th>Ciudad</th>
+          <th>Plan</th>
+          <th>Estado</th>
+          <th>Activación</th>
+          <th>Renovación</th>
+          <th>Tiempo Restante</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        <tr><td colspan="8" class="empty">Cargando...</td></tr>
+      </tbody>
+    </table>
+    <div class="pagination" id="paginationBar" style="display:none">
+      <span id="paginationInfo"></span>
+      <div class="pagination-btns">
+        <button class="btn" id="btnPrev">← Anterior</button>
+        <button class="btn" id="btnNext">Siguiente →</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Modal: Acceder como Negocio -->
+<div class="modal-overlay" id="modalAcceder">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Acceder como Negocio</span>
+      <button class="modal-close" data-close="modalAcceder">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="info-rows">
+        <div class="info-row"><span class="info-key">Negocio</span><span class="info-val" id="acc-nombre">—</span></div>
+        <div class="info-row"><span class="info-key">Plan</span><span class="info-val" id="acc-plan">—</span></div>
+        <div class="info-row"><span class="info-key">Estado</span><span class="info-val" id="acc-estado">—</span></div>
+        <div class="info-row"><span class="info-key">Propietario</span><span class="info-val" id="acc-owner">—</span></div>
+      </div>
+      <p class="info-note">Vas a acceder al panel de este negocio con todos sus permisos y módulos. Podrás realizar cambios y brindar soporte directo. La sesión queda auditada.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-close="modalAcceder">Cancelar</button>
+      <button class="btn btn-primary" id="btnConfirmarAcceso">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+        Acceder al Negocio
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Cambiar Plan -->
+<div class="modal-overlay" id="modalPlan">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Cambiar Plan</span>
+      <button class="modal-close" data-close="modalPlan">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="info-rows">
+        <div class="info-row"><span class="info-key">Negocio</span><span class="info-val" id="plan-nombre">—</span></div>
+        <div class="info-row"><span class="info-key">Plan Actual</span><span class="info-val" id="plan-actual">—</span></div>
+      </div>
+      <div class="form" style="margin-top:var(--space-4)">
+        <div class="field">
+          <label>Nuevo Plan</label>
+          <select id="plan-select">
+            <option value="">Seleccionar plan...</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Monto cobrado (R$)</label>
+          <input type="number" id="plan-monto" placeholder="0" min="0" step="0.01" />
+        </div>
+        <div class="field">
+          <label>Método de pago</label>
+          <select id="plan-metodo">
+            <option value="manual">Manual</option>
+            <option value="transferencia">Transferencia</option>
+            <option value="tarjeta">Tarjeta</option>
+            <option value="efectivo">Efectivo</option>
+          </select>
+        </div>
+      </div>
+      <p class="info-note" style="margin-top:var(--space-4)">Al cambiar el plan, los módulos y permisos se actualizarán automáticamente. No se requiere intervención técnica.</p>
+      <div class="modal-msg" id="planMsg"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-close="modalPlan">Cancelar</button>
+      <button class="btn btn-primary" id="btnConfirmarPlan">Actualizar Plan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Cambiar Estado -->
+<div class="modal-overlay" id="modalEstado">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Cambiar Estado</span>
+      <button class="modal-close" data-close="modalEstado">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="info-rows">
+        <div class="info-row"><span class="info-key">Negocio</span><span class="info-val" id="est-nombre">—</span></div>
+        <div class="info-row"><span class="info-key">Estado Actual</span><span class="info-val" id="est-actual">—</span></div>
+      </div>
+      <div class="form" style="margin-top:var(--space-4)">
+        <div class="field">
+          <label>Nuevo Estado</label>
+          <select id="est-select">
+            <option value="activo">Activo</option>
+            <option value="prueba">En Prueba</option>
+            <option value="suspendido">Suspendido</option>
+            <option value="cancelado">Cancelado</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-msg" id="estMsg"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-close="modalEstado">Cancelar</button>
+      <button class="btn btn-primary" id="btnConfirmarEstado">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Soporte (notas + info detallada) -->
+<div class="modal-overlay" id="modalSoporte">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Soporte Operativo</span>
+      <button class="modal-close" data-close="modalSoporte">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="info-rows" id="sop-info"></div>
+      <div class="form" style="margin-top:var(--space-4)">
+        <div class="field">
+          <label>Notas de soporte (internas)</label>
+          <textarea id="sop-notas" placeholder="Notas de seguimiento, incidencias, acuerdos..."></textarea>
+          <span class="field-hint">Visible solo para el Super Administrador</span>
+        </div>
+      </div>
+      <div class="modal-msg" id="sopMsg"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-close="modalSoporte">Cerrar</button>
+      <button class="btn btn-primary" id="btnGuardarNotas">Guardar Notas</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Crear Negocio -->
+<div class="modal-overlay" id="modalCrear">
+  <div class="modal" style="max-width:560px;max-height:90vh">
+    <div class="modal-header">
+      <span class="modal-title">Crear Nuevo Negocio</span>
+      <button class="modal-close" data-close="modalCrear">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form" id="crearForm">
+        <div class="field-row">
+          <div class="field" id="cf-nombre-field">
+            <label>Nombre del Negocio *</label>
+            <input type="text" id="cf-nombre" placeholder="La Piazza Restaurant" />
+          </div>
+          <div class="field">
+            <label>Ciudad</label>
+            <input type="text" id="cf-ciudad" placeholder="Puerto Ordaz" />
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Plan Inicial *</label>
+            <select id="cf-plan">
+              <option value="">Seleccionar...</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Estado Inicial</label>
+            <select id="cf-estado">
+              <option value="activa">Activo</option>
+              <option value="prueba">En Prueba</option>
+            </select>
+          </div>
+        </div>
+        <hr class="field-sep" />
+        <div class="field" id="cf-pnombre-field">
+          <label>Nombre del Propietario *</label>
+          <input type="text" id="cf-pnombre" placeholder="Juan Pérez" />
+        </div>
+        <div class="field-row">
+          <div class="field" id="cf-email-field">
+            <label>Correo Electrónico *</label>
+            <input type="email" id="cf-email" placeholder="juan@mirestaurante.com" autocomplete="off" />
+          </div>
+          <div class="field" id="cf-pass-field">
+            <label>Contraseña Temporal *</label>
+            <input type="password" id="cf-pass" placeholder="Mínimo 8 caracteres" autocomplete="new-password" />
+          </div>
+        </div>
+      </div>
+      <div class="modal-msg" id="crearMsg"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-close="modalCrear">Cancelar</button>
+      <button class="btn btn-primary" id="btnCrearNegocio">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Crear Negocio
+      </button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { requireAuth, getUser } from '/shared/js/auth.js';
+import { api } from '/shared/js/api.js';
+
+requireAuth('/app/login/');
+
+const user = getUser();
+
+// ── Only super_admin may access this page ─────────────────────────────────
+if (user?.role !== 'super_admin') {
+  window.location.replace('/app/dashboard/');
+}
+
+// ── Impersonation banner ──────────────────────────────────────────────────
+const imp = (() => { try { return JSON.parse(sessionStorage.getItem('reca_impersonation') || 'null'); } catch { return null; } })();
+if (imp) {
+  document.getElementById('impBanner').style.display = 'flex';
+  document.getElementById('impText').textContent = `Accediendo como: ${imp.empresa_nombre || 'empresa'}`;
+}
+document.getElementById('stopImp').addEventListener('click', async () => {
+  try { await api.auth.stopImpersonating(); } catch {}
+  sessionStorage.removeItem('reca_impersonation');
+  window.location.href = '/app/dashboard/';
+});
+
+// ── State ─────────────────────────────────────────────────────────────────
+let allPlanes    = [];
+let empresas     = [];
+let totalEmpresas = 0;
+let currentPage  = 1;
+const PAGE_SIZE  = 50;
+let pendingEmpresaId = null; // for modals that need the ID
+
+// ── Boot ──────────────────────────────────────────────────────────────────
+async function boot() {
+  try {
+    [allPlanes] = await Promise.all([api.planes.list()]);
+    populatePlanSelects();
+    await refreshAll();
+  } catch (err) {
+    showMsg(err.message || 'Error al cargar datos', 'error');
+  }
+}
+
+function populatePlanSelects() {
+  const selects = ['plan-select', 'cf-plan', 'filterPlan'];
+  selects.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el || id === 'filterPlan') return; // filterPlan has static options
+    // Remove all but first option
+    while (el.options.length > 1) el.remove(1);
+    allPlanes.forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.id;
+      opt.textContent = `${p.nombre} — R$ ${p.precio_mensual.toFixed(2)}/mes`;
+      el.appendChild(opt);
+    });
+  });
+}
+
+async function refreshAll() {
+  await Promise.all([loadStats(), loadTable()]);
+}
+
+// ── Stats ─────────────────────────────────────────────────────────────────
+async function loadStats() {
+  try {
+    const s = await api.multiempresa.stats();
+    document.getElementById('sTotal').textContent     = s.total;
+    document.getElementById('sActivos').textContent   = s.activos;
+    document.getElementById('sPrueba').textContent    = s.prueba;
+    document.getElementById('sSuspendidos').textContent = s.suspendidos;
+
+    const pct = s.total > 0 ? Math.round((s.activos / s.total) * 100) : 0;
+    document.getElementById('sTotalSub').textContent      = `${s.cancelados} cancelados`;
+    document.getElementById('sActivosSub').textContent    = `${pct}% del total`;
+    document.getElementById('sPruebaSub').textContent     = s.proximos_vencer > 0 ? `${s.proximos_vencer} próximos a vencer` : '';
+    document.getElementById('sSuspendidosSub').textContent = s.suspendidos > 0 ? 'Requieren atención' : '';
+  } catch {}
+}
+
+// ── Table ─────────────────────────────────────────────────────────────────
+async function loadTable() {
+  const q       = document.getElementById('filterQ').value.trim();
+  const estado  = document.getElementById('filterEstado').value;
+  const plan_id = document.getElementById('filterPlan').value;
+
+  document.getElementById('tableBody').innerHTML =
+    '<tr><td colspan="8" class="empty"><span class="spinner"></span></td></tr>';
+
+  try {
+    const data = await api.multiempresa.listar({ q, estado, plan_id, page: currentPage, limit: PAGE_SIZE });
+    empresas      = data.empresas;
+    totalEmpresas = data.total;
+    renderTable();
+    renderPagination(data.total, data.page, data.limit);
+  } catch (err) {
+    document.getElementById('tableBody').innerHTML =
+      `<tr><td colspan="8" class="empty">Error: ${err.message}</td></tr>`;
+  }
+}
+
+function renderTable() {
+  const tbody = document.getElementById('tableBody');
+  if (!empresas.length) {
+    tbody.innerHTML = '<tr><td colspan="8" class="empty">No se encontraron negocios</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = empresas.map(e => {
+    const planBadge = planBadgeHtml(e.plan_id);
+    const estBadge  = estadoBadgeHtml(e.estado);
+    const cd        = countdownHtml(e.fecha_renovacion_plan);
+    const fechaAct  = fmtDate(e.fecha_activacion_plan);
+    const fechaRen  = e.fecha_renovacion_plan ? fmtDate(e.fecha_renovacion_plan) : '—';
+
+    return `<tr data-id="${e.id}">
+      <td>
+        <div class="td-name">${esc(e.nombre)}</div>
+        ${e.propietario ? `<div class="td-mono">${esc(e.propietario.email)}</div>` : ''}
+      </td>
+      <td>${esc(e.ciudad || '—')}</td>
+      <td>${planBadge}</td>
+      <td>${estBadge}</td>
+      <td class="td-mono">${fechaAct}</td>
+      <td class="td-mono">${fechaRen}</td>
+      <td>${cd}</td>
+      <td>
+        <div class="actions">
+          <button class="btn-icon btn-icon-access" data-action="acceder" data-id="${e.id}" title="Acceder como negocio">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+          </button>
+          <button class="btn-icon" data-action="plan" data-id="${e.id}" title="Cambiar plan">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          </button>
+          <button class="btn-icon" data-action="estado" data-id="${e.id}" title="Cambiar estado">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button class="btn-icon" data-action="soporte" data-id="${e.id}" title="Soporte operativo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function renderPagination(total, page, limit) {
+  const bar = document.getElementById('paginationBar');
+  const info = document.getElementById('paginationInfo');
+  if (total <= limit) { bar.style.display = 'none'; return; }
+  bar.style.display = 'flex';
+  const from = (page - 1) * limit + 1;
+  const to   = Math.min(page * limit, total);
+  info.textContent = `${from}–${to} de ${total} negocios`;
+  document.getElementById('btnPrev').disabled = page <= 1;
+  document.getElementById('btnNext').disabled = to >= total;
+}
+
+// ── Table action delegation ───────────────────────────────────────────────
+document.getElementById('tableBody').addEventListener('click', e => {
+  const btn = e.target.closest('[data-action]');
+  if (!btn) return;
+  const id      = btn.dataset.id;
+  const empresa = empresas.find(x => x.id === id);
+  if (!empresa) return;
+  const action = btn.dataset.action;
+  if (action === 'acceder') openModalAcceder(empresa);
+  if (action === 'plan')    openModalPlan(empresa);
+  if (action === 'estado')  openModalEstado(empresa);
+  if (action === 'soporte') openModalSoporte(empresa);
+});
+
+// ── Filters ───────────────────────────────────────────────────────────────
+let filterTimer = null;
+['filterQ', 'filterPlan', 'filterEstado'].forEach(id => {
+  document.getElementById(id).addEventListener('input', () => {
+    clearTimeout(filterTimer);
+    filterTimer = setTimeout(() => { currentPage = 1; loadTable(); }, 300);
+  });
+  document.getElementById(id).addEventListener('change', () => { currentPage = 1; loadTable(); });
+});
+
+document.getElementById('btnLimpiar').addEventListener('click', () => {
+  document.getElementById('filterQ').value = '';
+  document.getElementById('filterPlan').value = '';
+  document.getElementById('filterEstado').value = '';
+  currentPage = 1;
+  loadTable();
+});
+
+document.getElementById('btnPrev').addEventListener('click', () => { currentPage--; loadTable(); });
+document.getElementById('btnNext').addEventListener('click', () => { currentPage++; loadTable(); });
+
+// ── Modal: Acceder como negocio ───────────────────────────────────────────
+function openModalAcceder(e) {
+  pendingEmpresaId = e.id;
+  document.getElementById('acc-nombre').textContent = e.nombre;
+  document.getElementById('acc-plan').textContent   = e.plan_nombre || e.plan_id;
+  document.getElementById('acc-estado').textContent = capitalize(e.estado);
+  document.getElementById('acc-owner').textContent  = e.propietario ? e.propietario.nombre : '—';
+  openModal('modalAcceder');
+}
+
+document.getElementById('btnConfirmarAcceso').addEventListener('click', async () => {
+  const btn = document.getElementById('btnConfirmarAcceso');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Accediendo...';
+
+  try {
+    const data = await api.auth.impersonate(pendingEmpresaId);
+    const empresa = empresas.find(x => x.id === pendingEmpresaId);
+
+    // Store impersonation token so dashboard can use it
+    sessionStorage.setItem('reca_impersonation', JSON.stringify({
+      access_token:   data.access_token,
+      empresa_id:     pendingEmpresaId,
+      empresa_nombre: empresa?.nombre || pendingEmpresaId,
+    }));
+
+    closeModal('modalAcceder');
+    window.location.href = '/app/dashboard/';
+  } catch (err) {
+    showMsg(err.message || 'Error al acceder como negocio', 'error');
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg> Acceder al Negocio';
+  }
+});
+
+// ── Modal: Cambiar Plan ───────────────────────────────────────────────────
+function openModalPlan(e) {
+  pendingEmpresaId = e.id;
+  document.getElementById('plan-nombre').textContent = e.nombre;
+  document.getElementById('plan-actual').textContent = e.plan_nombre || e.plan_id;
+  document.getElementById('plan-select').value = '';
+  document.getElementById('plan-monto').value = '';
+  document.getElementById('planMsg').className = 'modal-msg';
+  openModal('modalPlan');
+}
+
+document.getElementById('btnConfirmarPlan').addEventListener('click', async () => {
+  const planId = document.getElementById('plan-select').value;
+  if (!planId) {
+    showModalMsg('planMsg', 'Selecciona un plan', 'error');
+    return;
+  }
+  const btn = document.getElementById('btnConfirmarPlan');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Actualizando...';
+
+  try {
+    await api.planes.cambiarPlan(pendingEmpresaId, {
+      plan_id:     planId,
+      monto:       parseFloat(document.getElementById('plan-monto').value) || 0,
+      metodo_pago: document.getElementById('plan-metodo').value,
+    });
+    closeModal('modalPlan');
+    showMsg('Plan actualizado exitosamente', 'success');
+    await refreshAll();
+  } catch (err) {
+    showModalMsg('planMsg', err.message || 'Error al actualizar plan', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Actualizar Plan';
+  }
+});
+
+// ── Modal: Cambiar Estado ─────────────────────────────────────────────────
+function openModalEstado(e) {
+  pendingEmpresaId = e.id;
+  document.getElementById('est-nombre').textContent = e.nombre;
+  document.getElementById('est-actual').textContent = capitalize(e.estado);
+  document.getElementById('est-select').value = e.estado;
+  document.getElementById('estMsg').className = 'modal-msg';
+  openModal('modalEstado');
+}
+
+document.getElementById('btnConfirmarEstado').addEventListener('click', async () => {
+  const estado = document.getElementById('est-select').value;
+  const btn = document.getElementById('btnConfirmarEstado');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Guardando...';
+
+  try {
+    await api.multiempresa.cambiarEstado(pendingEmpresaId, estado);
+    closeModal('modalEstado');
+    showMsg('Estado actualizado', 'success');
+    await refreshAll();
+  } catch (err) {
+    showModalMsg('estMsg', err.message || 'Error al actualizar estado', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Confirmar';
+  }
+});
+
+// ── Modal: Soporte ────────────────────────────────────────────────────────
+function openModalSoporte(e) {
+  pendingEmpresaId = e.id;
+  document.getElementById('sop-notas').value = e.notas_soporte || '';
+  document.getElementById('sopMsg').className = 'modal-msg';
+
+  const rows = [
+    ['Negocio',      e.nombre],
+    ['Propietario',  e.propietario ? `${e.propietario.nombre} · ${e.propietario.email}` : '—'],
+    ['Ciudad',       e.ciudad || '—'],
+    ['Plan',         e.plan_nombre || e.plan_id],
+    ['Estado',       capitalize(e.estado)],
+    ['Productos',    e.productos_count],
+    ['Activación',   e.fecha_activacion_plan ? fmtDate(e.fecha_activacion_plan) : '—'],
+    ['Renovación',   e.fecha_renovacion_plan ? fmtDate(e.fecha_renovacion_plan) : '—'],
+  ];
+
+  document.getElementById('sop-info').innerHTML = rows.map(([k, v]) =>
+    `<div class="info-row"><span class="info-key">${k}</span><span class="info-val">${esc(String(v))}</span></div>`
+  ).join('');
+
+  openModal('modalSoporte');
+}
+
+document.getElementById('btnGuardarNotas').addEventListener('click', async () => {
+  const btn = document.getElementById('btnGuardarNotas');
+  btn.disabled = true;
+
+  try {
+    await api.multiempresa.guardarNotas(pendingEmpresaId, document.getElementById('sop-notas').value);
+    showModalMsg('sopMsg', 'Notas guardadas', 'success');
+    // Update local cache
+    const idx = empresas.findIndex(x => x.id === pendingEmpresaId);
+    if (idx !== -1) empresas[idx].notas_soporte = document.getElementById('sop-notas').value;
+  } catch (err) {
+    showModalMsg('sopMsg', err.message || 'Error al guardar notas', 'error');
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+// ── Modal: Crear Negocio ──────────────────────────────────────────────────
+document.getElementById('btnNuevoNegocio').addEventListener('click', () => {
+  ['cf-nombre','cf-ciudad','cf-pnombre','cf-email','cf-pass'].forEach(id => {
+    document.getElementById(id).value = '';
+    document.getElementById(id).closest('.field')?.classList.remove('has-error');
+  });
+  document.getElementById('cf-plan').value = '';
+  document.getElementById('cf-estado').value = 'activa';
+  document.getElementById('crearMsg').className = 'modal-msg';
+  openModal('modalCrear');
+});
+
+document.getElementById('btnCrearNegocio').addEventListener('click', async () => {
+  // Clear errors
+  ['cf-nombre-field','cf-pnombre-field','cf-email-field','cf-pass-field'].forEach(id => {
+    document.getElementById(id)?.classList.remove('has-error');
+  });
+
+  const nombre   = document.getElementById('cf-nombre').value.trim();
+  const ciudad   = document.getElementById('cf-ciudad').value.trim();
+  const plan_id  = document.getElementById('cf-plan').value;
+  const estadoI  = document.getElementById('cf-estado').value;
+  const pNombre  = document.getElementById('cf-pnombre').value.trim();
+  const pEmail   = document.getElementById('cf-email').value.trim();
+  const pPass    = document.getElementById('cf-pass').value;
+
+  let valid = true;
+  if (!nombre)  { document.getElementById('cf-nombre-field').classList.add('has-error');  valid = false; }
+  if (!pNombre) { document.getElementById('cf-pnombre-field').classList.add('has-error'); valid = false; }
+  if (!pEmail)  { document.getElementById('cf-email-field').classList.add('has-error');   valid = false; }
+  if (!pPass || pPass.length < 8) { document.getElementById('cf-pass-field').classList.add('has-error'); valid = false; }
+  if (!plan_id) { showModalMsg('crearMsg', 'Selecciona un plan inicial', 'error'); valid = false; }
+  if (!valid) return;
+
+  const btn = document.getElementById('btnCrearNegocio');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Creando...';
+
+  try {
+    await api.multiempresa.crear({
+      empresa_nombre:       nombre,
+      ciudad:               ciudad || undefined,
+      plan_id,
+      estado_suscripcion:   estadoI,
+      propietario_nombre:   pNombre,
+      propietario_email:    pEmail,
+      propietario_password: pPass,
+    });
+    closeModal('modalCrear');
+    showMsg(`Negocio "${nombre}" creado exitosamente`, 'success');
+    currentPage = 1;
+    await refreshAll();
+  } catch (err) {
+    showModalMsg('crearMsg', err.message || 'Error al crear el negocio', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Crear Negocio';
+  }
+});
+
+// ── Modal helpers ─────────────────────────────────────────────────────────
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+document.querySelectorAll('[data-close]').forEach(btn => {
+  btn.addEventListener('click', () => closeModal(btn.dataset.close));
+});
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) closeModal(overlay.id);
+  });
+});
+
+function showModalMsg(id, text, type) {
+  const el = document.getElementById(id);
+  el.textContent = text;
+  el.className = `modal-msg ${type} show`;
+}
+
+// ── Global message bar ────────────────────────────────────────────────────
+let msgTimer = null;
+function showMsg(text, type) {
+  const el = document.getElementById('msgBar');
+  el.textContent = text;
+  el.className = `msg-bar ${type} show`;
+  clearTimeout(msgTimer);
+  msgTimer = setTimeout(() => { el.className = 'msg-bar'; }, 4000);
+}
+
+// ── Rendering helpers ─────────────────────────────────────────────────────
+function planBadgeHtml(planId) {
+  const cls = { start: 'badge-start', business: 'badge-business', premium: 'badge-premium' }[planId] || 'badge-start';
+  const plan = allPlanes.find(p => p.id === planId);
+  return `<span class="badge ${cls}">${plan ? plan.nombre : planId}</span>`;
+}
+
+function estadoBadgeHtml(estado) {
+  const map = {
+    activo:     ['badge-activo',     'Activo'],
+    prueba:     ['badge-prueba',     'Prueba'],
+    suspendido: ['badge-suspendido', 'Suspendido'],
+    cancelado:  ['badge-cancelado',  'Cancelado'],
+  };
+  const [cls, label] = map[estado] || ['badge-activo', estado];
+  return `<span class="badge ${cls}"><span class="badge-dot"></span>${label}</span>`;
+}
+
+function countdownHtml(fechaRenovacion) {
+  if (!fechaRenovacion) return '<span class="td-mono">—</span>';
+
+  const diff = new Date(fechaRenovacion) - Date.now();
+  if (diff <= 0) return '<span class="cd-expired">Vencido</span>';
+
+  const days = Math.floor(diff / 86400000);
+  const hrs  = Math.floor((diff % 86400000) / 3600000);
+  const mins = Math.floor((diff % 3600000)  / 60000);
+
+  let cls = '';
+  if (days <= 7)  cls = 'critical';
+  else if (days <= 30) cls = 'warning';
+
+  return `<div class="countdown ${cls}">
+    <div class="cd-unit"><span class="cd-val">${days}</span><span class="cd-lbl">días</span></div>
+    <div class="cd-unit"><span class="cd-val">${hrs}</span><span class="cd-lbl">hrs</span></div>
+    <div class="cd-unit"><span class="cd-val">${mins}</span><span class="cd-lbl">min</span></div>
+  </div>`;
+}
+
+function fmtDate(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleDateString('es', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function capitalize(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
+
+// ── Live countdown refresh ────────────────────────────────────────────────
+setInterval(() => { if (empresas.length) renderTable(); }, 60000);
+
+// ── Start ─────────────────────────────────────────────────────────────────
+boot();
+</script>
+</body>
+</html>

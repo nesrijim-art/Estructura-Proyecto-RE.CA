@@ -27,6 +27,9 @@ const tableMigrations = {
     `ALTER TABLE empresas ADD COLUMN fecha_activacion_plan DATETIME`,
     `ALTER TABLE empresas ADD COLUMN fecha_renovacion_plan DATETIME`,
     `ALTER TABLE empresas ADD COLUMN estado_suscripcion TEXT DEFAULT 'activa'`,
+    // M03: geographic field + trial state
+    `ALTER TABLE empresas ADD COLUMN ciudad TEXT`,
+    `ALTER TABLE empresas ADD COLUMN notas_soporte TEXT`,
   ],
 };
 
