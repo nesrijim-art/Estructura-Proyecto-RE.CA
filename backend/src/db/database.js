@@ -137,4 +137,38 @@ db.transaction(() => {
   seedPlanes.run('premium',  'Premium',  600, 0,  0,   5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
 })();
 
+// M07: multimedia library
+db.exec(`
+  CREATE TABLE IF NOT EXISTS multimedia (
+    id                    TEXT PRIMARY KEY,
+    empresa_id            TEXT NOT NULL REFERENCES empresas(id),
+    nombre                TEXT NOT NULL,
+    tipo                  TEXT NOT NULL CHECK(tipo IN ('imagen','video')),
+    mime_type             TEXT NOT NULL,
+    filename              TEXT NOT NULL,
+    size_bytes            INTEGER NOT NULL DEFAULT 0,
+    width                 INTEGER,
+    height                INTEGER,
+    duracion_seg          REAL,
+    ia_mejorado           INTEGER NOT NULL DEFAULT 0,
+    ia_pendiente          INTEGER NOT NULL DEFAULT 0,
+    ia_candidato_filename TEXT,
+    created_at            DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at            DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+  CREATE INDEX IF NOT EXISTS idx_multimedia_empresa ON multimedia(empresa_id);
+
+  CREATE TABLE IF NOT EXISTS multimedia_refs (
+    id            TEXT PRIMARY KEY,
+    multimedia_id TEXT NOT NULL REFERENCES multimedia(id) ON DELETE CASCADE,
+    modulo        TEXT NOT NULL,
+    entidad_id    TEXT NOT NULL,
+    descripcion   TEXT,
+    created_at    DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+  CREATE UNIQUE INDEX IF NOT EXISTS idx_multimedia_refs_unique
+    ON multimedia_refs(multimedia_id, modulo, entidad_id);
+  CREATE INDEX IF NOT EXISTS idx_multimedia_refs_media ON multimedia_refs(multimedia_id);
+`);
+
 module.exports = db;

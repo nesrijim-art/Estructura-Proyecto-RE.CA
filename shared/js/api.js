@@ -61,6 +61,49 @@ export const api = {
     crearPlan:   (body)          => request('/planes',    { method: 'POST', body: JSON.stringify(body) }),
     editarPlan:  (id, body)      => request(`/planes/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
   },
+  multimedia: {
+    stats:        ()              => request('/multimedia/stats'),
+    listar:       (params = {})   => {
+      const qs = new URLSearchParams(
+        Object.entries(params).filter(([, v]) => v !== '' && v != null)
+      ).toString();
+      return request('/multimedia' + (qs ? '?' + qs : ''));
+    },
+    obtener:      (id)            => request(`/multimedia/${id}`),
+    usos:         (id)            => request(`/multimedia/${id}/usos`),
+    renombrar:    (id, nombre)    => request(`/multimedia/${id}`, { method: 'PUT', body: JSON.stringify({ nombre }) }),
+    eliminar:     (id)            => request(`/multimedia/${id}`, { method: 'DELETE' }),
+    subir: (form) => {
+      const token = getAccessToken();
+      return fetch('/api/multimedia/upload', {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        credentials: 'include',
+        body: form,
+      }).then(async r => {
+        const d = await r.json().catch(() => ({}));
+        if (!r.ok) throw Object.assign(new Error(d.message || `Error ${r.status}`), { status: r.status, data: d });
+        return d;
+      });
+    },
+    reemplazar: (id, form) => {
+      const token = getAccessToken();
+      return fetch(`/api/multimedia/${id}/reemplazar`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        credentials: 'include',
+        body: form,
+      }).then(async r => {
+        const d = await r.json().catch(() => ({}));
+        if (!r.ok) throw Object.assign(new Error(d.message || `Error ${r.status}`), { status: r.status, data: d });
+        return d;
+      });
+    },
+    mejoraIa:    (id)             => request(`/multimedia/${id}/mejora-ia`,   { method: 'POST' }),
+    aprobarIa:   (id)             => request(`/multimedia/${id}/aprobar-ia`,  { method: 'POST' }),
+    agregarRef:  (body)           => request('/multimedia/refs',              { method: 'POST', body: JSON.stringify(body) }),
+    eliminarRef: (refId)          => request(`/multimedia/refs/${refId}`,     { method: 'DELETE' }),
+  },
   usuarios: {
     listar:               ()              => request('/usuarios'),
     invitaciones:         ()              => request('/usuarios/invitaciones'),

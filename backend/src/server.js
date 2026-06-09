@@ -24,8 +24,9 @@ const cookieParser = require('cookie-parser');
 const authRouter           = require('./routes/auth');
 const planesRouter         = require('./routes/planes');
 const multiempresaRouter   = require('./routes/multiempresa');
-const usuariosRouter       = require('./routes/usuarios');
+const usuariosRouter        = require('./routes/usuarios');
 const identidadVisualRouter = require('./routes/identidad-visual');
+const multimediaRouter      = require('./routes/multimedia');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -62,6 +63,7 @@ app.use('/api/planes',           planesRouter);
 app.use('/api/multiempresa',     multiempresaRouter);
 app.use('/api/usuarios',         usuariosRouter);
 app.use('/api/identidad-visual', identidadVisualRouter);
+app.use('/api/multimedia',       multimediaRouter);
 
 // Placeholder for future module routes — each module adds its own router here
 // app.use('/api/catalogo',         require('./routes/catalogo'));
@@ -72,7 +74,11 @@ app.use('/api/identidad-visual', identidadVisualRouter);
 // app.use('/api/automatizaciones', require('./routes/automatizaciones'));
 
 // ─── Static files ─────────────────────────────────────────────────────────────
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+// Serve uploads with sensible cache headers
+app.use('/uploads', express.static(path.join(__dirname, '../uploads'), {
+  maxAge: '7d',
+  immutable: false,
+}));
 app.use('/shared',  express.static(path.join(ROOT, 'shared')));
 app.use('/app',     express.static(path.join(ROOT, 'app')));
 
