@@ -1,0 +1,1139 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Planes y Suscripciones · RE.CA</title>
+<link rel="manifest" href="/manifest.json" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Source+Sans+Pro:wght@400;600&display=swap" />
+<link rel="stylesheet" href="/shared/css/design-tokens.css" />
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--fg);
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+/* ─── Layout ─────────────────────────────────────────────────────────────── */
+.topbar {
+  height: 56px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 var(--space-6);
+  gap: var(--space-4);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.topbar-brand {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--fg);
+  text-decoration: none;
+}
+.topbar-sep { flex: 1; }
+.topbar-nav a {
+  font-size: 13px;
+  color: var(--muted);
+  text-decoration: none;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  transition: color 0.15s, background 0.15s;
+}
+.topbar-nav a:hover { color: var(--fg); background: var(--border-soft); }
+
+.impersonation-banner {
+  background: #7c3aed;
+  color: white;
+  padding: 8px var(--space-6);
+  font-size: 13px;
+  font-family: var(--font-display);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.impersonation-banner button {
+  background: rgba(255,255,255,.15);
+  color: white;
+  border: 1px solid rgba(255,255,255,.3);
+  padding: 4px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: 12px;
+  margin-left: auto;
+}
+.impersonation-banner button:hover { background: rgba(255,255,255,.25); }
+
+.page-wrapper {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-6);
+}
+
+/* ─── Page header ────────────────────────────────────────────────────────── */
+.page-header { margin-bottom: var(--space-8); }
+.page-header h1 {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-bottom: 4px;
+}
+.page-header p { color: var(--muted); font-size: 14px; }
+
+/* ─── Stats cards ────────────────────────────────────────────────────────── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-8);
+}
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+}
+.stat-label {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 8px;
+}
+.stat-value {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--fg);
+  letter-spacing: -0.02em;
+}
+.stat-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+.timer { font-family: var(--font-display); font-size: 14px; font-weight: 600; margin-top: 4px; }
+.timer.normal  { color: var(--success); }
+.timer.warning { color: var(--warn); }
+.timer.critical { color: var(--danger); }
+
+/* ─── Tabs ───────────────────────────────────────────────────────────────── */
+.tabs {
+  display: flex;
+  gap: 2px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--space-6);
+}
+.tab-btn {
+  padding: 10px 16px;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 500;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  color: var(--muted);
+  transition: color 0.15s;
+  margin-bottom: -1px;
+}
+.tab-btn:hover { color: var(--fg); }
+.tab-btn.active { color: var(--fg); border-bottom-color: var(--fg); }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ─── Plan cards ─────────────────────────────────────────────────────────── */
+.plan-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-5);
+  margin-bottom: var(--space-6);
+}
+.plan-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-6);
+  position: relative;
+}
+.plan-card.current { border-color: var(--accent); border-width: 2px; }
+.plan-card.recommended { border-color: var(--accent); }
+
+.plan-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--accent);
+  color: var(--accent-on);
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: var(--space-3);
+}
+.plan-badge.current-badge { background: var(--fg); color: var(--surface); }
+
+.plan-name {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--fg);
+  margin-bottom: 4px;
+}
+.plan-price {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--fg);
+  letter-spacing: -0.02em;
+}
+.plan-price span { font-size: 14px; color: var(--muted); font-weight: 400; }
+.plan-desc { font-size: 13px; color: var(--muted); margin: var(--space-3) 0 var(--space-4); }
+
+.plan-features { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-bottom: var(--space-5); }
+.plan-features li { font-size: 13px; color: var(--fg-2); display: flex; align-items: center; gap: 8px; }
+.plan-features li::before { content: '✓'; color: var(--success); font-weight: 700; flex-shrink: 0; }
+.plan-features li.off { color: var(--muted); }
+.plan-features li.off::before { content: '–'; color: var(--border); }
+
+.btn-plan {
+  width: 100%;
+  height: 44px;
+  border-radius: var(--radius-md);
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+  border: none;
+}
+.btn-plan.primary { background: var(--fg); color: var(--surface); }
+.btn-plan.primary:hover { background: var(--fg-2); }
+.btn-plan.secondary { background: none; border: 1px solid var(--border); color: var(--fg); }
+.btn-plan.secondary:hover { background: var(--border-soft); }
+.btn-plan.current-btn { background: var(--border-soft); color: var(--muted); cursor: default; }
+
+/* ─── Comparison table ───────────────────────────────────────────────────── */
+.compare-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.compare-table th {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  padding: 10px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.compare-table th:not(:first-child) { text-align: center; }
+.compare-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-soft);
+  color: var(--fg-2);
+}
+.compare-table td:not(:first-child) { text-align: center; }
+.compare-table tr:last-child td { border-bottom: none; }
+.compare-table tr:hover td { background: var(--border-soft); }
+.check { color: var(--success); font-size: 16px; }
+.cross { color: var(--border); font-size: 16px; }
+.current-col { background: color-mix(in oklab, var(--accent), transparent 90%); }
+
+/* ─── History table ──────────────────────────────────────────────────────── */
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.history-table th {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  padding: 10px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.history-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-soft);
+  color: var(--fg-2);
+}
+.history-table tr:last-child td { border-bottom: none; }
+.history-table tr:hover td { background: var(--border-soft); }
+.badge {
+  display: inline-flex;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.badge.pagado    { background: color-mix(in oklab,var(--success),transparent 85%); color: var(--success); }
+.badge.pendiente { background: color-mix(in oklab,var(--warn),transparent 85%);    color: var(--warn); }
+.badge.fallido   { background: color-mix(in oklab,var(--danger),transparent 85%);  color: var(--danger); }
+.badge.pago      { background: color-mix(in oklab,var(--success),transparent 85%); color: var(--success); }
+.badge.cambio_plan { background: color-mix(in oklab,var(--accent),transparent 70%); color: var(--accent-on); }
+.badge.activacion  { background: color-mix(in oklab, #7c3aed, transparent 85%);  color: #7c3aed; }
+
+/* ─── Admin panel ────────────────────────────────────────────────────────── */
+.admin-section { margin-bottom: var(--space-8); }
+.section-title {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--fg);
+  margin-bottom: var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.admin-table th {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  padding: 10px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  background: var(--border-soft);
+}
+.admin-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-soft);
+  color: var(--fg-2);
+}
+.admin-table tr:last-child td { border-bottom: none; }
+.btn-sm {
+  padding: 4px 12px;
+  font-size: 12px;
+  font-family: var(--font-display);
+  font-weight: 500;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-sm:hover { background: var(--border-soft); }
+.btn-create {
+  padding: 8px 16px;
+  font-size: 13px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--fg);
+  color: var(--surface);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.15s;
+}
+.btn-create:hover { background: var(--fg-2); }
+
+/* ─── Feature matrix ─────────────────────────────────────────────────────── */
+.matrix-wrap { overflow-x: auto; }
+.feature-matrix {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.feature-matrix th {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  padding: 10px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  background: var(--border-soft);
+  white-space: nowrap;
+}
+.feature-matrix th:not(:first-child) { text-align: center; }
+.feature-matrix td {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border-soft);
+  color: var(--fg-2);
+}
+.feature-matrix td:not(:first-child) { text-align: center; }
+
+/* ─── Contact note ───────────────────────────────────────────────────────── */
+.contact-note {
+  background: color-mix(in oklab, var(--accent), transparent 85%);
+  border: 1px solid color-mix(in oklab, var(--accent), transparent 50%);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  margin-top: var(--space-6);
+}
+.contact-note svg { flex-shrink: 0; color: var(--accent-hover); }
+.contact-note-body h3 {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--fg);
+  margin-bottom: 4px;
+}
+.contact-note-body p { font-size: 13px; color: var(--fg-2); }
+
+/* ─── Modal ──────────────────────────────────────────────────────────────── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-8);
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 20px 48px rgba(0,0,0,.18);
+}
+.modal h2 {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: var(--space-3);
+}
+.modal p { font-size: 14px; color: var(--muted); margin-bottom: var(--space-5); }
+.modal-actions { display: flex; gap: var(--space-3); justify-content: flex-end; }
+.btn-cancel {
+  padding: 10px 20px;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: none;
+  cursor: pointer;
+}
+.btn-confirm {
+  padding: 10px 20px;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--fg);
+  color: var(--surface);
+  cursor: pointer;
+}
+.btn-confirm:hover { background: var(--fg-2); }
+
+/* Form fields in modal */
+.mform { display: flex; flex-direction: column; gap: var(--space-4); }
+.mfield { display: flex; flex-direction: column; gap: 6px; }
+.mfield label {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--fg);
+}
+.mfield input, .mfield select {
+  height: 42px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-family: var(--font-body);
+  color: var(--fg);
+  background: var(--surface);
+}
+.mfield input:focus, .mfield select:focus { outline: none; border-color: var(--fg); }
+.mfield-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+
+.flags-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+.flag-check { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--fg-2); cursor: pointer; }
+.flag-check input { width: 14px; height: 14px; cursor: pointer; }
+
+.message {
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  margin-bottom: var(--space-4);
+  display: none;
+}
+.message.show { display: block; }
+.message.success { background: color-mix(in oklab,var(--success),transparent 90%); color: var(--success); }
+.message.error   { background: color-mix(in oklab,var(--danger),transparent 90%); color: var(--danger); }
+
+.empty-state { text-align: center; padding: var(--space-12) var(--space-6); color: var(--muted); font-size: 14px; }
+
+@media (max-width: 640px) {
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .plan-grid  { grid-template-columns: 1fr; }
+  .tabs { overflow-x: auto; }
+}
+</style>
+</head>
+<body>
+
+<!-- Top bar -->
+<nav class="topbar">
+  <a href="/app/dashboard/" class="topbar-brand">RE.CA</a>
+  <div class="topbar-sep"></div>
+  <div class="topbar-nav">
+    <a href="/app/dashboard/">Dashboard</a>
+  </div>
+</nav>
+
+<!-- Impersonation banner (shown only when super admin is accessing as empresa) -->
+<div class="impersonation-banner" id="impersonationBanner" style="display:none">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+  <span id="impersonationText">Accediendo como empresa</span>
+  <button id="stopImpersonating">Salir de empresa</button>
+</div>
+
+<div class="page-wrapper">
+  <div class="page-header">
+    <h1>Planes y Suscripciones</h1>
+    <p>Gestiona el plan de tu negocio y revisa tu historial de facturación</p>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-grid" id="statsGrid">
+    <div class="stat-card">
+      <div class="stat-label">Plan Actual</div>
+      <div class="stat-value" id="statPlan">—</div>
+      <div class="stat-sub" id="statEstado"></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Próximo Vencimiento</div>
+      <div class="stat-value" id="statFecha">—</div>
+      <div class="timer" id="statTimer"></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Inversión Mensual</div>
+      <div class="stat-value" id="statPrecio">—</div>
+      <div class="stat-sub">Por mes</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Estado Suscripción</div>
+      <div class="stat-value" id="statSuscripcion">—</div>
+      <div class="stat-sub" id="statEmpresa"></div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="resumen">Resumen</button>
+    <button class="tab-btn" data-tab="comparar">Comparar Planes</button>
+    <button class="tab-btn" data-tab="historial">Historial</button>
+    <button class="tab-btn" data-tab="admin" id="adminTab" style="display:none">Gestionar (Admin)</button>
+  </div>
+
+  <!-- Tab: Resumen -->
+  <div class="tab-panel active" id="tab-resumen">
+    <div class="plan-grid" id="currentPlanGrid">
+      <div class="stat-card empty-state" id="loadingResumen">Cargando...</div>
+    </div>
+
+    <div class="contact-note" id="contactNote" style="display:none">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      <div class="contact-note-body">
+        <h3>¿Quieres cambiar de plan?</h3>
+        <p>Los cambios de plan son gestionados directamente por el Super Administrador. Contacta con soporte para actualizar o modificar tu suscripción.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab: Comparar -->
+  <div class="tab-panel" id="tab-comparar">
+    <div id="compareContent">
+      <div class="empty-state">Cargando planes...</div>
+    </div>
+  </div>
+
+  <!-- Tab: Historial -->
+  <div class="tab-panel" id="tab-historial">
+    <div id="historialContent">
+      <div class="empty-state">Cargando historial...</div>
+    </div>
+  </div>
+
+  <!-- Tab: Admin -->
+  <div class="tab-panel" id="tab-admin">
+    <div class="admin-section">
+      <div class="section-title">
+        Planes disponibles
+        <button class="btn-create" id="btnNuevoPlan">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Nuevo plan
+        </button>
+      </div>
+      <div id="adminPlanesContent"><div class="empty-state">Cargando...</div></div>
+    </div>
+
+    <div class="admin-section">
+      <div class="section-title">Matriz de funcionalidades por plan</div>
+      <div class="matrix-wrap" id="featureMatrix"><div class="empty-state">Cargando...</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Confirmar cambio de plan (for admin assigning plan to empresa) -->
+<div class="modal-overlay" id="modalCambiarPlan">
+  <div class="modal">
+    <h2 id="modalTitle">Actualizar plan</h2>
+    <p id="modalDesc">¿Confirmas el cambio de plan para esta empresa?</p>
+    <div class="mform">
+      <div class="mfield">
+        <label>Monto cobrado (R$)</label>
+        <input type="number" id="modalMonto" placeholder="0" min="0" step="0.01" />
+      </div>
+      <div class="mfield">
+        <label>Método de pago</label>
+        <select id="modalMetodo">
+          <option value="manual">Manual</option>
+          <option value="transferencia">Transferencia</option>
+          <option value="tarjeta">Tarjeta</option>
+          <option value="efectivo">Efectivo</option>
+        </select>
+      </div>
+      <div class="mfield">
+        <label>Descripción (opcional)</label>
+        <input type="text" id="modalDescInput" placeholder="Descripción del movimiento" />
+      </div>
+    </div>
+    <div class="message" id="modalMsg"></div>
+    <div class="modal-actions" style="margin-top:24px">
+      <button class="btn-cancel" id="modalCancelar">Cancelar</button>
+      <button class="btn-confirm" id="modalConfirmar">Confirmar cambio</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Crear nuevo plan -->
+<div class="modal-overlay" id="modalNuevoPlan">
+  <div class="modal" style="max-width:560px; max-height:90vh; overflow-y:auto">
+    <h2>Crear nuevo plan</h2>
+    <div class="mform" id="nuevoPlanForm">
+      <div class="mfield-row">
+        <div class="mfield">
+          <label>ID del plan</label>
+          <input type="text" id="npId" placeholder="ej: enterprise" />
+        </div>
+        <div class="mfield">
+          <label>Nombre</label>
+          <input type="text" id="npNombre" placeholder="Enterprise" />
+        </div>
+      </div>
+      <div class="mfield-row">
+        <div class="mfield">
+          <label>Precio mensual (R$)</label>
+          <input type="number" id="npPrecio" placeholder="0" min="0" />
+        </div>
+        <div class="mfield">
+          <label>Máx. usuarios (0=∞)</label>
+          <input type="number" id="npUsuarios" placeholder="0" min="0" />
+        </div>
+      </div>
+      <div class="mfield-row">
+        <div class="mfield">
+          <label>Máx. productos (0=∞)</label>
+          <input type="number" id="npProductos" placeholder="0" min="0" />
+        </div>
+        <div class="mfield">
+          <label>Máx. idiomas</label>
+          <input type="number" id="npIdiomas" placeholder="1" min="1" />
+        </div>
+      </div>
+      <div class="mfield">
+        <label>Funcionalidades habilitadas</label>
+        <div class="flags-grid">
+          <label class="flag-check"><input type="checkbox" name="ia_texto" /> IA Texto</label>
+          <label class="flag-check"><input type="checkbox" name="ia_imagenes" /> IA Imágenes</label>
+          <label class="flag-check"><input type="checkbox" name="analytics_basico" /> Analytics Básico</label>
+          <label class="flag-check"><input type="checkbox" name="analytics_avanzado" /> Analytics Avanzado</label>
+          <label class="flag-check"><input type="checkbox" name="marketing_basico" /> Marketing Básico</label>
+          <label class="flag-check"><input type="checkbox" name="marketing_avanzado" /> Marketing Avanzado</label>
+          <label class="flag-check"><input type="checkbox" name="automatizaciones" /> Automatizaciones</label>
+          <label class="flag-check"><input type="checkbox" name="menu_dinamico" /> Menú Dinámico</label>
+          <label class="flag-check"><input type="checkbox" name="calendario_ia" /> Calendario IA</label>
+          <label class="flag-check"><input type="checkbox" name="publicaciones_automaticas" /> Pub. Automáticas</label>
+        </div>
+      </div>
+    </div>
+    <div class="message" id="npMsg"></div>
+    <div class="modal-actions" style="margin-top:24px">
+      <button class="btn-cancel" id="npCancelar">Cancelar</button>
+      <button class="btn-confirm" id="npConfirmar">Crear plan</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { requireAuth, getUser, getAccessToken, clearSession } from '/shared/js/auth.js';
+import { api } from '/shared/js/api.js';
+
+requireAuth('/app/login/');
+
+// ── Session & impersonation setup ─────────────────────────────────────────
+const impersonation = (() => {
+  try { return JSON.parse(sessionStorage.getItem('reca_impersonation') || 'null'); } catch { return null; }
+})();
+
+if (impersonation) {
+  document.getElementById('impersonationBanner').style.display = 'flex';
+  document.getElementById('impersonationText').textContent =
+    `Accediendo como: ${impersonation.empresa_nombre || 'empresa'}`;
+}
+
+document.getElementById('stopImpersonating').addEventListener('click', async () => {
+  try { await api.auth.stopImpersonating(); } catch {}
+  sessionStorage.removeItem('reca_impersonation');
+  window.location.href = '/app/dashboard/';
+});
+
+const user = getUser();
+const isSuperAdmin = user?.role === 'super_admin';
+
+// ── State ─────────────────────────────────────────────────────────────────
+let allPlanes   = [];
+let miPlan      = null;
+let historial   = [];
+let pendingChange = null; // { empresaId, planId, planNombre }
+
+// ── Load data ─────────────────────────────────────────────────────────────
+async function loadAll() {
+  try {
+    [allPlanes, miPlan, historial] = await Promise.all([
+      api.planes.list(),
+      api.planes.miPlan(),
+      api.planes.historial(),
+    ]);
+    renderStats();
+    renderResumen();
+    renderComparar();
+    renderHistorial();
+    if (isSuperAdmin && !impersonation) {
+      document.getElementById('adminTab').style.display = '';
+      renderAdmin();
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+// ── Stats ─────────────────────────────────────────────────────────────────
+function renderStats() {
+  const p = miPlan;
+  document.getElementById('statPlan').textContent = p.plan_nombre || p.plan_id || '—';
+  document.getElementById('statEstado').textContent = p.estado_suscripcion || '';
+  document.getElementById('statPrecio').textContent = p.precio_mensual
+    ? `R$ ${p.precio_mensual.toFixed(2)}`
+    : 'Gratis';
+  document.getElementById('statSuscripcion').textContent = capitalize(p.estado_suscripcion || '—');
+  document.getElementById('statEmpresa').textContent = p.nombre || '';
+
+  if (p.fecha_renovacion_plan) {
+    const d = new Date(p.fecha_renovacion_plan);
+    document.getElementById('statFecha').textContent = d.toLocaleDateString('es', { day:'2-digit', month:'short', year:'numeric' });
+    const days = Math.ceil((d - Date.now()) / 86400000);
+    const timer = document.getElementById('statTimer');
+    timer.textContent = days > 0 ? `${days} días restantes` : 'Vencido';
+    timer.className = 'timer ' + (days > 7 ? 'normal' : days > 3 ? 'warning' : 'critical');
+  } else {
+    document.getElementById('statFecha').textContent = '—';
+  }
+}
+
+// ── Resumen tab ───────────────────────────────────────────────────────────
+function renderResumen() {
+  const plan = allPlanes.find(p => p.id === miPlan.plan_id) || {};
+  const features = miPlan.features || {};
+
+  const featureLabels = [
+    ['usuarios_max',              (v) => v === 0 ? 'Usuarios ilimitados' : `Hasta ${v} usuarios`],
+    ['productos_max',             (v) => v === 0 ? 'Productos ilimitados' : `Hasta ${v} productos`],
+    ['idiomas_max',               (v) => `${v} idioma${v !== 1 ? 's' : ''} en menú`],
+    ['ia_texto',                  (v) => v ? 'Generación de texto con IA' : null],
+    ['ia_imagenes',               (v) => v ? 'Generación de imágenes con IA' : null],
+    ['analytics_basico',          (v) => v ? 'Analytics básico' : null],
+    ['analytics_avanzado',        (v) => v ? 'Analytics avanzado' : null],
+    ['marketing_basico',          (v) => v ? 'Herramientas de marketing' : null],
+    ['marketing_avanzado',        (v) => v ? 'Marketing avanzado' : null],
+    ['automatizaciones',          (v) => v ? 'Automatizaciones' : null],
+    ['menu_dinamico',             (v) => v ? 'Menú dinámico' : null],
+    ['calendario_ia',             (v) => v ? 'Calendario IA' : null],
+    ['publicaciones_automaticas', (v) => v ? 'Publicaciones automáticas' : null],
+  ];
+
+  const featureItems = featureLabels
+    .map(([key, fn]) => {
+      const label = fn(features[key]);
+      if (!label) return null;
+      const enabled = typeof features[key] === 'boolean' ? features[key] : features[key] > 0;
+      return `<li class="${enabled ? '' : 'off'}">${label}</li>`;
+    })
+    .filter(Boolean)
+    .join('');
+
+  document.getElementById('currentPlanGrid').innerHTML = `
+    <div class="plan-card current">
+      <div class="plan-badge current-badge">Plan actual</div>
+      <div class="plan-name">${miPlan.plan_nombre || miPlan.plan_id}</div>
+      <div class="plan-price">R$ ${(miPlan.precio_mensual || 0).toFixed(2)}<span>/mes</span></div>
+      <p class="plan-desc">Suscripción ${capitalize(miPlan.estado_suscripcion || 'activa')}</p>
+      <ul class="plan-features">${featureItems}</ul>
+      <button class="btn-plan current-btn" disabled>Plan contratado</button>
+    </div>
+  `;
+
+  // Show contact note for non-admin (they can't change plan themselves)
+  if (!isSuperAdmin) {
+    document.getElementById('contactNote').style.display = 'flex';
+  }
+}
+
+// ── Comparar tab ──────────────────────────────────────────────────────────
+function renderComparar() {
+  const currentPlanId = miPlan.plan_id;
+
+  const flagRows = [
+    ['usuarios_max',              'Usuarios',            (v) => v === 0 ? '∞' : v],
+    ['productos_max',             'Productos en menú',   (v) => v === 0 ? '∞' : v],
+    ['idiomas_max',               'Idiomas',             (v) => v],
+    ['analytics_basico',          'Analytics básico',    bool],
+    ['analytics_avanzado',        'Analytics avanzado',  bool],
+    ['ia_texto',                  'IA para textos',      bool],
+    ['ia_imagenes',               'IA para imágenes',    bool],
+    ['marketing_basico',          'Marketing básico',    bool],
+    ['marketing_avanzado',        'Marketing avanzado',  bool],
+    ['automatizaciones',          'Automatizaciones',    bool],
+    ['menu_dinamico',             'Menú dinámico',       bool],
+    ['calendario_ia',             'Calendario IA',       bool],
+    ['publicaciones_automaticas', 'Publicaciones auto',  bool],
+  ];
+
+  const headers = allPlanes.map(p =>
+    `<th class="${p.id === currentPlanId ? 'current-col' : ''}">${p.nombre}${p.id === currentPlanId ? ' ✓' : ''}</th>`
+  ).join('');
+
+  const priceRow = allPlanes.map(p =>
+    `<td class="${p.id === currentPlanId ? 'current-col' : ''}"><strong>R$ ${p.precio_mensual.toFixed(2)}/mes</strong></td>`
+  ).join('');
+
+  const rows = flagRows.map(([key, label, fmt]) => {
+    const cells = allPlanes.map(p =>
+      `<td class="${p.id === currentPlanId ? 'current-col' : ''}">${fmt(p[key])}</td>`
+    ).join('');
+    return `<tr><td>${label}</td>${cells}</tr>`;
+  }).join('');
+
+  document.getElementById('compareContent').innerHTML = `
+    <div style="overflow-x:auto">
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th>Funcionalidad</th>${headers}
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Precio</strong></td>${priceRow}</tr>
+          ${rows}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function bool(v) {
+  return v ? `<span class="check">✓</span>` : `<span class="cross">–</span>`;
+}
+
+// ── Historial tab ─────────────────────────────────────────────────────────
+function renderHistorial() {
+  if (!historial.length) {
+    document.getElementById('historialContent').innerHTML = `<div class="empty-state">No hay registros en el historial</div>`;
+    return;
+  }
+
+  const rows = historial.map(h => `
+    <tr>
+      <td>${new Date(h.created_at).toLocaleDateString('es', { day:'2-digit', month:'short', year:'numeric' })}</td>
+      <td><span class="badge ${h.tipo}">${formatTipo(h.tipo)}</span></td>
+      <td>${h.descripcion || '—'}</td>
+      <td>${h.plan_nuevo_nombre || h.plan_nuevo_id || '—'}</td>
+      <td>R$ ${(h.monto || 0).toFixed(2)}</td>
+      <td><span class="badge ${h.estado}">${capitalize(h.estado)}</span></td>
+    </tr>
+  `).join('');
+
+  document.getElementById('historialContent').innerHTML = `
+    <div style="overflow-x:auto">
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th>Fecha</th><th>Tipo</th><th>Descripción</th>
+            <th>Plan</th><th>Monto</th><th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+function formatTipo(t) {
+  return { pago: 'Pago', cambio_plan: 'Cambio plan', activacion: 'Activación' }[t] || t;
+}
+
+// ── Admin tab ─────────────────────────────────────────────────────────────
+function renderAdmin() {
+  renderAdminPlanes();
+  renderFeatureMatrix();
+}
+
+function renderAdminPlanes() {
+  const rows = allPlanes.map(p => `
+    <tr>
+      <td><strong>${p.nombre}</strong></td>
+      <td>R$ ${p.precio_mensual.toFixed(2)}</td>
+      <td>${p.usuarios_max || '∞'}</td>
+      <td>${p.productos_max || '∞'}</td>
+      <td><span class="badge ${p.estado === 'activo' ? 'pagado' : 'fallido'}">${p.estado}</span></td>
+      <td>
+        <button class="btn-sm" onclick="editPlan('${p.id}')">Editar</button>
+      </td>
+    </tr>
+  `).join('');
+
+  document.getElementById('adminPlanesContent').innerHTML = `
+    <table class="admin-table">
+      <thead>
+        <tr><th>Nombre</th><th>Precio</th><th>Usuarios</th><th>Productos</th><th>Estado</th><th>Acciones</th></tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+}
+
+function renderFeatureMatrix() {
+  const flags = [
+    ['ia_texto','IA Texto'],['ia_imagenes','IA Imágenes'],
+    ['analytics_basico','Analytics Básico'],['analytics_avanzado','Analytics Avanzado'],
+    ['marketing_basico','Marketing Básico'],['marketing_avanzado','Marketing Avanzado'],
+    ['automatizaciones','Automatizaciones'],['menu_dinamico','Menú Dinámico'],
+    ['calendario_ia','Calendario IA'],['publicaciones_automaticas','Pub. Automáticas'],
+  ];
+
+  const headers = allPlanes.map(p => `<th>${p.nombre}</th>`).join('');
+  const rows = flags.map(([key, label]) => {
+    const cells = allPlanes.map(p => `<td>${bool(p[key])}</td>`).join('');
+    return `<tr><td>${label}</td>${cells}</tr>`;
+  }).join('');
+
+  document.getElementById('featureMatrix').innerHTML = `
+    <table class="feature-matrix">
+      <thead><tr><th>Funcionalidad</th>${headers}</tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+}
+
+// expose for inline onclick (admin table)
+window.editPlan = function(planId) {
+  const plan = allPlanes.find(p => p.id === planId);
+  if (!plan) return;
+  // Pre-fill the modal (reuse create modal but for edit)
+  openNuevoPlanModal(plan);
+};
+
+// ── Tabs ──────────────────────────────────────────────────────────────────
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
+  });
+});
+
+// ── Modal: cambiar plan ───────────────────────────────────────────────────
+function openCambiarPlan(empresaId, planId, planNombre) {
+  pendingChange = { empresaId, planId };
+  document.getElementById('modalTitle').textContent = `Actualizar a ${planNombre}`;
+  document.getElementById('modalDesc').textContent =
+    `¿Confirmas el cambio de plan para esta empresa a "${planNombre}"?`;
+  document.getElementById('modalMsg').className = 'message';
+  document.getElementById('modalCambiarPlan').classList.add('open');
+}
+
+document.getElementById('modalCancelar').addEventListener('click', () => {
+  document.getElementById('modalCambiarPlan').classList.remove('open');
+});
+
+document.getElementById('modalConfirmar').addEventListener('click', async () => {
+  if (!pendingChange) return;
+  const btn = document.getElementById('modalConfirmar');
+  btn.disabled = true;
+  btn.textContent = 'Guardando...';
+
+  const monto  = parseFloat(document.getElementById('modalMonto').value) || 0;
+  const metodo = document.getElementById('modalMetodo').value;
+  const desc   = document.getElementById('modalDescInput').value;
+
+  try {
+    await api.planes.cambiarPlan(pendingChange.empresaId, {
+      plan_id: pendingChange.planId,
+      monto, metodo_pago: metodo, descripcion: desc,
+    });
+    document.getElementById('modalCambiarPlan').classList.remove('open');
+    await loadAll();
+  } catch (err) {
+    const msg = document.getElementById('modalMsg');
+    msg.textContent = err.message || 'Error al cambiar plan';
+    msg.className = 'message error show';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Confirmar cambio';
+  }
+});
+
+// ── Modal: nuevo plan ─────────────────────────────────────────────────────
+function openNuevoPlanModal(existingPlan = null) {
+  const form = document.getElementById('nuevoPlanForm');
+
+  if (existingPlan) {
+    document.querySelector('#modalNuevoPlan h2').textContent = `Editar plan: ${existingPlan.nombre}`;
+    document.getElementById('npId').value = existingPlan.id;
+    document.getElementById('npId').disabled = true;
+    document.getElementById('npNombre').value = existingPlan.nombre;
+    document.getElementById('npPrecio').value = existingPlan.precio_mensual;
+    document.getElementById('npUsuarios').value = existingPlan.usuarios_max;
+    document.getElementById('npProductos').value = existingPlan.productos_max;
+    document.getElementById('npIdiomas').value = existingPlan.idiomas_max;
+    form.querySelectorAll('.flag-check input').forEach(cb => {
+      cb.checked = !!existingPlan[cb.name];
+    });
+  } else {
+    document.querySelector('#modalNuevoPlan h2').textContent = 'Crear nuevo plan';
+    form.querySelectorAll('input[type=text], input[type=number]').forEach(i => i.value = '');
+    form.querySelectorAll('.flag-check input').forEach(cb => cb.checked = false);
+    document.getElementById('npId').disabled = false;
+  }
+
+  document.getElementById('npMsg').className = 'message';
+  document.getElementById('modalNuevoPlan').classList.add('open');
+  document.getElementById('npConfirmar').dataset.editId = existingPlan?.id || '';
+}
+
+document.getElementById('btnNuevoPlan').addEventListener('click', () => openNuevoPlanModal());
+
+document.getElementById('npCancelar').addEventListener('click', () => {
+  document.getElementById('modalNuevoPlan').classList.remove('open');
+});
+
+document.getElementById('npConfirmar').addEventListener('click', async () => {
+  const btn = document.getElementById('npConfirmar');
+  const editId = btn.dataset.editId;
+
+  const getFlags = () => {
+    const flags = {};
+    document.querySelectorAll('#nuevoPlanForm .flag-check input').forEach(cb => {
+      flags[cb.name] = cb.checked ? 1 : 0;
+    });
+    return flags;
+  };
+
+  const body = {
+    id:            document.getElementById('npId').value.trim(),
+    nombre:        document.getElementById('npNombre').value.trim(),
+    precio_mensual: parseFloat(document.getElementById('npPrecio').value) || 0,
+    usuarios_max:  parseInt(document.getElementById('npUsuarios').value) || 0,
+    productos_max: parseInt(document.getElementById('npProductos').value) || 0,
+    idiomas_max:   parseInt(document.getElementById('npIdiomas').value) || 1,
+    ...getFlags(),
+  };
+
+  if (!body.nombre) {
+    const msg = document.getElementById('npMsg');
+    msg.textContent = 'El nombre es requerido';
+    msg.className = 'message error show';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Guardando...';
+
+  try {
+    if (editId) {
+      await api.planes.editarPlan(editId, body);
+    } else {
+      await api.planes.crearPlan(body);
+    }
+    document.getElementById('modalNuevoPlan').classList.remove('open');
+    await loadAll();
+  } catch (err) {
+    const msg = document.getElementById('npMsg');
+    msg.textContent = err.message || 'Error al guardar';
+    msg.className = 'message error show';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = editId ? 'Guardar cambios' : 'Crear plan';
+  }
+});
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+function capitalize(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
+
+// ── Boot ──────────────────────────────────────────────────────────────────
+loadAll();
+</script>
+</body>
+</html>

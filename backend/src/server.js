@@ -21,7 +21,8 @@ const helmet     = require('helmet');
 const cors       = require('cors');
 const cookieParser = require('cookie-parser');
 
-const authRouter = require('./routes/auth');
+const authRouter   = require('./routes/auth');
+const planesRouter = require('./routes/planes');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -53,12 +54,12 @@ app.use(express.json({ limit: '256kb' }));
 app.use(express.urlencoded({ extended: false }));
 
 // ─── API routes ───────────────────────────────────────────────────────────────
-app.use('/api/auth', authRouter);
+app.use('/api/auth',   authRouter);
+app.use('/api/planes', planesRouter);
 
 // Placeholder for future module routes — each module adds its own router here
 // app.use('/api/multiempresa', require('./routes/multiempresa'));
 // app.use('/api/usuarios',     require('./routes/usuarios'));
-// app.use('/api/planes',       require('./routes/planes'));
 // app.use('/api/catalogo',     require('./routes/catalogo'));
 // app.use('/api/multimedia',   require('./routes/multimedia'));
 // app.use('/api/marketing',    require('./routes/marketing'));

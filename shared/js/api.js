@@ -40,6 +40,14 @@ async function request(path, options = {}) {
 }
 
 export const api = {
+  planes: {
+    list:        ()              => request('/planes'),
+    miPlan:      ()              => request('/planes/mi-plan'),
+    historial:   ()              => request('/planes/historial'),
+    cambiarPlan: (empresaId, body) => request(`/planes/empresa/${empresaId}`, { method: 'PUT', body: JSON.stringify(body) }),
+    crearPlan:   (body)          => request('/planes',    { method: 'POST', body: JSON.stringify(body) }),
+    editarPlan:  (id, body)      => request(`/planes/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
+  },
   auth: {
     login:           (body) => request('/auth/login',           { method: 'POST', body: JSON.stringify(body) }),
     register:        (body) => request('/auth/register',        { method: 'POST', body: JSON.stringify(body) }),
