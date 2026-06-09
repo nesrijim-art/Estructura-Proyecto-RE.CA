@@ -107,6 +107,19 @@ router.put('/empresa/:empresaId', requireAuth, requireRole('super_admin'), (req,
   renovacion.setMonth(renovacion.getMonth() + 1);
 
   const planAnteriorId = empresa.plan_id || empresa.plan || null;
+
+  // No-op guard: if the empresa already has this exact plan active, skip the
+  // write entirely to avoid resetting fecha_activacion_plan and creating
+  // spurious history entries.
+  if (planAnteriorId === plan_id && empresa.estado_suscripcion === 'activa') {
+    return res.json({
+      message: `La empresa ya tiene el plan ${plan.nombre} activo. No se realizaron cambios.`,
+      plan_id,
+      fecha_renovacion_plan: empresa.fecha_renovacion_plan,
+      changed: false,
+    });
+  }
+
   const tipo = planAnteriorId ? 'cambio_plan' : 'activacion';
   const desc = descripcion || `Cambio de plan a ${plan.nombre}`;
 
