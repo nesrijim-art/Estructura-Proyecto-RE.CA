@@ -11,6 +11,15 @@ const router = express.Router();
 
 router.use(requireAuth);
 
+// Resolves the effective empresa_id, accounting for super_admin impersonation.
+// Durante impersonación req.user.empresa_id es la empresa del super_admin;
+// req.user.impersonating_empresa_id es la empresa objetivo de soporte.
+function resolveEmpresaId(user) {
+  return user?.impersonating
+    ? user.impersonating_empresa_id
+    : user?.empresa_id;
+}
+
 // ─── Quota helper ─────────────────────────────────────────────────────────────
 function quotaCheck(empresaId) {
   const plan = db.prepare(`
@@ -87,7 +96,7 @@ router.post('/generar-descripcion',
   requireEmpresaRole('dueno', 'admin', 'editor'),
   requireFeature('ia_texto'),
   (req, res) => {
-    const empresaId = req.user.empresa_id;
+    const empresaId = resolveEmpresaId(req.user);
     const { producto_id, nombre, descripcion_actual, tono = 'informal', longitud = 'media', idioma = 'es' } = req.body;
 
     if (!nombre?.trim()) return res.status(400).json({ message: 'nombre es requerido' });
@@ -129,7 +138,7 @@ router.post('/traducir',
   requireEmpresaRole('dueno', 'admin', 'editor'),
   requireFeature('ia_texto'),
   (req, res) => {
-    const empresaId = req.user.empresa_id;
+    const empresaId = resolveEmpresaId(req.user);
     const { textos, idioma_origen = 'es', idioma_destino } = req.body;
 
     if (!idioma_destino) return res.status(400).json({ message: 'idioma_destino es requerido' });
@@ -172,7 +181,7 @@ router.post('/traducir',
 router.get('/quota',
   requireEmpresaRole('dueno', 'admin', 'editor', 'visualizador'),
   (req, res) => {
-    const empresaId = req.user.empresa_id;
+    const empresaId = resolveEmpresaId(req.user);
     const plan = db.prepare(`
       SELECT p.ia_texto, p.ia_imagenes, p.ia_generaciones_max, p.nombre AS plan_nombre
       FROM empresas e LEFT JOIN planes p ON e.plan_id = p.id
@@ -197,7 +206,7 @@ router.get('/quota',
 router.get('/historial',
   requireEmpresaRole('dueno', 'admin', 'editor', 'visualizador'),
   (req, res) => {
-    const empresaId = req.user.empresa_id;
+    const empresaId = resolveEmpresaId(req.user);
     const { tipo, modulo, estado, usuario_id, desde, hasta, page = 1, limit = 20 } = req.query;
 
     const conditions = ['h.empresa_id = ?'];
@@ -234,7 +243,7 @@ router.get('/historial',
 router.get('/historial/:id',
   requireEmpresaRole('dueno', 'admin', 'editor', 'visualizador'),
   (req, res) => {
-    const empresaId = req.user.empresa_id;
+    const empresaId = resolveEmpresaId(req.user);
     const entry = db.prepare(`
       SELECT h.*, u.nombre AS usuario_nombre
       FROM ia_historial h
@@ -257,7 +266,7 @@ router.get('/historial/:id',
 router.put('/historial/:id',
   requireEmpresaRole('dueno', 'admin', 'editor'),
   (req, res) => {
-    const empresaId = req.user.empresa_id;
+    const empresaId = resolveEmpresaId(req.user);
     const { estado, contenido_final } = req.body;
 
     const VALID_ESTADOS = ['generado', 'editado', 'aprobado', 'publicado', 'descartado'];
@@ -282,7 +291,7 @@ router.put('/historial/:id',
 router.get('/stats',
   requireEmpresaRole('dueno', 'admin', 'editor', 'visualizador'),
   (req, res) => {
-    const empresaId = req.user.empresa_id;
+    const empresaId = resolveEmpresaId(req.user);
     const quota     = quotaCheck(empresaId);
 
     const total      = db.prepare('SELECT COUNT(*) AS n FROM ia_historial WHERE empresa_id = ?').get(empresaId).n;
