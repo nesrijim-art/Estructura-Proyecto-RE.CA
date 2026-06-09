@@ -50,6 +50,9 @@
     .btn-danger { background: var(--danger); border-color: var(--danger); color: #fff; }
     .btn-danger:hover { background: color-mix(in oklch, var(--danger), black 15%); }
     .btn:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-ia { background: color-mix(in oklch, var(--accent) 18%, transparent); border-color: color-mix(in oklch, var(--accent) 50%, transparent); color: var(--fg); font-size: 13px; padding: 6px 12px; }
+    .btn-ia:hover { background: var(--accent); border-color: var(--accent); }
+    .hidden { display: none !important; }
 
     /* Toolbar */
     .toolbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 12px 24px; display: flex; align-items: center; gap: 14px; flex-shrink: 0; flex-wrap: wrap; }
@@ -141,6 +144,13 @@
     .section-label { font-family: var(--font-display); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-bottom: 10px; margin-top: 18px; }
     .hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
     @media (max-width: 900px) { .app-layout { grid-template-columns: 1fr; } .sidebar { display: none; } }
+
+    /* IA variants */
+    .ia-variant { border: 2px solid var(--border); border-radius: 10px; padding: 14px; cursor: pointer; transition: all .15s; }
+    .ia-variant:hover { border-color: var(--accent); }
+    .ia-variant.selected { border-color: var(--accent); background: color-mix(in oklch, var(--accent) 10%, transparent); }
+    .ia-variant-label { font-family: var(--font-mono); font-size: 11px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+    .ia-recommended { background: var(--accent); color: var(--fg); padding: 1px 6px; border-radius: 4px; font-size: 10px; }
   </style>
 </head>
 <body>
@@ -228,7 +238,13 @@
     <div id="prodAlert"></div>
 
     <!-- Translations tabs -->
-    <div class="section-label">Nombre y descripción</div>
+    <div class="section-label" style="display:flex;align-items:center;justify-content:space-between">
+      <span>Nombre y descripción</span>
+      <div style="display:flex;gap:7px" id="iaBtnsWrap">
+        <button class="btn btn-ia hidden" id="iaGenBtn" type="button" title="Generar descripción con IA">✨ Generar con IA</button>
+        <button class="btn btn-ia hidden" id="iaTraducirBtn" type="button" title="Traducir con IA">🌐 Traducir</button>
+      </div>
+    </div>
     <div class="trad-tab-bar" id="tradTabBar"></div>
     <div id="tradPanels"></div>
 
@@ -302,6 +318,88 @@
     <div class="modal-actions">
       <button class="btn" id="prodCancel">Cancelar</button>
       <button class="btn btn-primary" id="prodSave">Guardar producto</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal: Generar descripción con IA ── -->
+<div class="modal-backdrop hidden" id="iaModal">
+  <div class="modal" style="max-width:580px">
+    <h3>✨ Generar descripción con IA</h3>
+    <div id="iaAlert"></div>
+
+    <!-- Options panel -->
+    <div id="iaOptionsPanel">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Tono</label>
+          <select id="iaTono">
+            <option value="informal">Informal (cercano)</option>
+            <option value="formal">Formal (profesional)</option>
+            <option value="juvenil">Juvenil (dinámico)</option>
+            <option value="premium">Premium (exclusivo)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Longitud</label>
+          <select id="iaLongitud">
+            <option value="media">Media</option>
+            <option value="corta">Corta</option>
+            <option value="larga">Larga</option>
+          </select>
+        </div>
+      </div>
+      <p class="hint">El texto generado se basará en el nombre del producto activo.</p>
+      <div class="modal-actions">
+        <button class="btn" id="iaCancelar">Cancelar</button>
+        <button class="btn btn-primary" id="iaGenerar">Generar</button>
+      </div>
+    </div>
+
+    <!-- Loading panel -->
+    <div id="iaLoadingPanel" class="hidden" style="text-align:center;padding:32px 0">
+      <div style="font-size:32px;margin-bottom:12px">✨</div>
+      <p style="color:var(--muted)">Generando descripciones…</p>
+    </div>
+
+    <!-- Variants panel -->
+    <div id="iaVariantsPanel" class="hidden">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Selecciona la descripción que mejor represente tu producto</p>
+      <div id="iaVariantsList" style="display:flex;flex-direction:column;gap:10px"></div>
+      <div class="modal-actions">
+        <button class="btn" id="iaDescartar">Descartar</button>
+        <button class="btn btn-primary" id="iaUsar" disabled>Usar seleccionada</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal: Traducir con IA ── -->
+<div class="modal-backdrop hidden" id="iaTraducirModal">
+  <div class="modal" style="max-width:560px">
+    <h3>🌐 Traducir descripción con IA</h3>
+    <div id="iaTraducirAlert"></div>
+    <div id="iaTraducirContent">
+      <p style="font-size:14px;color:var(--fg-2);margin-bottom:16px">
+        IA tomará el nombre y descripción en <strong>Español</strong> y los traducirá al idioma seleccionado.
+      </p>
+      <div class="form-group">
+        <label>Idioma destino</label>
+        <select id="iaTraducirIdioma">
+          <option value="en">🇬🇧 Inglés</option>
+          <option value="pt">🇧🇷 Portugués</option>
+          <option value="fr">🇫🇷 Francés</option>
+        </select>
+      </div>
+      <p class="hint" id="iaTraducirHint"></p>
+    </div>
+    <div id="iaTraducirLoading" class="hidden" style="text-align:center;padding:24px 0">
+      <div style="font-size:28px;margin-bottom:10px">🌐</div>
+      <p style="color:var(--muted)">Traduciendo…</p>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" id="iaTraducirCancelar">Cancelar</button>
+      <button class="btn btn-primary" id="iaTraducirEjecutar">Traducir</button>
     </div>
   </div>
 </div>
@@ -386,6 +484,7 @@ async function loadAll() {
     const planData = await api.planes.miPlan().catch(() => null);
     maxIdiomas  = planData?.plan?.idiomas_max ?? 1;
     empresaSlug = planData?.empresa?.slug || me?.empresa_id;
+    checkIaAccess();
 
     const [catData, prodData] = await Promise.all([
       api.catalogo.listarCategorias(),
@@ -799,6 +898,195 @@ async function deleteProd(id) {
     showAlert(document.getElementById('alertMain'), err.message);
   }
 }
+
+// ── IA integration ─────────────────────────────────────────────────────────────
+
+let iaEnabled = false;
+let iaHistorialId = null;
+let iaSelectedVariant = null;
+let iaLangTarget = null;
+
+async function checkIaAccess() {
+  try {
+    const q = await api.ia.quota();
+    iaEnabled = q.ia_texto;
+    if (iaEnabled) {
+      document.getElementById('iaGenBtn').classList.remove('hidden');
+      if (maxIdiomas > 1) document.getElementById('iaTraducirBtn').classList.remove('hidden');
+    }
+  } catch (_) {
+    // plan sin IA — botones quedan ocultos
+  }
+}
+
+// checkIaAccess is called in loadAll after plan data is resolved
+// ── IA: generate description ──────────────────────────────────────────────────
+
+function showIaPanel(panelId) {
+  ['iaOptionsPanel','iaLoadingPanel','iaVariantsPanel'].forEach(id => {
+    document.getElementById(id).classList.toggle('hidden', id !== panelId);
+  });
+}
+
+document.getElementById('iaGenBtn').addEventListener('click', () => {
+  const nombre = document.getElementById('trad-nombre-es')?.value?.trim();
+  if (!nombre) {
+    showAlert(document.getElementById('prodAlert'), 'Ingresa el nombre del producto en Español antes de usar IA.');
+    return;
+  }
+  iaHistorialId = null;
+  iaSelectedVariant = null;
+  document.getElementById('iaAlert').innerHTML = '';
+  document.getElementById('iaVariantsList').innerHTML = '';
+  document.getElementById('iaUsar').disabled = true;
+  showIaPanel('iaOptionsPanel');
+  document.getElementById('iaModal').classList.remove('hidden');
+});
+
+document.getElementById('iaCancelar').addEventListener('click', () => document.getElementById('iaModal').classList.add('hidden'));
+
+document.getElementById('iaGenerar').addEventListener('click', async () => {
+  const nombre = document.getElementById('trad-nombre-es')?.value?.trim();
+  const descActual = document.getElementById('trad-desc-es')?.value?.trim();
+  const tono    = document.getElementById('iaTono').value;
+  const longitud = document.getElementById('iaLongitud').value;
+
+  showIaPanel('iaLoadingPanel');
+
+  try {
+    const res = await api.ia.generarDescripcion({
+      producto_id:       editProdId || null,
+      nombre,
+      descripcion_actual: descActual || null,
+      tono,
+      longitud,
+      idioma: 'es',
+    });
+
+    iaHistorialId = res.historial_id;
+    renderVariantes(res.variantes);
+    showIaPanel('iaVariantsPanel');
+  } catch (err) {
+    showIaPanel('iaOptionsPanel');
+    showAlert(document.getElementById('iaAlert'), err.message);
+  }
+});
+
+function renderVariantes(variantes) {
+  iaSelectedVariant = null;
+  document.getElementById('iaUsar').disabled = true;
+  document.getElementById('iaVariantsList').innerHTML = variantes.map((v, i) => `
+    <div class="ia-variant" data-varid="${v.id}" data-texto="${encodeURIComponent(v.texto)}">
+      <div class="ia-variant-label">
+        Variante ${i + 1}
+        ${v.recomendada ? '<span class="ia-recommended">Recomendada</span>' : ''}
+      </div>
+      <p style="font-size:14px;line-height:1.5">${v.texto}</p>
+    </div>`).join('');
+
+  document.getElementById('iaVariantsList').querySelectorAll('.ia-variant').forEach(el => {
+    el.addEventListener('click', () => {
+      document.querySelectorAll('.ia-variant').forEach(v => v.classList.remove('selected'));
+      el.classList.add('selected');
+      iaSelectedVariant = { id: el.dataset.varid, texto: decodeURIComponent(el.dataset.texto) };
+      document.getElementById('iaUsar').disabled = false;
+    });
+  });
+}
+
+document.getElementById('iaDescartar').addEventListener('click', async () => {
+  if (iaHistorialId) {
+    await api.ia.actualizarHistorial(iaHistorialId, { estado: 'descartado' }).catch(() => {});
+  }
+  document.getElementById('iaModal').classList.add('hidden');
+});
+
+document.getElementById('iaUsar').addEventListener('click', async () => {
+  if (!iaSelectedVariant) return;
+  const descEl = document.getElementById('trad-desc-es');
+  if (descEl) {
+    const textoFinal = iaSelectedVariant.texto;
+    descEl.value = textoFinal;
+    if (iaHistorialId) {
+      await api.ia.actualizarHistorial(iaHistorialId, { estado: 'aprobado', contenido_final: textoFinal }).catch(() => {});
+    }
+  }
+  document.getElementById('iaModal').classList.add('hidden');
+});
+
+// ── IA: translate ──────────────────────────────────────────────────────────────
+
+document.getElementById('iaTraducirBtn').addEventListener('click', () => {
+  document.getElementById('iaTraducirAlert').innerHTML = '';
+  document.getElementById('iaTraducirContent').classList.remove('hidden');
+  document.getElementById('iaTraducirLoading').classList.add('hidden');
+  document.getElementById('iaTraducirEjecutar').disabled = false;
+
+  // Populate idioma options based on plan langs (excluding es)
+  const sel = document.getElementById('iaTraducirIdioma');
+  const LANG_MAP = { en: '🇬🇧 Inglés', pt: '🇧🇷 Portugués', fr: '🇫🇷 Francés' };
+  sel.innerHTML = IDIOMAS.slice(1, maxIdiomas).map(l =>
+    `<option value="${l.code}">${l.flag} ${l.label}</option>`
+  ).join('') || '<option value="en">🇬🇧 Inglés</option>';
+
+  const nombreEs = document.getElementById('trad-nombre-es')?.value?.trim() || '';
+  document.getElementById('iaTraducirHint').textContent = nombreEs
+    ? `Se traducirá: "${nombreEs}"`
+    : 'Ingresa el nombre en Español antes de traducir.';
+
+  document.getElementById('iaTraducirModal').classList.remove('hidden');
+});
+
+document.getElementById('iaTraducirCancelar').addEventListener('click', () => {
+  document.getElementById('iaTraducirModal').classList.add('hidden');
+});
+
+document.getElementById('iaTraducirEjecutar').addEventListener('click', async () => {
+  const nombreEs = document.getElementById('trad-nombre-es')?.value?.trim();
+  const descEs   = document.getElementById('trad-desc-es')?.value?.trim();
+  if (!nombreEs) {
+    showAlert(document.getElementById('iaTraducirAlert'), 'Ingresa el nombre en Español primero.');
+    return;
+  }
+
+  const idiomaDest = document.getElementById('iaTraducirIdioma').value;
+  document.getElementById('iaTraducirContent').classList.add('hidden');
+  document.getElementById('iaTraducirLoading').classList.remove('hidden');
+  document.getElementById('iaTraducirEjecutar').disabled = true;
+
+  try {
+    const res = await api.ia.traducir({
+      textos: [{ producto_id: editProdId || null, nombre: nombreEs, descripcion: descEs || null }],
+      idioma_origen: 'es',
+      idioma_destino: idiomaDest,
+    });
+
+    const trad = res.traducciones?.[0];
+    if (trad) {
+      const nameEl = document.getElementById(`trad-nombre-${idiomaDest}`);
+      const descEl = document.getElementById(`trad-desc-${idiomaDest}`);
+      if (nameEl) nameEl.value = trad.nombre_traducido;
+      if (descEl && trad.descripcion_traducida) descEl.value = trad.descripcion_traducida;
+
+      // Switch to the translated language tab
+      const tabBtn = document.querySelector(`.trad-tab[data-lang="${idiomaDest}"]`);
+      if (tabBtn) tabBtn.click();
+
+      if (res.historial_id) {
+        await api.ia.actualizarHistorial(res.historial_id, {
+          estado: 'aprobado',
+          contenido_final: trad.nombre_traducido,
+        }).catch(() => {});
+      }
+    }
+    document.getElementById('iaTraducirModal').classList.add('hidden');
+  } catch (err) {
+    document.getElementById('iaTraducirContent').classList.remove('hidden');
+    document.getElementById('iaTraducirLoading').classList.add('hidden');
+    document.getElementById('iaTraducirEjecutar').disabled = false;
+    showAlert(document.getElementById('iaTraducirAlert'), err.message);
+  }
+});
 
 // ── Init ───────────────────────────────────────────────────────────────────────
 loadAll();

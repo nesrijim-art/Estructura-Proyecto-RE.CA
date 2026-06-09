@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Inteligencia Artificial · RE.CA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #fafafa; --surface: #ffffff;
+      --fg: #0d1117; --fg-2: #374151; --muted: #6b7280;
+      --border: #e5e7eb; --border-soft: #f3f4f6;
+      --accent: #ffd21e; --accent-on: #0d1117; --accent-hover: #f59e0b;
+      --accent-soft: color-mix(in oklch, #ffd21e 14%, transparent);
+      --fg-soft: color-mix(in oklch, #0d1117 6%, transparent);
+      --success: #16a34a; --warn: #f59e0b; --danger: #dc2626;
+      --font-display: "IBM Plex Mono", ui-monospace, monospace;
+      --font-body: "Source Sans Pro", system-ui, sans-serif;
+      --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; }
+    html { -webkit-text-size-adjust: 100%; }
+    body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.55; }
+    h1,h2,h3 { font-family: var(--font-display); font-weight: 600; line-height: 1.2; }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; cursor: pointer; border: 0; }
+    input, select, textarea { font: inherit; }
+
+    .app-layout { display: grid; grid-template-columns: 240px 1fr; height: 100vh; }
+    .sidebar { background: var(--surface); border-right: 1px solid var(--border); padding: 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
+    .sidebar-brand { font-family: var(--font-display); font-size: 18px; font-weight: 600; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 2px solid var(--fg); }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 14px; border-radius: 8px; color: var(--muted); font-size: 14px; transition: all .15s; }
+    .nav-item:hover { background: var(--bg); color: var(--fg); }
+    .nav-item.active { background: var(--accent); color: var(--fg); font-weight: 600; }
+    .main-content { display: flex; flex-direction: column; overflow: hidden; }
+
+    .content-header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-shrink: 0; }
+    .header-left { display: flex; align-items: baseline; gap: 14px; }
+    .page-title { font-size: 26px; }
+
+    .btn { padding: 9px 16px; border-radius: 8px; font-size: 14px; font-weight: 500; border: 1px solid var(--border); background: var(--surface); color: var(--fg); transition: all .15s; display: inline-flex; align-items: center; gap: 7px; cursor: pointer; }
+    .btn:hover { background: var(--bg); border-color: var(--fg); }
+    .btn-primary { background: var(--accent); border-color: var(--accent); color: var(--fg); font-weight: 600; }
+    .btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+
+    .toolbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 12px 24px; display: flex; align-items: center; gap: 12px; flex-shrink: 0; flex-wrap: wrap; }
+    .select-sm { padding: 7px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--fg); font-size: 13px; }
+    .select-sm:focus { outline: none; border-color: var(--accent); }
+
+    .scroll-area { flex: 1; overflow-y: auto; padding: 24px; }
+
+    /* Stats bar */
+    .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 24px; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+    .stat-label { font-size: 12px; color: var(--muted); font-family: var(--font-mono); margin-bottom: 4px; }
+    .stat-value { font-family: var(--font-display); font-size: 26px; font-weight: 600; }
+    .stat-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    /* Quota bar */
+    .quota-bar-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; margin-bottom: 24px; display: flex; align-items: center; gap: 16px; }
+    .quota-info { flex: 1; }
+    .quota-label { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+    .quota-bar { background: var(--border); border-radius: 99px; height: 8px; overflow: hidden; }
+    .quota-fill { background: var(--accent); height: 100%; border-radius: 99px; transition: width .3s; }
+    .quota-fill.warn { background: var(--warn); }
+    .quota-fill.full { background: var(--danger); }
+    .quota-text { font-family: var(--font-mono); font-size: 13px; font-weight: 600; white-space: nowrap; }
+
+    /* History list */
+    .history-list { display: flex; flex-direction: column; gap: 10px; }
+    .history-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; display: flex; gap: 14px; align-items: flex-start; }
+    .history-card:hover { border-color: color-mix(in oklch, var(--fg) 30%, transparent); }
+    .history-icon { width: 36px; height: 36px; border-radius: 8px; background: var(--accent-soft); display: grid; place-items: center; font-size: 16px; flex-shrink: 0; }
+    .history-body { flex: 1; min-width: 0; }
+    .history-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
+    .history-tipo { font-family: var(--font-mono); font-size: 12px; font-weight: 600; }
+    .history-modulo { font-size: 12px; color: var(--muted); }
+    .history-date { font-size: 12px; color: var(--muted); margin-left: auto; }
+    .history-preview { font-size: 13px; color: var(--fg-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 520px; }
+    .history-user { font-size: 12px; color: var(--muted); margin-top: 4px; }
+    .history-actions { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+
+    /* Status badges */
+    .badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; font-family: var(--font-mono); }
+    .badge-generado  { background: color-mix(in oklch, #6b7280 15%, transparent); color: #374151; }
+    .badge-editado   { background: color-mix(in oklch, #f59e0b 15%, transparent); color: #92400e; }
+    .badge-aprobado  { background: color-mix(in oklch, #16a34a 15%, transparent); color: #14532d; }
+    .badge-publicado { background: color-mix(in oklch, #2563eb 15%, transparent); color: #1e3a8a; }
+    .badge-descartado { background: color-mix(in oklch, #dc2626 15%, transparent); color: #7f1d1d; }
+
+    .tipo-label { display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; border-radius: 5px; font-size: 11px; font-family: var(--font-mono); background: var(--border-soft); color: var(--muted); }
+
+    .empty-state { text-align: center; padding: 60px 24px; color: var(--muted); }
+    .empty-icon { font-size: 48px; margin-bottom: 12px; }
+    .empty-title { font-family: var(--font-display); font-size: 18px; color: var(--fg); margin-bottom: 8px; }
+
+    .pagination { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 24px; }
+    .pagination button { padding: 6px 12px; border-radius: 7px; font-size: 13px; }
+    .page-info { font-family: var(--font-mono); font-size: 13px; color: var(--muted); }
+
+    .alert { padding: 11px 14px; border-radius: 8px; font-size: 14px; margin-bottom: 14px; }
+    .alert-error { background: color-mix(in oklch, var(--danger) 10%, transparent); color: var(--danger); border: 1px solid color-mix(in oklch, var(--danger) 25%, transparent); }
+    .alert-warn  { background: color-mix(in oklch, var(--warn) 12%, transparent); color: #92400e; border: 1px solid color-mix(in oklch, var(--warn) 30%, transparent); }
+    .alert-info  { background: color-mix(in oklch, #2563eb 10%, transparent); color: #1e3a8a; border: 1px solid color-mix(in oklch, #2563eb 20%, transparent); }
+
+    /* Detail modal */
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: grid; place-items: center; z-index: 100; padding: 16px; }
+    .modal-backdrop.hidden { display: none; }
+    .modal { background: var(--surface); border-radius: 14px; padding: 26px 28px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,.18); }
+    .modal h3 { font-size: 20px; margin-bottom: 18px; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; border-top: 1px solid var(--border); padding-top: 16px; }
+    .detail-row { display: flex; gap: 8px; margin-bottom: 10px; font-size: 14px; }
+    .detail-key { font-family: var(--font-mono); font-size: 12px; color: var(--muted); min-width: 130px; padding-top: 2px; }
+    .detail-val { flex: 1; }
+    .detail-block { background: var(--bg); border-radius: 8px; padding: 12px; font-size: 13px; font-family: var(--font-mono); white-space: pre-wrap; word-break: break-all; margin-top: 6px; max-height: 200px; overflow-y: auto; }
+
+    .upgrade-banner { background: color-mix(in oklch, var(--accent) 18%, transparent); border: 1px solid color-mix(in oklch, var(--accent) 45%, transparent); border-radius: 10px; padding: 16px 20px; margin-bottom: 24px; display: flex; align-items: center; gap: 14px; }
+    .upgrade-banner .ub-icon { font-size: 28px; }
+    .upgrade-banner .ub-text { flex: 1; }
+    .upgrade-banner .ub-title { font-family: var(--font-display); font-size: 15px; font-weight: 600; }
+    .upgrade-banner .ub-sub { font-size: 13px; color: var(--fg-2); }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">RE.CA</div>
+    <a class="nav-item" href="/app/dashboard/">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </a>
+    <a class="nav-item" href="/app/catalogo/">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+      Catálogo
+    </a>
+    <a class="nav-item" href="/app/multimedia/">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      Multimedia
+    </a>
+    <a class="nav-item active" href="/app/ia/">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+      Inteligencia Artificial
+    </a>
+    <a class="nav-item" href="/app/usuarios/">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      Usuarios
+    </a>
+  </aside>
+
+  <!-- Main -->
+  <div class="main-content">
+    <header class="content-header">
+      <div class="header-left">
+        <h1 class="page-title">✨ Inteligencia Artificial</h1>
+      </div>
+    </header>
+
+    <div class="toolbar">
+      <label style="font-size:13px;color:var(--muted)">Módulo</label>
+      <select class="select-sm" id="filtroModulo">
+        <option value="">Todos</option>
+        <option value="catalogo">Catálogo</option>
+        <option value="marketing">Marketing</option>
+        <option value="idiomas">Idiomas</option>
+        <option value="multimedia">Multimedia</option>
+      </select>
+      <label style="font-size:13px;color:var(--muted)">Tipo</label>
+      <select class="select-sm" id="filtroTipo">
+        <option value="">Todos</option>
+        <option value="descripcion_producto">Descripción</option>
+        <option value="traduccion">Traducción</option>
+        <option value="campania_marketing">Campaña</option>
+        <option value="optimizacion_imagen">Imagen</option>
+      </select>
+      <label style="font-size:13px;color:var(--muted)">Estado</label>
+      <select class="select-sm" id="filtroEstado">
+        <option value="">Todos</option>
+        <option value="generado">Generado</option>
+        <option value="editado">Editado</option>
+        <option value="aprobado">Aprobado</option>
+        <option value="publicado">Publicado</option>
+        <option value="descartado">Descartado</option>
+      </select>
+      <button class="btn" id="filtrarBtn">Filtrar</button>
+      <button class="btn" id="limpiarBtn" style="color:var(--muted)">Limpiar</button>
+    </div>
+
+    <div class="scroll-area">
+      <div id="alertGlobal"></div>
+
+      <!-- Upgrade banner (hidden by default) -->
+      <div class="upgrade-banner hidden" id="upgradeBanner">
+        <div class="ub-icon">🔒</div>
+        <div class="ub-text">
+          <div class="ub-title">Tu plan no incluye acceso a IA</div>
+          <div class="ub-sub">Actualiza a Business o Premium para generar contenido con Inteligencia Artificial.</div>
+        </div>
+      </div>
+
+      <!-- Quota bar -->
+      <div class="quota-bar-wrap hidden" id="quotaWrap">
+        <div class="quota-info">
+          <div class="quota-label">Generaciones este mes</div>
+          <div class="quota-bar"><div class="quota-fill" id="quotaFill" style="width:0%"></div></div>
+        </div>
+        <div class="quota-text" id="quotaText">—</div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-row" id="statsRow">
+        <div class="stat-card"><div class="stat-label">total generaciones</div><div class="stat-value" id="statTotal">—</div></div>
+        <div class="stat-card"><div class="stat-label">aprobadas</div><div class="stat-value" id="statAprobadas">—</div></div>
+        <div class="stat-card"><div class="stat-label">descartadas</div><div class="stat-value" id="statDescartadas">—</div></div>
+        <div class="stat-card"><div class="stat-label">tasa aprobación</div><div class="stat-value" id="statTasa">—</div><div class="stat-sub">de contenido generado</div></div>
+      </div>
+
+      <!-- History list -->
+      <div id="historialArea"></div>
+
+      <!-- Pagination -->
+      <div class="pagination hidden" id="paginacion">
+        <button class="btn" id="prevBtn">← Anterior</button>
+        <span class="page-info" id="pageInfo"></span>
+        <button class="btn" id="nextBtn">Siguiente →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Detalle de generación -->
+<div class="modal-backdrop hidden" id="detailModal">
+  <div class="modal">
+    <h3>Detalle de generación</h3>
+    <div id="detailContent"></div>
+    <div class="modal-actions">
+      <button class="btn" id="detailClose">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { api } from '/shared/js/api.js';
+import { requireAuth, getUser } from '/shared/js/auth.js';
+
+requireAuth();
+
+let currentPage = 1;
+let totalPages  = 1;
+
+const TIPO_LABELS = {
+  descripcion_producto: { icon: '📝', label: 'Descripción' },
+  traduccion:           { icon: '🌐', label: 'Traducción' },
+  campania_marketing:   { icon: '📢', label: 'Campaña' },
+  optimizacion_imagen:  { icon: '🖼️', label: 'Imagen' },
+};
+
+const MODULO_LABELS = {
+  catalogo:   'Catálogo',
+  marketing:  'Marketing',
+  idiomas:    'Idiomas',
+  multimedia: 'Multimedia',
+};
+
+function showAlert(msg, type = 'error') {
+  document.getElementById('alertGlobal').innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+}
+
+function estadoBadge(e) {
+  const icons = { generado: '⏳', editado: '✏️', aprobado: '✅', publicado: '🚀', descartado: '❌' };
+  return `<span class="badge badge-${e}">${icons[e] || ''} ${e}</span>`;
+}
+
+function fmtDate(d) {
+  if (!d) return '—';
+  return new Date(d).toLocaleString('es', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
+}
+
+async function loadStats() {
+  try {
+    const s = await api.ia.stats();
+    document.getElementById('statTotal').textContent      = s.total;
+    document.getElementById('statAprobadas').textContent  = s.aprobados;
+    document.getElementById('statDescartadas').textContent = s.descartados;
+    document.getElementById('statTasa').textContent       = `${s.tasa_aprobacion}%`;
+
+    const q = s.quota;
+    if (q.ilimitado) {
+      document.getElementById('quotaWrap').classList.remove('hidden');
+      document.getElementById('quotaText').textContent = `${q.usado} · ilimitado`;
+      document.getElementById('quotaFill').style.width = '15%';
+    } else if (q.max > 0) {
+      document.getElementById('quotaWrap').classList.remove('hidden');
+      const pct = Math.min(100, Math.round((q.usado / q.max) * 100));
+      const fill = document.getElementById('quotaFill');
+      fill.style.width = `${pct}%`;
+      fill.className   = `quota-fill${pct >= 100 ? ' full' : pct >= 80 ? ' warn' : ''}`;
+      document.getElementById('quotaText').textContent = `${q.usado} / ${q.max}`;
+    }
+  } catch (err) {
+    if (err.status === 403 && err.data?.upgrade_required) {
+      document.getElementById('upgradeBanner').classList.remove('hidden');
+    }
+  }
+}
+
+async function loadHistorial() {
+  const params = {
+    modulo: document.getElementById('filtroModulo').value,
+    tipo:   document.getElementById('filtroTipo').value,
+    estado: document.getElementById('filtroEstado').value,
+    page:   currentPage,
+    limit:  15,
+  };
+
+  try {
+    const data = await api.ia.historial(params);
+    totalPages = Math.ceil(data.total / data.limit) || 1;
+
+    document.getElementById('pageInfo').textContent = `Página ${currentPage} de ${totalPages} · ${data.total} registros`;
+    document.getElementById('paginacion').classList.toggle('hidden', data.total <= data.limit);
+    document.getElementById('prevBtn').disabled = currentPage <= 1;
+    document.getElementById('nextBtn').disabled = currentPage >= totalPages;
+
+    renderHistorial(data.registros);
+  } catch (err) {
+    showAlert(err.message);
+  }
+}
+
+function renderHistorial(registros) {
+  const area = document.getElementById('historialArea');
+
+  if (!registros.length) {
+    area.innerHTML = `<div class="empty-state">
+      <div class="empty-icon">🤖</div>
+      <div class="empty-title">Sin registros de IA</div>
+      <p>Las generaciones de contenido con IA aparecerán aquí.</p>
+    </div>`;
+    return;
+  }
+
+  const cards = registros.map(r => {
+    const t = TIPO_LABELS[r.tipo] || { icon: '•', label: r.tipo };
+    const preview = r.contenido_final || '—';
+    return `
+      <div class="history-card">
+        <div class="history-icon">${t.icon}</div>
+        <div class="history-body">
+          <div class="history-meta">
+            <span class="history-tipo">${t.label}</span>
+            <span class="history-modulo">${MODULO_LABELS[r.modulo] || r.modulo}</span>
+            ${estadoBadge(r.estado)}
+            <span class="history-date">${fmtDate(r.created_at)}</span>
+          </div>
+          <div class="history-preview">${preview}</div>
+          <div class="history-user">por ${r.usuario_nombre || 'usuario'}</div>
+        </div>
+        <div class="history-actions">
+          <button class="btn" style="font-size:12px;padding:5px 10px" data-id="${r.id}" data-action="detail">Ver detalle</button>
+        </div>
+      </div>`;
+  }).join('');
+
+  area.innerHTML = `<div class="history-list">${cards}</div>`;
+
+  area.querySelectorAll('[data-action="detail"]').forEach(btn => {
+    btn.addEventListener('click', () => openDetail(btn.dataset.id));
+  });
+}
+
+async function openDetail(id) {
+  try {
+    const r = await api.ia.obtenerHistorial(id);
+    const t = TIPO_LABELS[r.tipo] || { icon: '•', label: r.tipo };
+    document.getElementById('detailContent').innerHTML = `
+      <div class="detail-row"><span class="detail-key">tipo</span><span class="detail-val">${t.icon} ${t.label}</span></div>
+      <div class="detail-row"><span class="detail-key">módulo</span><span class="detail-val">${MODULO_LABELS[r.modulo] || r.modulo}</span></div>
+      <div class="detail-row"><span class="detail-key">estado</span><span class="detail-val">${estadoBadge(r.estado)}</span></div>
+      <div class="detail-row"><span class="detail-key">usuario</span><span class="detail-val">${r.usuario_nombre || '—'}</span></div>
+      <div class="detail-row"><span class="detail-key">fecha</span><span class="detail-val">${fmtDate(r.created_at)}</span></div>
+      ${r.contenido_final ? `<div class="detail-row"><span class="detail-key">contenido final</span></div><div class="detail-block">${r.contenido_final}</div>` : ''}
+      <div class="detail-row" style="margin-top:12px"><span class="detail-key">input</span></div>
+      <div class="detail-block">${JSON.stringify(r.input_data, null, 2)}</div>
+    `;
+    document.getElementById('detailModal').classList.remove('hidden');
+  } catch (err) {
+    showAlert(err.message);
+  }
+}
+
+document.getElementById('detailClose').addEventListener('click', () => {
+  document.getElementById('detailModal').classList.add('hidden');
+});
+
+document.getElementById('detailModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('detailModal')) {
+    document.getElementById('detailModal').classList.add('hidden');
+  }
+});
+
+document.getElementById('filtrarBtn').addEventListener('click', () => { currentPage = 1; loadHistorial(); });
+document.getElementById('limpiarBtn').addEventListener('click', () => {
+  document.getElementById('filtroModulo').value = '';
+  document.getElementById('filtroTipo').value   = '';
+  document.getElementById('filtroEstado').value = '';
+  currentPage = 1;
+  loadHistorial();
+});
+
+document.getElementById('prevBtn').addEventListener('click', () => { if (currentPage > 1) { currentPage--; loadHistorial(); } });
+document.getElementById('nextBtn').addEventListener('click', () => { if (currentPage < totalPages) { currentPage++; loadHistorial(); } });
+
+loadStats();
+loadHistorial();
+</script>
+</body>
+</html>

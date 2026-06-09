@@ -154,6 +154,20 @@ export const api = {
     actualizarColores: (body) => request('/identidad-visual/colores', { method: 'PUT', body: JSON.stringify(body) }),
     eliminarLogo:      ()     => request('/identidad-visual/logo',    { method: 'DELETE' }),
   },
+  ia: {
+    quota:               ()              => request('/ia/quota'),
+    stats:               ()              => request('/ia/stats'),
+    generarDescripcion:  (body)          => request('/ia/generar-descripcion', { method: 'POST', body: JSON.stringify(body) }),
+    traducir:            (body)          => request('/ia/traducir',            { method: 'POST', body: JSON.stringify(body) }),
+    historial:           (params = {})   => {
+      const qs = new URLSearchParams(
+        Object.entries(params).filter(([, v]) => v !== '' && v != null)
+      ).toString();
+      return request('/ia/historial' + (qs ? '?' + qs : ''));
+    },
+    obtenerHistorial:    (id)            => request(`/ia/historial/${id}`),
+    actualizarHistorial: (id, body)      => request(`/ia/historial/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
+  },
   auth: {
     login:           (body) => request('/auth/login',           { method: 'POST', body: JSON.stringify(body) }),
     register:        (body) => request('/auth/register',        { method: 'POST', body: JSON.stringify(body) }),

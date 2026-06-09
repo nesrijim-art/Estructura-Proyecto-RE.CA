@@ -29,6 +29,7 @@ const identidadVisualRouter = require('./routes/identidad-visual');
 const multimediaRouter      = require('./routes/multimedia');
 const catalogoRouter        = require('./routes/catalogo');
 const menuPublicoRouter     = require('./routes/menu-publico');
+const iaRouter              = require('./routes/ia');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -67,6 +68,7 @@ app.use('/api/usuarios',         usuariosRouter);
 app.use('/api/identidad-visual', identidadVisualRouter);
 app.use('/api/multimedia',       multimediaRouter);
 app.use('/api/catalogo',         catalogoRouter);
+app.use('/api/ia',               iaRouter);
 app.use('/api/menu',             menuPublicoRouter);   // public — no auth
 
 // Placeholder for future module routes — each module adds its own router here

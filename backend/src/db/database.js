@@ -22,6 +22,10 @@ const tableMigrations = {
   sesiones: [
     `ALTER TABLE sesiones ADD COLUMN impersonating_empresa_id TEXT`,
   ],
+  planes: [
+    // M09: monthly AI generation quota (0 = unlimited)
+    `ALTER TABLE planes ADD COLUMN ia_generaciones_max INTEGER NOT NULL DEFAULT 100`,
+  ],
   empresas: [
     `ALTER TABLE empresas ADD COLUMN plan_id TEXT REFERENCES planes(id)`,
     `ALTER TABLE empresas ADD COLUMN fecha_activacion_plan DATETIME`,
@@ -217,6 +221,32 @@ db.exec(`
   CREATE UNIQUE INDEX IF NOT EXISTS idx_multimedia_refs_unique
     ON multimedia_refs(multimedia_id, modulo, entidad_id);
   CREATE INDEX IF NOT EXISTS idx_multimedia_refs_media ON multimedia_refs(multimedia_id);
+`);
+
+// M09: set unlimited generations for Premium plan
+db.prepare(`UPDATE planes SET ia_generaciones_max = 0 WHERE id = 'premium'`).run();
+
+// M09: ai history table
+db.exec(`
+  CREATE TABLE IF NOT EXISTS ia_historial (
+    id              TEXT PRIMARY KEY,
+    empresa_id      TEXT NOT NULL REFERENCES empresas(id) ON DELETE CASCADE,
+    usuario_id      TEXT NOT NULL,
+    tipo            TEXT NOT NULL CHECK(tipo IN ('descripcion_producto','traduccion','campania_marketing','optimizacion_imagen')),
+    modulo          TEXT NOT NULL CHECK(modulo IN ('catalogo','marketing','idiomas','multimedia')),
+    input_data      TEXT NOT NULL DEFAULT '{}',
+    output_data     TEXT NOT NULL DEFAULT '{}',
+    contenido_final TEXT,
+    estado          TEXT NOT NULL DEFAULT 'generado'
+                      CHECK(estado IN ('generado','editado','aprobado','publicado','descartado')),
+    recurso_tipo    TEXT,
+    recurso_id      TEXT,
+    created_at      DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at      DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+  CREATE INDEX IF NOT EXISTS idx_ia_historial_empresa ON ia_historial(empresa_id);
+  CREATE INDEX IF NOT EXISTS idx_ia_historial_tipo    ON ia_historial(empresa_id, tipo);
+  CREATE INDEX IF NOT EXISTS idx_ia_historial_mes     ON ia_historial(empresa_id, created_at);
 `);
 
 module.exports = db;
