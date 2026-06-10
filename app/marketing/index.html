@@ -107,6 +107,7 @@
     .badge-pausada     { background: var(--warn-soft);    color: var(--warn); }
     .badge-finalizada  { background: var(--fg-soft);      color: var(--muted); }
     .badge-borrador    { background: var(--border);        color: var(--muted); }
+    .badge-archivada   { background: var(--fg-soft);       color: var(--muted); }
     .card-body { padding: var(--space-5); }
     .card-title { font-size: var(--text-xl); font-weight: 600; margin-bottom: 2px; letter-spacing: -.01em; }
     .card-subtitle { font-size: var(--text-sm); color: var(--muted); margin-bottom: var(--space-4); }
@@ -299,6 +300,7 @@
         <option value="pausada">Pausada</option>
         <option value="borrador">Borrador</option>
         <option value="finalizada">Finalizada</option>
+        <option value="archivada">Archivadas (historial)</option>
       </select>
       <input type="search" class="toolbar-input" id="filtroBuscar" placeholder="Buscar campaña...">
       <button class="btn btn-outline btn-sm" id="btnRefreshCampanas">↺ Actualizar</button>
@@ -613,7 +615,7 @@ function fmtDatetime(iso) {
 
 const ESTADO_LABELS = {
   activa:'Activa', programada:'Programada', pausada:'Pausada',
-  finalizada:'Finalizada', borrador:'Borrador'
+  finalizada:'Finalizada', borrador:'Borrador', archivada:'Archivada'
 };
 
 const TIPO_LABELS = {
@@ -783,7 +785,10 @@ function renderCampanas(campanas) {
         ${btnToggle}
         <button class="icon-btn" title="Duplicar"    data-action="duplicar"  data-id="${c.id}">📋</button>
         <button class="icon-btn" title="Rendimiento" data-action="stats"     data-id="${c.id}" data-titulo="${c.titulo.replace(/"/g,'&quot;')}">📊</button>
-        <button class="icon-btn" title="Eliminar"    data-action="eliminar"  data-id="${c.id}">🗑️</button>
+        ${c.estado === 'archivada'
+          ? `<button class="icon-btn" title="Restaurar" data-action="restaurar" data-id="${c.id}">♻️</button>`
+          : `<button class="icon-btn" title="Archivar"  data-action="eliminar"  data-id="${c.id}">🗄️</button>`
+        }
       </div>
     </div>`;
   }).join('');
@@ -816,10 +821,17 @@ async function handleCampanaAction(action, id, titulo) {
       openStatsModal(id, titulo || 'Rendimiento');
       break;
     case 'eliminar':
-      if (!confirm('¿Eliminar esta campaña? Esta acción no se puede deshacer.')) return;
+      if (!confirm('¿Archivar esta campaña? Quedará en el historial y podrás restaurarla.')) return;
       try {
         await api.marketing.eliminarCampana(id);
-        showAlert(document.getElementById('alertMain'), 'Campaña eliminada.', 'success');
+        showAlert(document.getElementById('alertMain'), 'Campaña archivada. Puedes verla filtrando por "Archivadas".', 'success');
+        loadCampanas(); loadStats();
+      } catch (err) { showAlert(document.getElementById('alertMain'), err.message); }
+      break;
+    case 'restaurar':
+      try {
+        await api.marketing.cambiarEstadoCampana(id, 'borrador');
+        showAlert(document.getElementById('alertMain'), 'Campaña restaurada como borrador.', 'success');
         loadCampanas(); loadStats();
       } catch (err) { showAlert(document.getElementById('alertMain'), err.message); }
       break;

@@ -238,7 +238,7 @@ db.exec(`
     fecha_inicio  DATETIME,
     fecha_fin     DATETIME,
     estado        TEXT NOT NULL DEFAULT 'borrador'
-                    CHECK(estado IN ('borrador','programada','activa','pausada','finalizada')),
+                    CHECK(estado IN ('borrador','programada','activa','pausada','finalizada','archivada')),
     created_by    TEXT NOT NULL,
     created_at    DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at    DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -283,6 +283,39 @@ db.exec(`
   CREATE UNIQUE INDEX IF NOT EXISTS idx_destacados_unique  ON productos_destacados(empresa_id, producto_id);
   CREATE INDEX IF NOT EXISTS idx_destacados_empresa        ON productos_destacados(empresa_id);
 `);
+
+// M08 migration: add 'archivada' to campanas.estado CHECK (table recreation required in SQLite)
+{
+  const row = db.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='campanas'").get();
+  if (row && !row.sql.includes('archivada')) {
+    db.pragma('foreign_keys = OFF');
+    db.exec(`
+      CREATE TABLE campanas_v2 (
+        id            TEXT PRIMARY KEY,
+        empresa_id    TEXT NOT NULL REFERENCES empresas(id) ON DELETE CASCADE,
+        producto_id   TEXT REFERENCES productos(id) ON DELETE SET NULL,
+        multimedia_id TEXT REFERENCES multimedia(id) ON DELETE SET NULL,
+        titulo        TEXT NOT NULL,
+        descripcion   TEXT,
+        descuento     TEXT,
+        fecha_inicio  DATETIME,
+        fecha_fin     DATETIME,
+        estado        TEXT NOT NULL DEFAULT 'borrador'
+                        CHECK(estado IN ('borrador','programada','activa','pausada','finalizada','archivada')),
+        created_by    TEXT NOT NULL,
+        created_at    DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at    DATETIME DEFAULT CURRENT_TIMESTAMP
+      );
+      INSERT OR IGNORE INTO campanas_v2 SELECT * FROM campanas;
+      DROP TABLE campanas;
+      ALTER TABLE campanas_v2 RENAME TO campanas;
+      CREATE INDEX IF NOT EXISTS idx_campanas_empresa ON campanas(empresa_id);
+      CREATE INDEX IF NOT EXISTS idx_campanas_estado  ON campanas(empresa_id, estado);
+      CREATE INDEX IF NOT EXISTS idx_campanas_fechas  ON campanas(empresa_id, fecha_inicio, fecha_fin);
+    `);
+    db.pragma('foreign_keys = ON');
+  }
+}
 
 // M10: menu analytics tables
 db.exec(`

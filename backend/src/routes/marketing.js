@@ -26,6 +26,7 @@ function resolveEstado(campana) {
 }
 
 function applyLazyState(campana) {
+  if (campana.estado === 'archivada') return campana; // archived campaigns never auto-transition
   const resolved = resolveEstado(campana);
   if (resolved !== campana.estado) {
     db.prepare("UPDATE campanas SET estado = ?, updated_at = datetime('now') WHERE id = ?")
@@ -74,9 +75,10 @@ router.get('/stats', (req, res) => {
   db.prepare("SELECT * FROM campanas WHERE empresa_id = ? AND estado IN ('activa','programada')")
     .all(empresaId).forEach(applyLazyState);
 
-  const total      = db.prepare('SELECT COUNT(*) AS n FROM campanas WHERE empresa_id = ?').get(empresaId).n;
+  const total      = db.prepare("SELECT COUNT(*) AS n FROM campanas WHERE empresa_id = ? AND estado != 'archivada'").get(empresaId).n;
   const activas    = db.prepare("SELECT COUNT(*) AS n FROM campanas WHERE empresa_id = ? AND estado = 'activa'").get(empresaId).n;
   const programadas = db.prepare("SELECT COUNT(*) AS n FROM campanas WHERE empresa_id = ? AND estado = 'programada'").get(empresaId).n;
+  const archivadas  = db.prepare("SELECT COUNT(*) AS n FROM campanas WHERE empresa_id = ? AND estado = 'archivada'").get(empresaId).n;
   const pendContenido = db.prepare("SELECT COUNT(*) AS n FROM marketing_contenido WHERE empresa_id = ? AND estado = 'pendiente'").get(empresaId).n;
   const destacados = db.prepare('SELECT COUNT(*) AS n FROM productos_destacados WHERE empresa_id = ?').get(empresaId).n;
 
@@ -84,6 +86,7 @@ router.get('/stats', (req, res) => {
     campanas_total:       total,
     campanas_activas:     activas,
     campanas_programadas: programadas,
+    campanas_archivadas:  archivadas,
     contenido_pendiente:  pendContenido,
     destacados_activos:   destacados,
     destacados_max:       getPlanMaxDestacados(empresaId),
@@ -113,6 +116,10 @@ router.get('/campanas', (req, res) => {
   `;
   const params = [empresaId];
   if (buscar) { sql += ' AND c.titulo LIKE ?'; params.push(`%${buscar}%`); }
+  // Exclude archived campaigns from the default operational listing
+  if (estado !== 'archivada') {
+    sql += " AND c.estado != 'archivada'";
+  }
   sql += ' ORDER BY c.created_at DESC';
 
   let rows = db.prepare(sql).all(...params).map(applyLazyState);
@@ -135,7 +142,7 @@ router.get('/campanas/calendario', requireFeature('marketing_avanzado'), (req, r
   const rows = db.prepare(`
     SELECT id, titulo, estado, fecha_inicio, fecha_fin
     FROM campanas
-    WHERE empresa_id = ? AND estado NOT IN ('borrador')
+    WHERE empresa_id = ? AND estado NOT IN ('borrador', 'archivada')
       AND (fecha_inicio IS NULL OR fecha_inicio <= ?)
       AND (fecha_fin IS NULL OR fecha_fin >= ?)
     ORDER BY fecha_inicio ASC
@@ -196,6 +203,7 @@ router.put('/campanas/:id', requireEmpresaRole('dueno', 'admin', 'editor'), (req
   const existing = db.prepare('SELECT * FROM campanas WHERE id = ? AND empresa_id = ?').get(req.params.id, empresaId);
   if (!existing) return res.status(404).json({ message: 'Campaña no encontrada' });
   if (existing.estado === 'finalizada') return res.status(400).json({ message: 'No se puede editar una campaña finalizada' });
+  if (existing.estado === 'archivada')  return res.status(400).json({ message: 'No se puede editar una campaña archivada. Restáurala primero.' });
 
   const { titulo, descripcion, descuento, producto_id, multimedia_id, fecha_inicio, fecha_fin } = req.body;
   if (titulo !== undefined && !titulo?.trim()) return res.status(400).json({ message: 'El título no puede estar vacío' });
@@ -230,12 +238,14 @@ router.put('/campanas/:id/estado', requireEmpresaRole('dueno', 'admin'), (req, r
   if (!existing) return res.status(404).json({ message: 'Campaña no encontrada' });
 
   const { estado } = req.body;
-  const ALLOWED = ['borrador', 'activa', 'pausada', 'finalizada', 'programada'];
+  const ALLOWED = ['borrador', 'activa', 'pausada', 'finalizada', 'programada', 'archivada'];
   if (!ALLOWED.includes(estado)) return res.status(400).json({ message: 'Estado inválido' });
   if (estado === 'programada' && !canSchedule(empresaId))
     return res.status(403).json({ message: 'Tu plan no incluye programación de campañas', upgrade_required: true });
-  if (existing.estado === 'finalizada' && estado !== 'borrador')
-    return res.status(400).json({ message: 'Una campaña finalizada solo puede volver a borrador' });
+  if (existing.estado === 'finalizada' && estado !== 'borrador' && estado !== 'archivada')
+    return res.status(400).json({ message: 'Una campaña finalizada solo puede archivarse o volver a borrador' });
+  if (existing.estado === 'archivada' && estado !== 'borrador')
+    return res.status(400).json({ message: 'Una campaña archivada solo puede restaurarse a borrador' });
 
   db.prepare("UPDATE campanas SET estado = ?, updated_at = datetime('now') WHERE id = ?").run(estado, req.params.id);
   res.json({ message: 'Estado actualizado', estado });
@@ -259,10 +269,12 @@ router.delete('/campanas/:id', requireEmpresaRole('dueno', 'admin'), (req, res) 
   const empresaId = resolveEmpresaId(req.user);
   const existing = db.prepare('SELECT estado FROM campanas WHERE id = ? AND empresa_id = ?').get(req.params.id, empresaId);
   if (!existing) return res.status(404).json({ message: 'Campaña no encontrada' });
-  if (existing.estado === 'activa') return res.status(400).json({ message: 'Pausa la campaña antes de eliminarla' });
+  if (existing.estado === 'archivada') return res.status(400).json({ message: 'La campaña ya está archivada' });
+  if (existing.estado === 'activa') return res.status(400).json({ message: 'Pausa la campaña antes de archivarla' });
 
-  db.prepare('DELETE FROM campanas WHERE id = ?').run(req.params.id);
-  res.json({ message: 'Campaña eliminada' });
+  // Logical archive — no physical DELETE; preserves history, content links and M10 metrics
+  db.prepare("UPDATE campanas SET estado = 'archivada', updated_at = datetime('now') WHERE id = ?").run(req.params.id);
+  res.json({ message: 'Campaña archivada', estado: 'archivada' });
 });
 
 // GET /campanas/:id/stats — reads M10 tables without duplicating logic
