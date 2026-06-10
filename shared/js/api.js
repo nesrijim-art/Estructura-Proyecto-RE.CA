@@ -233,6 +233,37 @@ export const api = {
     editarDestacado:  (id, body)      => request(`/marketing/destacados/${id}`,        { method: 'PUT',    body: JSON.stringify(body) }),
     quitarDestacado:  (id)            => request(`/marketing/destacados/${id}`,        { method: 'DELETE' }),
   },
+  automatizaciones: {
+    stats:          ()              => request('/automatizaciones/stats'),
+    // Automatizaciones (Premium)
+    listar:         (params = {})   => {
+      const qs = new URLSearchParams(
+        Object.entries(params).filter(([, v]) => v !== '' && v != null)
+      ).toString();
+      return request('/automatizaciones' + (qs ? '?' + qs : ''));
+    },
+    obtener:        (id)            => request(`/automatizaciones/${id}`),
+    crear:          (body)          => request('/automatizaciones',                { method: 'POST', body: JSON.stringify(body) }),
+    editar:         (id, body)      => request(`/automatizaciones/${id}`,          { method: 'PUT',  body: JSON.stringify(body) }),
+    cambiarEstado:  (id, estado)    => request(`/automatizaciones/${id}/estado`,   { method: 'PUT',  body: JSON.stringify({ estado }) }),
+    eliminar:       (id)            => request(`/automatizaciones/${id}`,          { method: 'DELETE' }),
+    // Historial
+    historial:      (params = {})   => {
+      const qs = new URLSearchParams(
+        Object.entries(params).filter(([, v]) => v !== '' && v != null)
+      ).toString();
+      return request('/automatizaciones/historial/lista' + (qs ? '?' + qs : ''));
+    },
+    // Alertas
+    alertas:        (params = {})   => {
+      const qs = new URLSearchParams(
+        Object.entries(params).filter(([, v]) => v !== '' && v != null)
+      ).toString();
+      return request('/automatizaciones/alertas/lista' + (qs ? '?' + qs : ''));
+    },
+    leerAlerta:     (id)            => request(`/automatizaciones/alertas/${id}/leer`, { method: 'PUT' }),
+    leerTodasAlertas: ()            => request('/automatizaciones/alertas/leer-todas', { method: 'PUT' }),
+  },
   auth: {
     login:           (body) => request('/auth/login',           { method: 'POST', body: JSON.stringify(body) }),
     register:        (body) => request('/auth/register',        { method: 'POST', body: JSON.stringify(body) }),

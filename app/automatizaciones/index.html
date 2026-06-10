@@ -1,0 +1,739 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Automatizaciones · RE.CA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Source+Sans+Pro:wght@400;600;700&display=swap" />
+  <style>
+    :root {
+      --bg: #fafafa; --surface: #ffffff; --fg: #0d1117; --muted: #6b7280;
+      --border: #e5e7eb; --accent: #ffd21e;
+      --accent-soft: color-mix(in oklch, var(--accent) 14%, transparent);
+      --fg-soft: color-mix(in oklch, var(--fg) 6%, transparent);
+      --success: #16a34a; --success-soft: color-mix(in oklch, var(--success) 12%, transparent);
+      --warn: #f59e0b;    --warn-soft: color-mix(in oklch, var(--warn) 12%, transparent);
+      --danger: #dc2626;  --danger-soft: color-mix(in oklch, var(--danger) 12%, transparent);
+      --info: #2563eb;    --info-soft: color-mix(in oklch, var(--info) 12%, transparent);
+      --purple: #9333ea;  --purple-soft: color-mix(in oklch, var(--purple) 12%, transparent);
+      --font-display: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+      --font-body: "Source Sans Pro", Inter, system-ui, sans-serif;
+      --fs-xs:11px; --fs-sm:13px; --fs-base:15px; --fs-lg:17px;
+      --fs-xl:20px; --fs-2xl:24px; --fs-3xl:32px;
+      --space-xs:4px; --space-sm:8px; --space-md:16px; --space-lg:24px;
+      --space-xl:32px; --space-2xl:48px;
+      --radius:6px; --radius-lg:10px; --radius-xl:16px;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin:0; background:var(--bg); color:var(--fg); font-family:var(--font-body); font-size:var(--fs-base); line-height:1.5; -webkit-font-smoothing:antialiased; }
+    button { font:inherit; cursor:pointer; border:none; background:none; padding:0; }
+    h1,h2,h3 { margin:0; font-weight:600; }
+    p { margin:0; }
+
+    /* Stats bar */
+    .stats-bar { display:flex; gap:var(--space-md); flex-wrap:wrap; margin-bottom:var(--space-xl); }
+    .stat-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:var(--space-lg); flex:1; min-width:130px; }
+    .stat-value { font-family:var(--font-display); font-size:var(--fs-3xl); font-weight:700; letter-spacing:-0.02em; }
+    .stat-label { font-size:var(--fs-sm); color:var(--muted); margin-top:var(--space-xs); }
+
+    /* Tabs */
+    .tabs { display:flex; gap:var(--space-sm); border-bottom:1px solid var(--border); margin-bottom:var(--space-xl); overflow-x:auto; }
+    .tab { padding:var(--space-md) var(--space-lg); font-size:var(--fs-base); font-weight:500; color:var(--muted); border-bottom:2px solid transparent; white-space:nowrap; transition:all .15s; }
+    .tab:hover { color:var(--fg); }
+    .tab.active { color:var(--fg); font-weight:600; border-bottom-color:var(--accent); }
+    .tab-panel { display:none; }
+    .tab-panel.active { display:block; }
+
+    /* Page header */
+    .page-header { margin-bottom:var(--space-xl); }
+    .page-title { font-size:var(--fs-3xl); font-weight:700; letter-spacing:-0.02em; margin-bottom:var(--space-sm); }
+    .page-subtitle { color:var(--muted); font-size:var(--fs-lg); margin-bottom:var(--space-lg); line-height:1.6; }
+    .header-actions { display:flex; gap:var(--space-md); flex-wrap:wrap; align-items:center; }
+
+    /* Buttons */
+    .btn { padding:var(--space-sm) var(--space-lg); border-radius:var(--radius); font-size:var(--fs-base); font-weight:600; display:inline-flex; align-items:center; gap:var(--space-sm); transition:all .15s; }
+    .btn-primary { background:var(--fg); color:var(--surface); }
+    .btn-primary:hover { background:color-mix(in oklch,var(--fg) 85%,transparent); }
+    .btn-secondary { background:var(--surface); color:var(--fg); border:1px solid var(--border); }
+    .btn-secondary:hover { background:var(--bg); }
+    .btn-danger { background:var(--danger-soft); color:var(--danger); }
+    .btn-danger:hover { background:var(--danger); color:#fff; }
+    .btn:disabled { opacity:.45; cursor:not-allowed; }
+
+    /* Automation cards */
+    .automation-list { display:flex; flex-direction:column; gap:var(--space-md); }
+    .automation-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:var(--space-lg); display:flex; gap:var(--space-lg); align-items:flex-start; transition:border-color .15s; }
+    .automation-card:hover { border-color:var(--accent); }
+    .automation-icon { width:48px; height:48px; flex-shrink:0; border-radius:var(--radius); display:grid; place-items:center; font-size:24px; }
+    .automation-card.activa .automation-icon { background:var(--success-soft); }
+    .automation-card.pausada .automation-icon { background:var(--warn-soft); }
+    .automation-card.deshabilitada .automation-icon { background:var(--fg-soft); }
+    .automation-content { flex:1; display:flex; flex-direction:column; gap:var(--space-sm); }
+    .automation-header { display:flex; align-items:center; justify-content:space-between; gap:var(--space-md); flex-wrap:wrap; }
+    .automation-title { font-size:var(--fs-xl); font-weight:600; }
+    .automation-status { padding:var(--space-xs) var(--space-md); border-radius:var(--radius); font-size:var(--fs-xs); font-weight:700; text-transform:uppercase; letter-spacing:.03em; font-family:var(--font-display); }
+    .status-activa { background:var(--success-soft); color:var(--success); }
+    .status-pausada { background:var(--warn-soft); color:var(--warn); }
+    .status-deshabilitada { background:var(--fg-soft); color:var(--muted); }
+    .automation-desc { color:var(--muted); line-height:1.6; }
+    .automation-meta { display:flex; gap:var(--space-lg); flex-wrap:wrap; font-size:var(--fs-sm); color:var(--muted); padding-top:var(--space-sm); border-top:1px solid var(--border); }
+    .meta-item { display:flex; flex-direction:column; gap:var(--space-xs); }
+    .meta-label { font-size:var(--fs-xs); font-weight:600; text-transform:uppercase; letter-spacing:.03em; }
+    .meta-value { font-family:var(--font-display); font-size:var(--fs-sm); color:var(--fg); }
+    .automation-actions { display:flex; gap:var(--space-sm); margin-top:var(--space-sm); flex-wrap:wrap; }
+    .icon-btn { padding:var(--space-sm); border:1px solid var(--border); border-radius:var(--radius); background:var(--surface); transition:all .15s; display:grid; place-items:center; }
+    .icon-btn:hover { background:var(--bg); border-color:var(--fg); }
+
+    /* History table */
+    .history-table { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden; }
+    table { width:100%; border-collapse:collapse; }
+    thead { background:var(--bg); border-bottom:1px solid var(--border); }
+    th { padding:var(--space-md) var(--space-lg); text-align:left; font-size:var(--fs-sm); font-weight:600; text-transform:uppercase; letter-spacing:.03em; color:var(--muted); }
+    td { padding:var(--space-md) var(--space-lg); border-bottom:1px solid var(--border); font-size:var(--fs-base); }
+    tr:last-child td { border-bottom:none; }
+    tr:hover { background:var(--bg); }
+    .result-badge { padding:var(--space-xs) var(--space-sm); border-radius:var(--radius); font-size:var(--fs-xs); font-weight:700; text-transform:uppercase; font-family:var(--font-display); }
+    .result-exito { background:var(--success-soft); color:var(--success); }
+    .result-error { background:var(--danger-soft); color:var(--danger); }
+    .result-sin_accion { background:var(--fg-soft); color:var(--muted); }
+
+    /* Alerts tab */
+    .alert-list { display:flex; flex-direction:column; gap:var(--space-md); }
+    .alert-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:var(--space-lg); display:flex; gap:var(--space-lg); align-items:flex-start; }
+    .alert-card.leida { opacity:.55; }
+    .alert-nivel { width:10px; height:10px; border-radius:50%; flex-shrink:0; margin-top:6px; }
+    .nivel-info  { background:var(--info); }
+    .nivel-warn  { background:var(--warn); }
+    .nivel-error { background:var(--danger); }
+    .alert-content { flex:1; }
+    .alert-msg { font-size:var(--fs-base); line-height:1.5; }
+    .alert-meta { font-size:var(--fs-sm); color:var(--muted); margin-top:var(--space-xs); display:flex; gap:var(--space-md); }
+
+    /* Upgrade banner */
+    .upgrade-banner { background:var(--accent-soft); border:1px solid var(--accent); border-radius:var(--radius-lg); padding:var(--space-xl); text-align:center; }
+    .upgrade-banner h3 { font-size:var(--fs-2xl); margin-bottom:var(--space-sm); }
+    .upgrade-banner p { color:var(--muted); margin-bottom:var(--space-lg); }
+
+    /* Empty state */
+    .empty-state { text-align:center; padding:var(--space-2xl); }
+    .empty-icon { font-size:64px; margin-bottom:var(--space-lg); opacity:.3; }
+    .empty-title { font-size:var(--fs-2xl); font-weight:600; margin-bottom:var(--space-sm); }
+    .empty-desc { color:var(--muted); line-height:1.6; margin-bottom:var(--space-lg); }
+
+    /* Modal */
+    .modal-overlay { position:fixed; inset:0; background:color-mix(in oklch,var(--fg) 50%,transparent); backdrop-filter:blur(4px); z-index:1000; display:none; align-items:center; justify-content:center; padding:var(--space-lg); }
+    .modal-overlay.active { display:flex; }
+    .modal { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-xl); max-width:640px; width:100%; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px color-mix(in oklch,var(--fg) 30%,transparent); }
+    .modal-header { padding:var(--space-xl); border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+    .modal-title { font-size:var(--fs-2xl); font-weight:700; }
+    .modal-close { width:32px; height:32px; border-radius:50%; display:grid; place-items:center; background:var(--bg); transition:all .15s; }
+    .modal-close:hover { background:var(--border); }
+    .modal-body { padding:var(--space-xl); }
+    .modal-footer { padding:var(--space-xl); border-top:1px solid var(--border); display:flex; gap:var(--space-md); justify-content:flex-end; }
+
+    /* Form */
+    .form-group { margin-bottom:var(--space-lg); }
+    .form-label { display:block; font-size:var(--fs-base); font-weight:600; margin-bottom:var(--space-sm); }
+    .form-input, .form-select, .form-textarea { width:100%; padding:var(--space-md); border:1px solid var(--border); border-radius:var(--radius); background:var(--bg); color:var(--fg); font-size:var(--fs-base); font-family:var(--font-body); transition:all .15s; }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { outline:none; border-color:var(--accent); background:var(--surface); }
+    .form-textarea { min-height:80px; resize:vertical; }
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:var(--space-md); }
+    @media(max-width:520px){ .form-row { grid-template-columns:1fr; } }
+    .form-hint { font-size:var(--fs-sm); color:var(--muted); margin-top:var(--space-xs); }
+
+    /* Toast */
+    #toast { position:fixed; bottom:var(--space-xl); right:var(--space-xl); background:var(--fg); color:var(--surface); padding:var(--space-md) var(--space-lg); border-radius:var(--radius-lg); font-size:var(--fs-base); font-weight:600; z-index:9999; opacity:0; transform:translateY(8px); transition:all .25s; pointer-events:none; max-width:320px; }
+    #toast.show { opacity:1; transform:translateY(0); }
+    #toast.error { background:var(--danger); }
+
+    .filter-bar { display:flex; gap:var(--space-md); flex-wrap:wrap; margin-bottom:var(--space-lg); }
+    .filter-bar select { padding:var(--space-sm) var(--space-md); border:1px solid var(--border); border-radius:var(--radius); background:var(--surface); color:var(--fg); font-size:var(--fs-base); font-family:var(--font-body); }
+  </style>
+</head>
+<body>
+  <div id="app" style="padding:var(--space-xl); max-width:1200px; margin:0 auto;">
+
+    <div class="page-header">
+      <h1 class="page-title">Automatizaciones</h1>
+      <p class="page-subtitle">Configura reglas automáticas para reducir trabajo manual y mantener tu negocio activo sin supervisión constante.</p>
+      <div class="header-actions">
+        <button class="btn btn-primary" id="btnNuevaAuto">⚡ Nueva Automatización</button>
+        <button class="btn btn-secondary" id="btnLeerTodas" style="display:none">✓ Marcar todas leídas</button>
+      </div>
+    </div>
+
+    <!-- Stats bar -->
+    <div class="stats-bar" id="statsBar">
+      <div class="stat-card"><div class="stat-value" id="statTotal">—</div><div class="stat-label">Total</div></div>
+      <div class="stat-card"><div class="stat-value" id="statActivas" style="color:var(--success)">—</div><div class="stat-label">Activas</div></div>
+      <div class="stat-card"><div class="stat-value" id="statPausadas" style="color:var(--warn)">—</div><div class="stat-label">Pausadas</div></div>
+      <div class="stat-card"><div class="stat-value" id="statHistHoy">—</div><div class="stat-label">Ejecuciones hoy</div></div>
+      <div class="stat-card"><div class="stat-value" id="statAlertas" style="color:var(--danger)">—</div><div class="stat-label">Alertas sin leer</div></div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" data-tab="list">Automatizaciones</button>
+      <button class="tab" data-tab="history">Historial de Ejecuciones</button>
+      <button class="tab" data-tab="alerts">Alertas del Sistema</button>
+    </div>
+
+    <!-- Panel: Lista -->
+    <div class="tab-panel active" id="panel-list">
+      <div id="upgradeSection" style="display:none">
+        <div class="upgrade-banner">
+          <h3>⚡ Automatizaciones — Plan Premium</h3>
+          <p>Crea reglas automáticas para activar campañas, gestionar categorías y recibir recordatorios. Disponible en el plan Premium.</p>
+          <a href="/app/planes/" class="btn btn-primary">Ver planes</a>
+        </div>
+      </div>
+      <div id="autoListSection">
+        <div id="autoList" class="automation-list"></div>
+      </div>
+    </div>
+
+    <!-- Panel: Historial -->
+    <div class="tab-panel" id="panel-history">
+      <div class="filter-bar">
+        <select id="filtroResultado">
+          <option value="">Todos los resultados</option>
+          <option value="exito">Éxito</option>
+          <option value="error">Error</option>
+          <option value="sin_accion">Sin acción</option>
+        </select>
+        <select id="filtroOrigen">
+          <option value="">Todos los orígenes</option>
+          <option value="sistema">Sistema</option>
+          <option value="usuario">Usuario</option>
+        </select>
+        <select id="filtroModulo">
+          <option value="">Todos los módulos</option>
+          <option value="marketing">Marketing</option>
+          <option value="catalogo">Catálogo</option>
+          <option value="planes">Planes</option>
+          <option value="sistema">Sistema</option>
+        </select>
+      </div>
+      <div class="history-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha / Hora</th>
+              <th>Automatización</th>
+              <th>Acción</th>
+              <th>Módulo</th>
+              <th>Origen</th>
+              <th>Resultado</th>
+            </tr>
+          </thead>
+          <tbody id="historialBody"></tbody>
+        </table>
+      </div>
+      <div style="margin-top:var(--space-md); text-align:center;">
+        <button class="btn btn-secondary" id="btnCargarMas" style="display:none">Cargar más</button>
+      </div>
+    </div>
+
+    <!-- Panel: Alertas -->
+    <div class="tab-panel" id="panel-alerts">
+      <div id="alertasList" class="alert-list"></div>
+    </div>
+  </div>
+
+  <!-- Modal: Nueva / Editar Automatización -->
+  <div class="modal-overlay" id="modalAuto">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modalAutoTitle">Nueva Automatización</h2>
+        <button class="modal-close" id="btnCerrarModal">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="autoId" />
+        <div class="form-group">
+          <label class="form-label">Nombre *</label>
+          <input type="text" class="form-input" id="autoNombre" placeholder="Ej: Activar Happy Hour los viernes" maxlength="120" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Descripción</label>
+          <textarea class="form-textarea" id="autoDesc" placeholder="Descripción opcional..."></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Tipo de acción *</label>
+            <select class="form-select" id="autoTipo">
+              <option value="">— seleccionar —</option>
+              <option value="campana_activar">📢 Activar campaña</option>
+              <option value="campana_pausar">⏸️ Pausar campaña</option>
+              <option value="campana_finalizar">🏁 Finalizar campaña</option>
+              <option value="categoria_activar">✅ Activar categoría</option>
+              <option value="categoria_pausar">⛔ Pausar categoría</option>
+              <option value="recordatorio">🔔 Recordatorio</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Estado inicial</label>
+            <select class="form-select" id="autoEstadoInicial">
+              <option value="activa">Activa</option>
+              <option value="pausada">Pausada</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Acción config -->
+        <div id="accionCampana" style="display:none">
+          <div class="form-group">
+            <label class="form-label">ID de la campaña</label>
+            <select class="form-select" id="accionCampanaId"></select>
+          </div>
+        </div>
+        <div id="accionCategoria" style="display:none">
+          <div class="form-group">
+            <label class="form-label">Categoría</label>
+            <select class="form-select" id="accionCategoriaId"></select>
+          </div>
+        </div>
+        <div id="accionRecordatorio" style="display:none">
+          <div class="form-group">
+            <label class="form-label">Mensaje del recordatorio</label>
+            <input type="text" class="form-input" id="accionMensaje" placeholder="Ej: Revisar precios del menú" maxlength="200" />
+          </div>
+        </div>
+
+        <!-- Condición -->
+        <div class="form-group">
+          <label class="form-label">Tipo de condición *</label>
+          <select class="form-select" id="condTipo">
+            <option value="cron">⏰ Programado (recurrente)</option>
+            <option value="fecha_especifica">📅 Fecha específica (una vez)</option>
+          </select>
+        </div>
+
+        <div id="condCron">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Hora</label>
+              <input type="time" class="form-input" id="condHora" value="09:00" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Frecuencia</label>
+              <select class="form-select" id="condFrecuencia">
+                <option value="diario">Diario</option>
+                <option value="semanal">Días de la semana</option>
+                <option value="mensual">Día del mes</option>
+              </select>
+            </div>
+          </div>
+          <div id="condDiasSemana" style="display:none; margin-bottom:var(--space-lg);">
+            <label class="form-label">Días</label>
+            <div style="display:flex; gap:var(--space-sm); flex-wrap:wrap; margin-top:var(--space-sm);">
+              <label><input type="checkbox" value="1" /> Lun</label>
+              <label><input type="checkbox" value="2" /> Mar</label>
+              <label><input type="checkbox" value="3" /> Mié</label>
+              <label><input type="checkbox" value="4" /> Jue</label>
+              <label><input type="checkbox" value="5" /> Vie</label>
+              <label><input type="checkbox" value="6" /> Sáb</label>
+              <label><input type="checkbox" value="0" /> Dom</label>
+            </div>
+          </div>
+          <div id="condDiaMes" style="display:none; margin-bottom:var(--space-lg);">
+            <label class="form-label">Día del mes (1–28)</label>
+            <input type="number" class="form-input" id="condDiaMesVal" min="1" max="28" value="1" />
+          </div>
+        </div>
+        <div id="condFechaEsp" style="display:none">
+          <div class="form-group">
+            <label class="form-label">Fecha y hora</label>
+            <input type="datetime-local" class="form-input" id="condFechaVal" />
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btnCancelarModal">Cancelar</button>
+        <button class="btn btn-primary" id="btnGuardarAuto">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script type="module">
+    import { getAccessToken } from '/shared/js/auth.js';
+    import { api } from '/shared/js/api.js';
+
+    // Auth guard
+    if (!getAccessToken()) { location.href = '/app/login/'; }
+
+    // ── State ──────────────────────────────────────────────────────────
+    let histOffset = 0;
+    let histTotal  = 0;
+    let editingId  = null;
+    let planTieneAuto = false;
+
+    // ── Toast ──────────────────────────────────────────────────────────
+    function toast(msg, isError = false) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.className = 'show' + (isError ? ' error' : '');
+      setTimeout(() => { el.className = ''; }, 3000);
+    }
+
+    // ── Stats ──────────────────────────────────────────────────────────
+    async function loadStats() {
+      try {
+        const s = await api.automatizaciones.stats();
+        document.getElementById('statTotal').textContent   = s.total;
+        document.getElementById('statActivas').textContent = s.activas;
+        document.getElementById('statPausadas').textContent = s.pausadas;
+        document.getElementById('statHistHoy').textContent = s.historial_hoy;
+        document.getElementById('statAlertas').textContent = s.alertas_no_leidas;
+      } catch {}
+    }
+
+    // ── Tabs ───────────────────────────────────────────────────────────
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+
+        const isAlerts = tab.dataset.tab === 'alerts';
+        document.getElementById('btnLeerTodas').style.display = isAlerts ? '' : 'none';
+        document.getElementById('btnNuevaAuto').style.display = tab.dataset.tab === 'list' ? '' : 'none';
+
+        if (tab.dataset.tab === 'history') loadHistorial(true);
+        if (isAlerts) loadAlertas();
+      });
+    });
+
+    // ── Automations list ───────────────────────────────────────────────
+    const TIPO_ICONS = {
+      campana_activar:   '📢', campana_pausar: '⏸️', campana_finalizar: '🏁',
+      categoria_activar: '✅', categoria_pausar: '⛔', recordatorio: '🔔',
+    };
+
+    function tipoLabel(tipo) {
+      const MAP = {
+        campana_activar:'Activar campaña', campana_pausar:'Pausar campaña',
+        campana_finalizar:'Finalizar campaña', categoria_activar:'Activar categoría',
+        categoria_pausar:'Pausar categoría', recordatorio:'Recordatorio',
+      };
+      return MAP[tipo] || tipo;
+    }
+
+    function fmtDate(s) {
+      if (!s) return '—';
+      return s.replace('T', ' ').substring(0, 16);
+    }
+
+    function renderAuto(a) {
+      const card = document.createElement('div');
+      card.className = `automation-card ${a.estado}`;
+      card.dataset.id = a.id;
+
+      const toggleBtn = a.estado === 'activa'
+        ? `<button class="icon-btn" title="Pausar" data-action="pausar">⏸️</button>`
+        : a.estado === 'pausada'
+        ? `<button class="icon-btn" title="Activar" data-action="activar">▶️</button>`
+        : '';
+
+      card.innerHTML = `
+        <div class="automation-icon">${TIPO_ICONS[a.tipo] || '⚙️'}</div>
+        <div class="automation-content">
+          <div class="automation-header">
+            <h3 class="automation-title">${escHtml(a.nombre)}</h3>
+            <span class="automation-status status-${a.estado}">${a.estado.charAt(0).toUpperCase()+a.estado.slice(1)}</span>
+          </div>
+          ${a.descripcion ? `<p class="automation-desc">${escHtml(a.descripcion)}</p>` : ''}
+          <p class="automation-desc" style="font-size:var(--fs-sm)">Tipo: ${tipoLabel(a.tipo)} · Condición: ${a.condicion_tipo === 'cron' ? 'recurrente' : 'fecha específica'}</p>
+          <div class="automation-meta">
+            <div class="meta-item"><div class="meta-label">Creada</div><div class="meta-value">${fmtDate(a.created_at)}</div></div>
+            <div class="meta-item"><div class="meta-label">Última ejecución</div><div class="meta-value">${fmtDate(a.ultima_ejecucion)}</div></div>
+            <div class="meta-item"><div class="meta-label">Próxima</div><div class="meta-value">${fmtDate(a.proxima_ejecucion)}</div></div>
+            <div class="meta-item"><div class="meta-label">Ejecuciones</div><div class="meta-value">${a.contador_ejecuciones}</div></div>
+          </div>
+          <div class="automation-actions">
+            <button class="icon-btn" title="Editar" data-action="editar">✏️</button>
+            ${toggleBtn}
+            <button class="icon-btn" title="Eliminar" data-action="eliminar">🗑️</button>
+          </div>
+        </div>`;
+
+      card.querySelectorAll('[data-action]').forEach(btn => {
+        btn.addEventListener('click', () => handleAutoAction(a.id, btn.dataset.action, a));
+      });
+
+      return card;
+    }
+
+    async function loadAutos() {
+      const list = document.getElementById('autoList');
+      try {
+        const items = await api.automatizaciones.listar();
+        list.innerHTML = '';
+        if (!items.length) {
+          list.innerHTML = `<div class="empty-state">
+            <div class="empty-icon">⚡</div>
+            <div class="empty-title">Sin automatizaciones</div>
+            <div class="empty-desc">Crea tu primera regla automática para activar campañas o categorías según horario.</div>
+          </div>`;
+          return;
+        }
+        items.forEach(a => list.appendChild(renderAuto(a)));
+        planTieneAuto = true;
+      } catch (err) {
+        if (err.status === 403) {
+          document.getElementById('upgradeSection').style.display = '';
+          document.getElementById('autoListSection').style.display = 'none';
+          document.getElementById('btnNuevaAuto').style.display = 'none';
+        } else {
+          list.innerHTML = `<div class="empty-state"><div class="empty-desc">Error al cargar automatizaciones.</div></div>`;
+        }
+      }
+    }
+
+    async function handleAutoAction(id, action, auto) {
+      if (action === 'editar') {
+        openModal(auto);
+        return;
+      }
+      if (action === 'eliminar') {
+        if (!confirm(`¿Eliminar la automatización "${auto.nombre}"?`)) return;
+        try {
+          await api.automatizaciones.eliminar(id);
+          toast('Automatización eliminada');
+          loadAutos(); loadStats();
+        } catch (e) { toast(e.message, true); }
+        return;
+      }
+      if (action === 'pausar') {
+        try { await api.automatizaciones.cambiarEstado(id, 'pausada'); toast('Automatización pausada'); loadAutos(); loadStats(); }
+        catch (e) { toast(e.message, true); }
+        return;
+      }
+      if (action === 'activar') {
+        try { await api.automatizaciones.cambiarEstado(id, 'activa'); toast('Automatización activada'); loadAutos(); loadStats(); }
+        catch (e) { toast(e.message, true); }
+        return;
+      }
+    }
+
+    // ── Historial ──────────────────────────────────────────────────────
+    async function loadHistorial(reset = false) {
+      if (reset) { histOffset = 0; document.getElementById('historialBody').innerHTML = ''; }
+      const params = { limit: 50, offset: histOffset };
+      const r = document.getElementById('filtroResultado').value;
+      const o = document.getElementById('filtroOrigen').value;
+      const m = document.getElementById('filtroModulo').value;
+      if (r) params.resultado = r;
+      if (o) params.origen = o;
+      if (m) params.modulo = m;
+
+      try {
+        const data = await api.automatizaciones.historial(params);
+        histTotal = data.total;
+        const tbody = document.getElementById('historialBody');
+        if (!data.items.length && histOffset === 0) {
+          tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:var(--space-2xl);color:var(--muted)">Sin registros de ejecución todavía.</td></tr>`;
+          document.getElementById('btnCargarMas').style.display = 'none';
+          return;
+        }
+        data.items.forEach(h => {
+          const tr = document.createElement('tr');
+          const dt = (h.created_at || '').replace('T', ' ');
+          tr.innerHTML = `
+            <td>
+              <div style="font-family:var(--font-display);font-weight:600">${dt.substring(0,10)}</div>
+              <div style="color:var(--muted);font-size:var(--fs-sm)">${dt.substring(11,19)}</div>
+            </td>
+            <td>${escHtml(h.automatizacion_nombre || '—')}</td>
+            <td>${escHtml(h.accion)}</td>
+            <td style="color:var(--muted);font-size:var(--fs-sm)">${h.modulo || '—'}</td>
+            <td style="font-size:var(--fs-sm)">${h.origen}</td>
+            <td><span class="result-badge result-${h.resultado}">${h.resultado.replace('_',' ')}</span></td>`;
+          tbody.appendChild(tr);
+        });
+        histOffset += data.items.length;
+        document.getElementById('btnCargarMas').style.display = histOffset < histTotal ? '' : 'none';
+      } catch (e) { toast(e.message, true); }
+    }
+
+    ['filtroResultado','filtroOrigen','filtroModulo'].forEach(id =>
+      document.getElementById(id).addEventListener('change', () => loadHistorial(true))
+    );
+    document.getElementById('btnCargarMas').addEventListener('click', () => loadHistorial(false));
+
+    // ── Alertas ────────────────────────────────────────────────────────
+    async function loadAlertas() {
+      const list = document.getElementById('alertasList');
+      try {
+        const items = await api.automatizaciones.alertas({ limit: 100 });
+        if (!items.length) {
+          list.innerHTML = `<div class="empty-state"><div class="empty-icon">🔔</div><div class="empty-title">Sin alertas</div><div class="empty-desc">No hay alertas del sistema en este momento.</div></div>`;
+          return;
+        }
+        list.innerHTML = '';
+        items.forEach(a => {
+          const div = document.createElement('div');
+          div.className = `alert-card${a.leida ? ' leida' : ''}`;
+          div.innerHTML = `
+            <div class="alert-nivel nivel-${a.nivel}"></div>
+            <div class="alert-content">
+              <div class="alert-msg">${escHtml(a.mensaje)}</div>
+              <div class="alert-meta">
+                <span>${a.tipo}</span>
+                <span>${(a.created_at || '').replace('T',' ').substring(0,16)}</span>
+                ${!a.leida ? `<button style="color:var(--info);font-size:var(--fs-sm);cursor:pointer;background:none;border:none" data-alert-id="${a.id}">Marcar leída</button>` : ''}
+              </div>
+            </div>`;
+          div.querySelector('[data-alert-id]')?.addEventListener('click', async (e) => {
+            try { await api.automatizaciones.leerAlerta(e.target.dataset.alertId); loadAlertas(); loadStats(); }
+            catch {}
+          });
+          list.appendChild(div);
+        });
+      } catch (e) { toast(e.message, true); }
+    }
+
+    document.getElementById('btnLeerTodas').addEventListener('click', async () => {
+      try { await api.automatizaciones.leerTodasAlertas(); toast('Alertas marcadas como leídas'); loadAlertas(); loadStats(); }
+      catch (e) { toast(e.message, true); }
+    });
+
+    // ── Modal ──────────────────────────────────────────────────────────
+    const modalEl = document.getElementById('modalAuto');
+    function closeModal() { modalEl.classList.remove('active'); editingId = null; }
+
+    document.getElementById('btnCerrarModal').addEventListener('click', closeModal);
+    document.getElementById('btnCancelarModal').addEventListener('click', closeModal);
+    modalEl.addEventListener('click', e => { if (e.target === modalEl) closeModal(); });
+
+    document.getElementById('btnNuevaAuto').addEventListener('click', () => openModal(null));
+
+    async function openModal(auto) {
+      editingId = auto?.id || null;
+      document.getElementById('modalAutoTitle').textContent = auto ? 'Editar Automatización' : 'Nueva Automatización';
+      document.getElementById('autoId').value = auto?.id || '';
+      document.getElementById('autoNombre').value = auto?.nombre || '';
+      document.getElementById('autoDesc').value = auto?.descripcion || '';
+      document.getElementById('autoTipo').value = auto?.tipo || '';
+      document.getElementById('autoEstadoInicial').value = auto?.estado || 'activa';
+
+      // Load campaigns and categories for action selects
+      try {
+        const cats = await api.catalogo.listarCategorias();
+        const catSel = document.getElementById('accionCategoriaId');
+        catSel.innerHTML = cats.map(c => `<option value="${c.id}">${escHtml(c.nombre)}</option>`).join('') || '<option>—</option>';
+      } catch {}
+      try {
+        const camps = await api.marketing.listarCampanas({ limit: 100 });
+        const campSel = document.getElementById('accionCampanaId');
+        campSel.innerHTML = (camps.items || camps).map(c => `<option value="${c.id}">${escHtml(c.titulo)}</option>`).join('') || '<option>—</option>';
+      } catch {}
+
+      if (auto) {
+        const accion = JSON.parse(auto.accion_config || '{}');
+        const cond   = JSON.parse(auto.condicion_config || '{}');
+        if (accion.campana_id)   { document.getElementById('accionCampanaId').value   = accion.campana_id; }
+        if (accion.categoria_id) { document.getElementById('accionCategoriaId').value = accion.categoria_id; }
+        if (accion.mensaje)      { document.getElementById('accionMensaje').value      = accion.mensaje; }
+        document.getElementById('condTipo').value = auto.condicion_tipo || 'cron';
+        document.getElementById('condHora').value = cond.hora || '09:00';
+        if (cond.dias_semana?.length) {
+          document.getElementById('condFrecuencia').value = 'semanal';
+          document.querySelectorAll('#condDiasSemana input').forEach(cb => {
+            cb.checked = cond.dias_semana.includes(parseInt(cb.value));
+          });
+        } else if (cond.dia_mes) {
+          document.getElementById('condFrecuencia').value = 'mensual';
+          document.getElementById('condDiaMesVal').value = cond.dia_mes;
+        }
+        if (cond.fecha) document.getElementById('condFechaVal').value = cond.fecha.substring(0,16);
+      }
+
+      updateAccionVisibility();
+      updateCondVisibility();
+      modalEl.classList.add('active');
+    }
+
+    function updateAccionVisibility() {
+      const tipo = document.getElementById('autoTipo').value;
+      document.getElementById('accionCampana').style.display     = tipo.startsWith('campana') ? '' : 'none';
+      document.getElementById('accionCategoria').style.display   = tipo.startsWith('categoria') ? '' : 'none';
+      document.getElementById('accionRecordatorio').style.display = tipo === 'recordatorio' ? '' : 'none';
+    }
+    function updateCondVisibility() {
+      const tipo = document.getElementById('condTipo').value;
+      document.getElementById('condCron').style.display     = tipo === 'cron' ? '' : 'none';
+      document.getElementById('condFechaEsp').style.display = tipo === 'fecha_especifica' ? '' : 'none';
+      const frec = document.getElementById('condFrecuencia').value;
+      document.getElementById('condDiasSemana').style.display = frec === 'semanal' ? '' : 'none';
+      document.getElementById('condDiaMes').style.display     = frec === 'mensual' ? '' : 'none';
+    }
+
+    document.getElementById('autoTipo').addEventListener('change', updateAccionVisibility);
+    document.getElementById('condTipo').addEventListener('change', updateCondVisibility);
+    document.getElementById('condFrecuencia').addEventListener('change', updateCondVisibility);
+
+    document.getElementById('btnGuardarAuto').addEventListener('click', async () => {
+      const nombre = document.getElementById('autoNombre').value.trim();
+      const tipo   = document.getElementById('autoTipo').value;
+      const condTipo = document.getElementById('condTipo').value;
+      if (!nombre) return toast('El nombre es obligatorio', true);
+      if (!tipo)   return toast('Selecciona un tipo de acción', true);
+
+      // Build accion_config
+      let accion_config = {};
+      if (tipo.startsWith('campana'))   accion_config.campana_id   = document.getElementById('accionCampanaId').value;
+      if (tipo.startsWith('categoria')) accion_config.categoria_id = document.getElementById('accionCategoriaId').value;
+      if (tipo === 'recordatorio')      accion_config.mensaje       = document.getElementById('accionMensaje').value.trim();
+
+      // Build condicion_config
+      let condicion_config = {};
+      if (condTipo === 'cron') {
+        condicion_config.hora = document.getElementById('condHora').value;
+        const frec = document.getElementById('condFrecuencia').value;
+        if (frec === 'semanal') {
+          condicion_config.dias_semana = [...document.querySelectorAll('#condDiasSemana input:checked')].map(c => parseInt(c.value));
+        } else if (frec === 'mensual') {
+          condicion_config.dia_mes = parseInt(document.getElementById('condDiaMesVal').value);
+        }
+      } else {
+        const val = document.getElementById('condFechaVal').value;
+        if (!val) return toast('Selecciona fecha y hora', true);
+        condicion_config.fecha = val;
+      }
+
+      const body = {
+        nombre, descripcion: document.getElementById('autoDesc').value,
+        tipo, condicion_tipo: condTipo,
+        condicion_config, accion_config,
+        estado: document.getElementById('autoEstadoInicial').value,
+      };
+
+      try {
+        if (editingId) {
+          await api.automatizaciones.editar(editingId, body);
+          toast('Automatización actualizada');
+        } else {
+          await api.automatizaciones.crear(body);
+          toast('Automatización creada');
+        }
+        closeModal();
+        loadAutos();
+        loadStats();
+      } catch (e) { toast(e.message, true); }
+    });
+
+    // ── Utility ────────────────────────────────────────────────────────
+    function escHtml(s) {
+      return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // ── Init ───────────────────────────────────────────────────────────
+    loadStats();
+    loadAutos();
+  </script>
+</body>
+</html>

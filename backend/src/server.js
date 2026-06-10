@@ -31,7 +31,8 @@ const catalogoRouter        = require('./routes/catalogo');
 const menuPublicoRouter     = require('./routes/menu-publico');
 const iaRouter              = require('./routes/ia');
 const estadisticasRouter    = require('./routes/estadisticas');
-const marketingRouter       = require('./routes/marketing');
+const marketingRouter          = require('./routes/marketing');
+const automatizacionesRouter   = require('./routes/automatizaciones');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -73,6 +74,7 @@ app.use('/api/catalogo',         catalogoRouter);
 app.use('/api/ia',               iaRouter);
 app.use('/api/stats',            estadisticasRouter);
 app.use('/api/marketing',        marketingRouter);
+app.use('/api/automatizaciones', automatizacionesRouter);
 app.use('/api/menu',             menuPublicoRouter);   // public — no auth
 
 // Placeholder for future module routes — each module adds its own router here
@@ -117,6 +119,9 @@ app.use((err, req, res, _next) => {
 });
 
 // ─── Start ────────────────────────────────────────────────────────────────────
+// Start scheduler after all routes are registered
+require('./scheduler').start();
+
 app.listen(PORT, () => {
   console.log(`\nRE.CA API running on http://localhost:${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}\n`);

@@ -373,4 +373,61 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_ia_historial_mes     ON ia_historial(empresa_id, created_at);
 `);
 
+// M11: automatizaciones, historial de ejecuciones y alertas del sistema
+db.exec(`
+  CREATE TABLE IF NOT EXISTS automatizaciones (
+    id                    TEXT PRIMARY KEY,
+    empresa_id            TEXT NOT NULL REFERENCES empresas(id) ON DELETE CASCADE,
+    nombre                TEXT NOT NULL,
+    descripcion           TEXT,
+    tipo                  TEXT NOT NULL CHECK(tipo IN (
+                            'campana_activar','campana_pausar','campana_finalizar',
+                            'categoria_activar','categoria_pausar','recordatorio'
+                          )),
+    condicion_tipo        TEXT NOT NULL CHECK(condicion_tipo IN ('cron','fecha_especifica')),
+    condicion_config      TEXT NOT NULL DEFAULT '{}',
+    accion_config         TEXT NOT NULL DEFAULT '{}',
+    estado                TEXT NOT NULL DEFAULT 'activa'
+                            CHECK(estado IN ('activa','pausada','deshabilitada')),
+    ultima_ejecucion      DATETIME,
+    proxima_ejecucion     DATETIME,
+    contador_ejecuciones  INTEGER NOT NULL DEFAULT 0,
+    created_by            TEXT,
+    created_at            DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at            DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+  CREATE INDEX IF NOT EXISTS idx_auto_empresa ON automatizaciones(empresa_id);
+  CREATE INDEX IF NOT EXISTS idx_auto_estado  ON automatizaciones(empresa_id, estado);
+
+  CREATE TABLE IF NOT EXISTS auto_historial (
+    id                TEXT PRIMARY KEY,
+    automatizacion_id TEXT REFERENCES automatizaciones(id) ON DELETE SET NULL,
+    empresa_id        TEXT REFERENCES empresas(id) ON DELETE SET NULL,
+    tipo              TEXT NOT NULL,
+    accion            TEXT NOT NULL,
+    resultado         TEXT NOT NULL CHECK(resultado IN ('exito','error','sin_accion')),
+    detalles          TEXT,
+    modulo            TEXT,
+    origen            TEXT NOT NULL DEFAULT 'sistema' CHECK(origen IN ('sistema','usuario')),
+    created_at        DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+  CREATE INDEX IF NOT EXISTS idx_auto_hist_empresa ON auto_historial(empresa_id);
+  CREATE INDEX IF NOT EXISTS idx_auto_hist_auto    ON auto_historial(automatizacion_id);
+  CREATE INDEX IF NOT EXISTS idx_auto_hist_fecha   ON auto_historial(created_at);
+
+  CREATE TABLE IF NOT EXISTS alertas_sistema (
+    id           TEXT PRIMARY KEY,
+    tipo         TEXT NOT NULL,
+    nivel        TEXT NOT NULL DEFAULT 'info' CHECK(nivel IN ('info','warn','error')),
+    mensaje      TEXT NOT NULL,
+    empresa_id   TEXT REFERENCES empresas(id) ON DELETE CASCADE,
+    destinatario TEXT NOT NULL DEFAULT 'super_admin'
+                   CHECK(destinatario IN ('super_admin','empresa')),
+    leida        INTEGER NOT NULL DEFAULT 0,
+    created_at   DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+  CREATE INDEX IF NOT EXISTS idx_alertas_dest  ON alertas_sistema(destinatario, leida);
+  CREATE INDEX IF NOT EXISTS idx_alertas_emp   ON alertas_sistema(empresa_id);
+`);
+
 module.exports = db;
