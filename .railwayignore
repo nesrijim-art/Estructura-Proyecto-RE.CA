@@ -1,0 +1,7 @@
+# Exclude design prototypes and docs from build context (not needed at runtime)
+Estructura Proyecto RE.CA/
+
+# Exclude local dev files
+backend/.env
+backend/data/
+backend/uploads/
