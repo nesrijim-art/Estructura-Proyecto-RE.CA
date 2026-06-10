@@ -43,6 +43,8 @@ const tableMigrations = {
     `ALTER TABLE empresas ADD COLUMN color_botones TEXT DEFAULT '#ffd21e'`,
     `ALTER TABLE empresas ADD COLUMN color_promociones TEXT DEFAULT '#dc2626'`,
     `ALTER TABLE empresas ADD COLUMN identidad_updated_at DATETIME`,
+    // M10: WhatsApp contact number for public menu
+    `ALTER TABLE empresas ADD COLUMN whatsapp TEXT`,
   ],
   users: [
     // M04: intra-empresa role (dueno|admin|editor|visualizador)
@@ -221,6 +223,36 @@ db.exec(`
   CREATE UNIQUE INDEX IF NOT EXISTS idx_multimedia_refs_unique
     ON multimedia_refs(multimedia_id, modulo, entidad_id);
   CREATE INDEX IF NOT EXISTS idx_multimedia_refs_media ON multimedia_refs(multimedia_id);
+`);
+
+// M10: menu analytics tables
+db.exec(`
+  CREATE TABLE IF NOT EXISTS menu_visitas (
+    id          TEXT PRIMARY KEY,
+    empresa_id  TEXT NOT NULL REFERENCES empresas(id) ON DELETE CASCADE,
+    session_id  TEXT NOT NULL,
+    lang        TEXT NOT NULL DEFAULT 'es',
+    created_at  DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+  CREATE INDEX IF NOT EXISTS idx_visitas_empresa ON menu_visitas(empresa_id);
+  CREATE INDEX IF NOT EXISTS idx_visitas_fecha   ON menu_visitas(empresa_id, created_at);
+
+  CREATE TABLE IF NOT EXISTS menu_eventos (
+    id          TEXT PRIMARY KEY,
+    empresa_id  TEXT NOT NULL REFERENCES empresas(id) ON DELETE CASCADE,
+    session_id  TEXT NOT NULL,
+    tipo        TEXT NOT NULL CHECK(tipo IN (
+                  'vista_producto','clic_whatsapp','clic_instagram',
+                  'clic_facebook','cambio_idioma','compartir'
+                )),
+    recurso_id  TEXT,
+    lang        TEXT NOT NULL DEFAULT 'es',
+    created_at  DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+  CREATE INDEX IF NOT EXISTS idx_eventos_empresa ON menu_eventos(empresa_id);
+  CREATE INDEX IF NOT EXISTS idx_eventos_tipo    ON menu_eventos(empresa_id, tipo);
+  CREATE INDEX IF NOT EXISTS idx_eventos_fecha   ON menu_eventos(empresa_id, created_at);
+  CREATE INDEX IF NOT EXISTS idx_eventos_recurso ON menu_eventos(empresa_id, recurso_id);
 `);
 
 // M09: set unlimited generations for Premium plan

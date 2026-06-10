@@ -151,8 +151,39 @@ export const api = {
         return d;
       });
     },
-    actualizarColores: (body) => request('/identidad-visual/colores', { method: 'PUT', body: JSON.stringify(body) }),
-    eliminarLogo:      ()     => request('/identidad-visual/logo',    { method: 'DELETE' }),
+    actualizarColores:  (body) => request('/identidad-visual/colores',  { method: 'PUT', body: JSON.stringify(body) }),
+    actualizarContacto: (body) => request('/identidad-visual/contacto', { method: 'PUT', body: JSON.stringify(body) }),
+    eliminarLogo:       ()     => request('/identidad-visual/logo',     { method: 'DELETE' }),
+  },
+  stats: {
+    // Public endpoints (no auth) — called from public menu with sendBeacon
+    visita:   (body) => request('/stats/visita',  { method: 'POST', body: JSON.stringify(body) }),
+    evento:   (body) => request('/stats/evento',  { method: 'POST', body: JSON.stringify(body) }),
+    // Protected endpoints
+    resumen:  (params = {}) => {
+      const qs = new URLSearchParams(Object.entries(params).filter(([, v]) => v != null)).toString();
+      return request('/stats/resumen' + (qs ? '?' + qs : ''));
+    },
+    trafico:  (params = {}) => {
+      const qs = new URLSearchParams(Object.entries(params).filter(([, v]) => v != null)).toString();
+      return request('/stats/trafico' + (qs ? '?' + qs : ''));
+    },
+    productos: (params = {}) => {
+      const qs = new URLSearchParams(Object.entries(params).filter(([, v]) => v != null)).toString();
+      return request('/stats/productos' + (qs ? '?' + qs : ''));
+    },
+    idiomas:  (params = {}) => {
+      const qs = new URLSearchParams(Object.entries(params).filter(([, v]) => v != null)).toString();
+      return request('/stats/idiomas' + (qs ? '?' + qs : ''));
+    },
+    contacto: (params = {}) => {
+      const qs = new URLSearchParams(Object.entries(params).filter(([, v]) => v != null)).toString();
+      return request('/stats/contacto' + (qs ? '?' + qs : ''));
+    },
+    global:   (params = {}) => {
+      const qs = new URLSearchParams(Object.entries(params).filter(([, v]) => v != null)).toString();
+      return request('/stats/global' + (qs ? '?' + qs : ''));
+    },
   },
   ia: {
     quota:               ()              => request('/ia/quota'),

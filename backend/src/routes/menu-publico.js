@@ -21,10 +21,11 @@ router.get('/:slug', (req, res) => {
     return res.status(403).json({ message: 'Este menú no está disponible actualmente' });
   }
 
-  // Visual identity
+  // Visual identity + contact info (M10: whatsapp)
   const identidad = db.prepare(`
     SELECT logo_url, color_principal, color_secundario,
-           color_fondo, color_texto, color_botones, color_promociones
+           color_fondo, color_texto, color_botones, color_promociones,
+           whatsapp
     FROM empresas WHERE id = ?
   `).get(empresa.id);
 
@@ -106,6 +107,7 @@ router.get('/:slug', (req, res) => {
       color_texto:       identidad?.color_texto       || '#0d1117',
       color_botones:     identidad?.color_botones     || '#ffd21e',
       color_promociones: identidad?.color_promociones || '#dc2626',
+      whatsapp:          identidad?.whatsapp          || null,
     },
     idiomas_disponibles: idiomas,
     lang_activo:         lang,

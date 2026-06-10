@@ -64,7 +64,7 @@ router.get('/', requireAuth, (req, res) => {
     SELECT logo_url,
            color_principal, color_secundario, color_fondo,
            color_texto, color_botones, color_promociones,
-           identidad_updated_at
+           whatsapp, identidad_updated_at
     FROM empresas
     WHERE id = ?
   `).get(empresaId);
@@ -79,6 +79,7 @@ router.get('/', requireAuth, (req, res) => {
     color_texto:       row.color_texto       || '#0d1117',
     color_botones:     row.color_botones     || '#ffd21e',
     color_promociones: row.color_promociones || '#dc2626',
+    whatsapp:          row.whatsapp          || null,
     identidad_updated_at: row.identidad_updated_at || null,
   });
 });
@@ -145,6 +146,25 @@ router.put('/colores', requireAuth, requireEmpresaRole('dueno', 'admin'), (req, 
   `).run(...values);
 
   res.json({ message: 'Paleta de colores actualizada', ...updates });
+});
+
+// ── PUT /api/identidad-visual/contacto — update WhatsApp and contact info ────
+router.put('/contacto', requireAuth, requireEmpresaRole('dueno', 'admin'), (req, res) => {
+  const empresaId = getEmpresaId(req);
+  const { whatsapp } = req.body;
+
+  if (whatsapp !== undefined && whatsapp !== null) {
+    // Accept E.164-like or display format: +1234567890 or digits only
+    if (typeof whatsapp !== 'string' || !/^\+?[\d\s\-().]{7,20}$/.test(whatsapp.trim())) {
+      return res.status(400).json({ message: 'Número de WhatsApp inválido' });
+    }
+  }
+
+  db.prepare(`
+    UPDATE empresas SET whatsapp = ?, identidad_updated_at = datetime('now') WHERE id = ?
+  `).run(whatsapp?.trim() || null, empresaId);
+
+  res.json({ message: 'Información de contacto actualizada', whatsapp: whatsapp?.trim() || null });
 });
 
 // ── DELETE /api/identidad-visual/logo — remove logo ──────────────────────────

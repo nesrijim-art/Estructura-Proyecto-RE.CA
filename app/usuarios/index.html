@@ -230,6 +230,18 @@
               <button class="btn btn-primary" id="saveColorsBtn">Guardar paleta</button>
             </div>
           </div>
+
+          <div class="upload-section" style="margin-top:var(--space-6)">
+            <h3>Información de contacto</h3>
+            <p style="font-size:var(--text-sm);color:var(--muted);margin-bottom:var(--space-4)">El número de WhatsApp aparecerá como botón de contacto en tu menú público.</p>
+            <label style="display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:4px" for="waInput">Número de WhatsApp</label>
+            <div style="display:flex;gap:8px;align-items:center">
+              <input type="tel" id="waInput" placeholder="+1 234 567 8900"
+                style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:var(--text-sm);background:var(--surface);color:var(--fg)">
+              <button class="btn btn-primary" id="saveContactoBtn">Guardar</button>
+            </div>
+            <div id="contactoStatus" style="font-size:var(--text-xs);color:var(--muted);margin-top:6px"></div>
+          </div>
         </div>
 
         <!-- Live preview -->
@@ -636,6 +648,9 @@
         document.getElementById('uploadPrompt').style.display = 'none';
         document.getElementById('clearLogoBtn').style.display = '';
       }
+      if (data.whatsapp) {
+        document.getElementById('waInput').value = data.whatsapp;
+      }
     } catch (_) {
       buildColorPalette();
       updatePreview();
@@ -693,6 +708,25 @@
     } finally {
       btn.disabled = false;
       btn.textContent = 'Guardar paleta';
+    }
+  });
+
+  document.getElementById('saveContactoBtn').addEventListener('click', async () => {
+    const whatsapp = document.getElementById('waInput').value.trim() || null;
+    const statusEl = document.getElementById('contactoStatus');
+    const btn = document.getElementById('saveContactoBtn');
+    btn.disabled = true;
+    btn.textContent = 'Guardando…';
+    try {
+      await api.identidad.actualizarContacto({ whatsapp });
+      statusEl.textContent = 'Guardado correctamente.';
+      statusEl.style.color = 'var(--success, #16a34a)';
+    } catch (err) {
+      statusEl.textContent = err.message;
+      statusEl.style.color = 'var(--danger, #dc2626)';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Guardar';
     }
   });
 
