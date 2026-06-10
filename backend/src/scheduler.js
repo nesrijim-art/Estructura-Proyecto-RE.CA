@@ -356,7 +356,14 @@ function tick() {
 
 // ─── Start ─────────────────────────────────────────────────────────────────────
 
+let _started = false;
+
 function start() {
+  if (_started) {
+    console.warn('[Scheduler] already running — duplicate start() call ignored');
+    return;
+  }
+  _started = true;
   tick(); // immediate first run
   setInterval(tick, 60 * 1000);
   console.log('[Scheduler] started — 60s interval');
