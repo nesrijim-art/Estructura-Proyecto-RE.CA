@@ -225,6 +225,65 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_multimedia_refs_media ON multimedia_refs(multimedia_id);
 `);
 
+// M08: marketing & promotions tables
+db.exec(`
+  CREATE TABLE IF NOT EXISTS campanas (
+    id            TEXT PRIMARY KEY,
+    empresa_id    TEXT NOT NULL REFERENCES empresas(id) ON DELETE CASCADE,
+    producto_id   TEXT REFERENCES productos(id) ON DELETE SET NULL,
+    multimedia_id TEXT REFERENCES multimedia(id) ON DELETE SET NULL,
+    titulo        TEXT NOT NULL,
+    descripcion   TEXT,
+    descuento     TEXT,
+    fecha_inicio  DATETIME,
+    fecha_fin     DATETIME,
+    estado        TEXT NOT NULL DEFAULT 'borrador'
+                    CHECK(estado IN ('borrador','programada','activa','pausada','finalizada')),
+    created_by    TEXT NOT NULL,
+    created_at    DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at    DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+  CREATE INDEX IF NOT EXISTS idx_campanas_empresa ON campanas(empresa_id);
+  CREATE INDEX IF NOT EXISTS idx_campanas_estado  ON campanas(empresa_id, estado);
+  CREATE INDEX IF NOT EXISTS idx_campanas_fechas  ON campanas(empresa_id, fecha_inicio, fecha_fin);
+
+  CREATE TABLE IF NOT EXISTS marketing_contenido (
+    id              TEXT PRIMARY KEY,
+    empresa_id      TEXT NOT NULL REFERENCES empresas(id) ON DELETE CASCADE,
+    campana_id      TEXT REFERENCES campanas(id) ON DELETE SET NULL,
+    producto_id     TEXT REFERENCES productos(id) ON DELETE SET NULL,
+    titulo          TEXT,
+    tipo            TEXT NOT NULL CHECK(tipo IN (
+                      'instagram','facebook','whatsapp',
+                      'texto_promocional','campania_temporada','oferta_especial'
+                    )),
+    contenido       TEXT NOT NULL,
+    fuente          TEXT NOT NULL DEFAULT 'manual' CHECK(fuente IN ('manual','ia')),
+    ia_historial_id TEXT REFERENCES ia_historial(id) ON DELETE SET NULL,
+    estado          TEXT NOT NULL DEFAULT 'borrador'
+                      CHECK(estado IN ('borrador','pendiente','aprobado','publicado','descartado')),
+    created_by      TEXT NOT NULL,
+    created_at      DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at      DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+  CREATE INDEX IF NOT EXISTS idx_mkt_contenido_empresa ON marketing_contenido(empresa_id);
+  CREATE INDEX IF NOT EXISTS idx_mkt_contenido_estado  ON marketing_contenido(empresa_id, estado);
+
+  CREATE TABLE IF NOT EXISTS productos_destacados (
+    id          TEXT PRIMARY KEY,
+    empresa_id  TEXT NOT NULL REFERENCES empresas(id) ON DELETE CASCADE,
+    producto_id TEXT NOT NULL REFERENCES productos(id) ON DELETE CASCADE,
+    etiqueta    TEXT NOT NULL DEFAULT 'destacado'
+                  CHECK(etiqueta IN ('destacado','popular','recomendacion_chef',
+                                     'producto_estrella','nuevo','mas_vendido')),
+    orden       INTEGER NOT NULL DEFAULT 0,
+    created_by  TEXT NOT NULL,
+    created_at  DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+  CREATE UNIQUE INDEX IF NOT EXISTS idx_destacados_unique  ON productos_destacados(empresa_id, producto_id);
+  CREATE INDEX IF NOT EXISTS idx_destacados_empresa        ON productos_destacados(empresa_id);
+`);
+
 // M10: menu analytics tables
 db.exec(`
   CREATE TABLE IF NOT EXISTS menu_visitas (

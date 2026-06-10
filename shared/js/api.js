@@ -199,6 +199,40 @@ export const api = {
     obtenerHistorial:    (id)            => request(`/ia/historial/${id}`),
     actualizarHistorial: (id, body)      => request(`/ia/historial/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
   },
+  marketing: {
+    stats:            ()              => request('/marketing/stats'),
+    // Campañas
+    listarCampanas:   (params = {})   => {
+      const qs = new URLSearchParams(
+        Object.entries(params).filter(([, v]) => v !== '' && v != null)
+      ).toString();
+      return request('/marketing/campanas' + (qs ? '?' + qs : ''));
+    },
+    calendario:       (year, month)   => request(`/marketing/campanas/calendario?year=${year}&month=${month}`),
+    obtenerCampana:   (id)            => request(`/marketing/campanas/${id}`),
+    crearCampana:     (body)          => request('/marketing/campanas',                { method: 'POST',   body: JSON.stringify(body) }),
+    editarCampana:    (id, body)      => request(`/marketing/campanas/${id}`,          { method: 'PUT',    body: JSON.stringify(body) }),
+    cambiarEstadoCampana: (id, estado) => request(`/marketing/campanas/${id}/estado`,  { method: 'PUT',    body: JSON.stringify({ estado }) }),
+    duplicarCampana:  (id)            => request(`/marketing/campanas/${id}/duplicar`, { method: 'POST' }),
+    eliminarCampana:  (id)            => request(`/marketing/campanas/${id}`,          { method: 'DELETE' }),
+    statsCampana:     (id)            => request(`/marketing/campanas/${id}/stats`),
+    // Contenido generado
+    listarContenido:  (params = {})   => {
+      const qs = new URLSearchParams(
+        Object.entries(params).filter(([, v]) => v !== '' && v != null)
+      ).toString();
+      return request('/marketing/contenido' + (qs ? '?' + qs : ''));
+    },
+    crearContenido:   (body)          => request('/marketing/contenido',               { method: 'POST',   body: JSON.stringify(body) }),
+    editarContenido:  (id, body)      => request(`/marketing/contenido/${id}`,         { method: 'PUT',    body: JSON.stringify(body) }),
+    estadoContenido:  (id, estado)    => request(`/marketing/contenido/${id}/estado`,  { method: 'PUT',    body: JSON.stringify({ estado }) }),
+    eliminarContenido:(id)            => request(`/marketing/contenido/${id}`,         { method: 'DELETE' }),
+    // Productos destacados
+    listarDestacados: ()              => request('/marketing/destacados'),
+    agregarDestacado: (body)          => request('/marketing/destacados',              { method: 'POST',   body: JSON.stringify(body) }),
+    editarDestacado:  (id, body)      => request(`/marketing/destacados/${id}`,        { method: 'PUT',    body: JSON.stringify(body) }),
+    quitarDestacado:  (id)            => request(`/marketing/destacados/${id}`,        { method: 'DELETE' }),
+  },
   auth: {
     login:           (body) => request('/auth/login',           { method: 'POST', body: JSON.stringify(body) }),
     register:        (body) => request('/auth/register',        { method: 'POST', body: JSON.stringify(body) }),

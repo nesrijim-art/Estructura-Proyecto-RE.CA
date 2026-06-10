@@ -1,0 +1,1449 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Marketing y Promociones · RE.CA</title>
+  <style>
+    :root {
+      --bg:      #fafafa;
+      --surface: #ffffff;
+      --fg:      #0d1117;
+      --muted:   #6b7280;
+      --border:  #e5e7eb;
+      --accent:  #ffd21e;
+      --accent-soft: color-mix(in oklch, var(--accent) 14%, transparent);
+      --fg-soft:     color-mix(in oklch, var(--fg) 6%, transparent);
+      --success:     #16a34a;
+      --success-soft:color-mix(in oklch, var(--success) 12%, transparent);
+      --warn:        #f59e0b;
+      --warn-soft:   color-mix(in oklch, var(--warn) 12%, transparent);
+      --danger:      #dc2626;
+      --danger-soft: color-mix(in oklch, var(--danger) 12%, transparent);
+      --info:        #2563eb;
+      --info-soft:   color-mix(in oklch, var(--info) 12%, transparent);
+      --purple:      #9333ea;
+      --purple-soft: color-mix(in oklch, var(--purple) 12%, transparent);
+      --font-display: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      --font-body:    "Source Sans Pro", Inter, system-ui, sans-serif;
+      --text-xs: 11px; --text-sm: 13px; --text-base: 15px;
+      --text-lg: 17px; --text-xl: 20px; --text-2xl: 24px; --text-3xl: 32px;
+      --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
+      --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-10: 40px;
+      --radius: 6px; --radius-lg: 10px; --radius-xl: 16px;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: var(--text-base); line-height: 1.5; -webkit-font-smoothing: antialiased; }
+    img, svg { display: block; max-width: 100%; }
+    button { font: inherit; cursor: pointer; border: none; background: none; padding: 0; }
+    p, h1, h2, h3 { margin: 0; }
+    h1, h2, h3 { font-weight: 600; }
+
+    /* ── Layout ── */
+    .page { padding: var(--space-8); max-width: 1440px; }
+    @media (max-width: 768px) { .page { padding: var(--space-4); } }
+
+    /* ── Topbar ── */
+    .topbar { display: flex; align-items: center; gap: var(--space-4); padding: var(--space-4) var(--space-8); background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+    .topbar-brand { font-family: var(--font-display); font-size: 16px; font-weight: 700; color: var(--fg); text-decoration: none; }
+    .topbar-sep { color: var(--border); }
+    .topbar-title { font-size: var(--text-sm); color: var(--muted); }
+    .topbar-right { margin-left: auto; display: flex; gap: var(--space-2); align-items: center; }
+
+    /* ── Buttons ── */
+    .btn { display: inline-flex; align-items: center; gap: var(--space-2); padding: 8px 16px; border-radius: var(--radius); font-size: var(--text-sm); font-weight: 600; transition: all .15s; text-decoration: none; }
+    .btn-primary { background: var(--fg); color: #fff; }
+    .btn-primary:hover { background: #1f2937; }
+    .btn-outline { background: var(--surface); color: var(--fg); border: 1px solid var(--border); }
+    .btn-outline:hover { background: var(--bg); }
+    .btn-accent { background: var(--accent); color: var(--fg); }
+    .btn-accent:hover { filter: brightness(.92); }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-danger:hover { filter: brightness(.9); }
+    .btn-sm { padding: 5px 10px; font-size: var(--text-xs); }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* ── Alert ── */
+    .alert { padding: var(--space-3) var(--space-4); border-radius: var(--radius); font-size: var(--text-sm); margin-bottom: var(--space-4); display: none; }
+    .alert.show { display: block; }
+    .alert-error   { background: var(--danger-soft); color: var(--danger); }
+    .alert-success { background: var(--success-soft); color: var(--success); }
+
+    /* ── Page header ── */
+    .page-header { margin-bottom: var(--space-6); }
+    .page-title { font-size: var(--text-3xl); font-weight: 700; letter-spacing: -.02em; margin-bottom: var(--space-2); }
+    .page-subtitle { color: var(--muted); font-size: var(--text-lg); margin-bottom: var(--space-6); }
+    .header-actions { display: flex; gap: var(--space-3); flex-wrap: wrap; }
+
+    /* ── Stats bar ── */
+    .stats-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-3); margin-bottom: var(--space-6); }
+    .stat-chip { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--space-4); }
+    .stat-chip-value { font-family: var(--font-display); font-size: var(--text-2xl); font-weight: 700; }
+    .stat-chip-label { font-size: var(--text-xs); color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin-top: 2px; }
+
+    /* ── Tabs ── */
+    .tabs { display: flex; gap: var(--space-2); border-bottom: 1px solid var(--border); margin-bottom: var(--space-6); overflow-x: auto; }
+    .tab { padding: 12px 18px; font-size: var(--text-base); font-weight: 500; color: var(--muted); border-bottom: 2px solid transparent; white-space: nowrap; transition: all .15s; }
+    .tab:hover { color: var(--fg); }
+    .tab.active { color: var(--fg); font-weight: 600; border-bottom-color: var(--accent); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── Toolbar ── */
+    .toolbar { display: flex; gap: var(--space-3); align-items: center; flex-wrap: wrap; margin-bottom: var(--space-5); }
+    .toolbar-select { padding: 7px 12px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--fg); font-size: var(--text-sm); }
+    .toolbar-input  { padding: 7px 12px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--fg); font-size: var(--text-sm); min-width: 220px; }
+    .toolbar-input:focus, .toolbar-select:focus { outline: none; border-color: var(--accent); }
+
+    /* ── Campaign cards ── */
+    .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: var(--space-4); }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; transition: border-color .15s, box-shadow .15s; }
+    .card:hover { border-color: var(--accent); box-shadow: 0 4px 16px color-mix(in oklch, var(--fg) 7%, transparent); }
+    .card-img { height: 160px; background: linear-gradient(135deg, var(--accent-soft), var(--fg-soft)); display: grid; place-items: center; font-size: 40px; position: relative; overflow: hidden; }
+    .card-img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .status-badge { position: absolute; top: 10px; right: 10px; padding: 3px 8px; border-radius: var(--radius); font-size: var(--text-xs); font-weight: 700; text-transform: uppercase; letter-spacing: .03em; font-family: var(--font-display); }
+    .badge-activa      { background: var(--success-soft); color: var(--success); }
+    .badge-programada  { background: var(--info-soft);    color: var(--info); }
+    .badge-pausada     { background: var(--warn-soft);    color: var(--warn); }
+    .badge-finalizada  { background: var(--fg-soft);      color: var(--muted); }
+    .badge-borrador    { background: var(--border);        color: var(--muted); }
+    .card-body { padding: var(--space-5); }
+    .card-title { font-size: var(--text-xl); font-weight: 600; margin-bottom: 2px; letter-spacing: -.01em; }
+    .card-subtitle { font-size: var(--text-sm); color: var(--muted); margin-bottom: var(--space-4); }
+    .card-meta { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); padding-top: var(--space-4); border-top: 1px solid var(--border); }
+    .meta-item { display: flex; flex-direction: column; gap: 2px; }
+    .meta-label { font-size: var(--text-xs); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+    .meta-value { font-family: var(--font-display); font-size: var(--text-sm); }
+    .card-actions { padding: var(--space-3) var(--space-5); border-top: 1px solid var(--border); display: flex; gap: var(--space-2); }
+    .icon-btn { flex: 1; padding: 6px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); transition: all .15s; font-size: 16px; display: grid; place-items: center; }
+    .icon-btn:hover { background: var(--bg); border-color: var(--fg); }
+
+    /* ── Calendar ── */
+    .cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-5); }
+    .cal-title   { font-family: var(--font-display); font-size: var(--text-2xl); font-weight: 700; }
+    .cal-nav     { display: flex; gap: var(--space-2); }
+    .cal-nav-btn { padding: 6px 12px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); font-size: var(--text-sm); font-weight: 600; }
+    .cal-nav-btn:hover { background: var(--bg); }
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+    .cal-day-hdr { background: var(--surface); padding: var(--space-3); text-align: center; font-size: var(--text-xs); font-weight: 600; color: var(--muted); }
+    .cal-day { background: var(--surface); min-height: 100px; padding: var(--space-2); display: flex; flex-direction: column; gap: 3px; }
+    .cal-day.other { background: color-mix(in oklch, var(--bg) 60%, transparent); }
+    .cal-day:hover { background: var(--bg); }
+    .cal-day-num { font-family: var(--font-display); font-size: var(--text-sm); font-weight: 600; color: var(--muted); margin-bottom: 3px; }
+    .cal-day.today .cal-day-num { background: var(--accent); color: var(--fg); width: 22px; height: 22px; display: grid; place-items: center; border-radius: 50%; }
+    .cal-event { font-size: 10px; padding: 2px 5px; border-radius: 3px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .cal-event-activa    { background: var(--success-soft); color: var(--success); }
+    .cal-event-programada{ background: var(--info-soft);    color: var(--info); }
+    .cal-event-pausada   { background: var(--warn-soft);    color: var(--warn); }
+
+    /* ── Content list ── */
+    .content-list { display: flex; flex-direction: column; gap: var(--space-4); }
+    .content-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--space-5); display: flex; gap: var(--space-5); align-items: flex-start; }
+    .content-icon { width: 44px; height: 44px; flex-shrink: 0; border-radius: var(--radius); display: grid; place-items: center; font-size: 22px; }
+    .content-icon-borrador  { background: var(--fg-soft); }
+    .content-icon-pendiente { background: var(--warn-soft); }
+    .content-icon-aprobado  { background: var(--success-soft); }
+    .content-icon-publicado { background: var(--accent-soft); }
+    .content-icon-descartado{ background: var(--danger-soft); }
+    .content-body { flex: 1; min-width: 0; }
+    .content-top { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-2); flex-wrap: wrap; }
+    .content-title { font-size: var(--text-lg); font-weight: 600; letter-spacing: -.01em; }
+    .content-status { padding: 2px 8px; border-radius: var(--radius); font-size: var(--text-xs); font-weight: 700; text-transform: uppercase; letter-spacing: .04em; font-family: var(--font-display); }
+    .cs-borrador   { background: var(--fg-soft);      color: var(--muted); }
+    .cs-pendiente  { background: var(--warn-soft);    color: var(--warn); }
+    .cs-aprobado   { background: var(--success-soft); color: var(--success); }
+    .cs-publicado  { background: var(--accent-soft);  color: var(--fg); }
+    .cs-descartado { background: var(--danger-soft);  color: var(--danger); }
+    .content-text { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: var(--space-3) var(--space-4); font-size: var(--text-sm); line-height: 1.6; color: var(--muted); white-space: pre-wrap; max-height: 120px; overflow: hidden; margin-bottom: var(--space-3); }
+    .content-meta { display: flex; gap: var(--space-5); font-size: var(--text-xs); color: var(--muted); padding-top: var(--space-3); border-top: 1px solid var(--border); margin-bottom: var(--space-3); }
+    .content-actions { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+
+    /* ── Featured grid ── */
+    .featured-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: var(--space-4); }
+    .feat-card { background: var(--surface); border: 2px solid var(--accent); border-radius: var(--radius-lg); overflow: hidden; position: relative; }
+    .feat-badge { position: absolute; top: 10px; left: 10px; padding: 3px 8px; background: var(--accent); color: var(--fg); border-radius: var(--radius); font-size: var(--text-xs); font-weight: 700; text-transform: uppercase; font-family: var(--font-display); z-index: 10; }
+    .feat-img { height: 140px; background: linear-gradient(135deg, var(--accent-soft), var(--fg-soft)); display: grid; place-items: center; font-size: 36px; overflow: hidden; position: relative; }
+    .feat-img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .feat-body { padding: var(--space-4); }
+    .feat-name { font-size: var(--text-lg); font-weight: 600; margin-bottom: 2px; }
+    .feat-cat  { font-size: var(--text-sm); color: var(--muted); margin-bottom: var(--space-4); }
+    .feat-actions { padding-top: var(--space-3); border-top: 1px solid var(--border); display: flex; gap: var(--space-2); }
+    .empty-slot { background: var(--bg); border: 2px dashed var(--border); border-radius: var(--radius-lg); padding: var(--space-10) var(--space-5); display: flex; flex-direction: column; align-items: center; gap: var(--space-3); text-align: center; }
+    .empty-icon { font-size: 36px; opacity: .3; }
+    .empty-text { font-size: var(--text-sm); color: var(--muted); }
+
+    /* ── Plan limit bar ── */
+    .plan-limit-bar { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--space-4) var(--space-5); display: flex; align-items: center; gap: var(--space-4); margin-bottom: var(--space-5); }
+    .plan-limit-fill { flex: 1; height: 6px; background: var(--border); border-radius: 99px; overflow: hidden; }
+    .plan-limit-fill-inner { height: 100%; background: var(--accent); border-radius: 99px; transition: width .3s; }
+    .plan-limit-text { font-size: var(--text-sm); color: var(--muted); white-space: nowrap; }
+
+    /* ── Upgrade banner ── */
+    .upgrade-banner { background: var(--accent-soft); border: 1px solid var(--accent); border-radius: var(--radius-lg); padding: var(--space-5) var(--space-6); display: flex; align-items: center; gap: var(--space-4); margin-bottom: var(--space-6); }
+    .upgrade-banner h3 { font-size: var(--text-lg); font-weight: 700; margin-bottom: 4px; }
+    .upgrade-banner p  { font-size: var(--text-sm); color: var(--muted); }
+
+    /* ── Empty state ── */
+    .empty-state { padding: var(--space-10) var(--space-5); text-align: center; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); }
+    .empty-state .es-icon { font-size: 48px; margin-bottom: var(--space-3); }
+    .empty-state p { color: var(--muted); font-size: var(--text-base); margin-bottom: var(--space-5); }
+
+    /* ── Modal ── */
+    .modal-overlay { position: fixed; inset: 0; background: color-mix(in oklch, var(--fg) 50%, transparent); backdrop-filter: blur(4px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: var(--space-5); }
+    .modal-overlay.open { display: flex; }
+    .modal { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-xl); max-width: 680px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 24px 64px color-mix(in oklch, var(--fg) 30%, transparent); }
+    .modal-header { padding: var(--space-6) var(--space-6) var(--space-4); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .modal-title  { font-size: var(--text-2xl); font-weight: 700; letter-spacing: -.01em; }
+    .modal-close  { width: 30px; height: 30px; border-radius: 50%; background: var(--bg); display: grid; place-items: center; font-size: 14px; }
+    .modal-close:hover { background: var(--border); }
+    .modal-body { padding: var(--space-6); display: flex; flex-direction: column; gap: var(--space-5); }
+    .modal-footer { padding: var(--space-4) var(--space-6) var(--space-6); display: flex; gap: var(--space-3); justify-content: flex-end; }
+    .field { display: flex; flex-direction: column; gap: var(--space-2); }
+    .field label { font-size: var(--text-sm); font-weight: 600; }
+    .field input, .field select, .field textarea { padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--fg); font-size: var(--text-base); font-family: var(--font-body); }
+    .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--accent); }
+    .field textarea { min-height: 90px; resize: vertical; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+    .field-hint { font-size: var(--text-xs); color: var(--muted); }
+
+    /* AI preview */
+    .ai-preview { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--space-5); position: relative; }
+    .ai-label { position: absolute; top: var(--space-3); right: var(--space-3); padding: 2px 8px; background: var(--purple-soft); color: var(--purple); border-radius: var(--radius); font-size: var(--text-xs); font-weight: 700; font-family: var(--font-display); }
+    .ai-content-text { font-size: var(--text-sm); line-height: 1.7; white-space: pre-wrap; padding-top: var(--space-4); }
+    .ai-variants { display: flex; flex-direction: column; gap: var(--space-3); }
+    .ai-variant { padding: var(--space-4); border: 2px solid var(--border); border-radius: var(--radius-lg); cursor: pointer; transition: border-color .15s; font-size: var(--text-sm); white-space: pre-wrap; line-height: 1.7; }
+    .ai-variant:hover, .ai-variant.selected { border-color: var(--accent); background: var(--accent-soft); }
+
+    /* Stats modal */
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--space-4); }
+    .stat-box { background: var(--bg); border-radius: var(--radius-lg); padding: var(--space-5); text-align: center; }
+    .stat-box-value { font-family: var(--font-display); font-size: var(--text-3xl); font-weight: 700; }
+    .stat-box-label { font-size: var(--text-xs); color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin-top: 4px; }
+
+    /* Media picker */
+    .media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: var(--space-3); max-height: 360px; overflow-y: auto; }
+    .media-item { border: 2px solid var(--border); border-radius: var(--radius); overflow: hidden; cursor: pointer; transition: border-color .15s; aspect-ratio: 1; background: var(--bg); display: grid; place-items: center; }
+    .media-item:hover, .media-item.selected { border-color: var(--accent); }
+    .media-item img { width: 100%; height: 100%; object-fit: cover; }
+    .media-item-label { font-size: var(--text-xs); color: var(--muted); text-align: center; padding: 4px; display: none; }
+
+    /* Product picker */
+    .prod-picker-list { display: flex; flex-direction: column; gap: var(--space-2); max-height: 320px; overflow-y: auto; }
+    .prod-picker-item { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: all .15s; }
+    .prod-picker-item:hover, .prod-picker-item.selected { border-color: var(--accent); background: var(--accent-soft); }
+    .prod-picker-img { width: 40px; height: 40px; border-radius: var(--radius); background: var(--bg); object-fit: cover; flex-shrink: 0; display: grid; place-items: center; font-size: 20px; overflow: hidden; }
+    .prod-picker-name { font-weight: 600; font-size: var(--text-sm); }
+    .prod-picker-cat  { font-size: var(--text-xs); color: var(--muted); }
+
+    @media (max-width: 768px) {
+      .field-row { grid-template-columns: 1fr; }
+      .cards-grid { grid-template-columns: 1fr; }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .cal-grid   { font-size: var(--text-xs); }
+      .cal-day    { min-height: 70px; }
+    }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+<!-- ══ TOPBAR ══════════════════════════════════════════════════════════════════ -->
+<header class="topbar">
+  <a class="topbar-brand" href="/app/dashboard/">RE.CA</a>
+  <span class="topbar-sep">/</span>
+  <span class="topbar-title">Marketing y Promociones</span>
+  <div class="topbar-right">
+    <span id="userBadge" style="font-size:var(--text-xs);color:var(--muted);font-family:var(--font-display)"></span>
+    <a href="/app/dashboard/" class="btn btn-outline btn-sm">← Dashboard</a>
+  </div>
+</header>
+
+<!-- ══ MAIN ════════════════════════════════════════════════════════════════════ -->
+<main class="page">
+  <div id="alertMain" class="alert"></div>
+
+  <!-- Header -->
+  <header class="page-header">
+    <h1 class="page-title">Marketing y Promociones</h1>
+    <p class="page-subtitle">Impulsa tus productos, crea campañas profesionales y genera contenido con IA en segundos.</p>
+    <div class="header-actions">
+      <button class="btn btn-primary" id="btnNuevaCampana">➕ Crear Campaña</button>
+      <button class="btn btn-accent"  id="btnGenerarIa">✨ Generar con IA</button>
+    </div>
+  </header>
+
+  <!-- Stats bar -->
+  <div class="stats-bar" id="statsBar">
+    <div class="stat-chip"><div class="stat-chip-value" id="statTotal">–</div><div class="stat-chip-label">Total campañas</div></div>
+    <div class="stat-chip"><div class="stat-chip-value" id="statActivas">–</div><div class="stat-chip-label">Activas</div></div>
+    <div class="stat-chip"><div class="stat-chip-value" id="statProgramadas">–</div><div class="stat-chip-label">Programadas</div></div>
+    <div class="stat-chip"><div class="stat-chip-value" id="statPendContenido">–</div><div class="stat-chip-label">Contenido pendiente</div></div>
+    <div class="stat-chip"><div class="stat-chip-value" id="statDestacados">–</div><div class="stat-chip-label">Destacados</div></div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" data-tab="campanas">Promociones Activas</button>
+    <button class="tab" data-tab="calendario" id="tabCalendario">Calendario Comercial</button>
+    <button class="tab" data-tab="contenido">Contenido Generado</button>
+    <button class="tab" data-tab="destacados">Productos Destacados</button>
+  </div>
+
+  <!-- ══ TAB 1: CAMPAÑAS ══════════════════════════════════════════════════════ -->
+  <div class="tab-panel active" id="tab-campanas">
+    <div class="toolbar">
+      <select class="toolbar-select" id="filtroEstado">
+        <option value="">Todos los estados</option>
+        <option value="activa">Activa</option>
+        <option value="programada">Programada</option>
+        <option value="pausada">Pausada</option>
+        <option value="borrador">Borrador</option>
+        <option value="finalizada">Finalizada</option>
+      </select>
+      <input type="search" class="toolbar-input" id="filtroBuscar" placeholder="Buscar campaña...">
+      <button class="btn btn-outline btn-sm" id="btnRefreshCampanas">↺ Actualizar</button>
+    </div>
+    <div class="cards-grid" id="campanasList"></div>
+  </div>
+
+  <!-- ══ TAB 2: CALENDARIO ════════════════════════════════════════════════════ -->
+  <div class="tab-panel" id="tab-calendario">
+    <div id="calUpgradeBanner" class="upgrade-banner hidden">
+      <div style="font-size:32px">📅</div>
+      <div>
+        <h3>Calendario Comercial</h3>
+        <p>Disponible en Plan Business y Premium. Visualiza toda tu actividad promocional en perspectiva temporal.</p>
+      </div>
+      <a href="/app/planes/" class="btn btn-accent" style="margin-left:auto;white-space:nowrap">Ver planes</a>
+    </div>
+    <div id="calContent">
+      <div class="cal-header">
+        <h2 class="cal-title" id="calTitulo">Cargando...</h2>
+        <div class="cal-nav">
+          <button class="cal-nav-btn" id="calPrev">◀ Anterior</button>
+          <button class="cal-nav-btn" id="calHoy">Hoy</button>
+          <button class="cal-nav-btn" id="calNext">Siguiente ▶</button>
+        </div>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+    </div>
+  </div>
+
+  <!-- ══ TAB 3: CONTENIDO ═════════════════════════════════════════════════════ -->
+  <div class="tab-panel" id="tab-contenido">
+    <div class="toolbar">
+      <select class="toolbar-select" id="filtroContenidoEstado">
+        <option value="">Todos los estados</option>
+        <option value="pendiente">Pendiente revisión</option>
+        <option value="aprobado">Aprobado</option>
+        <option value="publicado">Publicado</option>
+        <option value="borrador">Borrador</option>
+        <option value="descartado">Descartado</option>
+      </select>
+      <select class="toolbar-select" id="filtroContenidoTipo">
+        <option value="">Todos los tipos</option>
+        <option value="instagram">Instagram</option>
+        <option value="facebook">Facebook</option>
+        <option value="whatsapp">WhatsApp</option>
+        <option value="texto_promocional">Texto promocional</option>
+        <option value="campania_temporada">Campaña de temporada</option>
+        <option value="oferta_especial">Oferta especial</option>
+      </select>
+      <button class="btn btn-outline btn-sm" id="btnRefreshContenido">↺ Actualizar</button>
+    </div>
+    <div class="content-list" id="contenidoList"></div>
+  </div>
+
+  <!-- ══ TAB 4: DESTACADOS ════════════════════════════════════════════════════ -->
+  <div class="tab-panel" id="tab-destacados">
+    <div class="plan-limit-bar" id="planLimitBar">
+      <span class="plan-limit-text" id="planLimitText">Cargando...</span>
+      <div class="plan-limit-fill"><div class="plan-limit-fill-inner" id="planLimitFill" style="width:0%"></div></div>
+      <button class="btn btn-primary btn-sm" id="btnAgregarDestacado">+ Agregar</button>
+    </div>
+    <div class="featured-grid" id="destacadosList"></div>
+  </div>
+</main>
+
+<!-- ══ MODAL CAMPAÑA ═══════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modalCampana">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title" id="modalCampanaTitulo">Crear Campaña</h2>
+      <button class="modal-close" data-close="modalCampana">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="alertCampana" class="alert"></div>
+      <input type="hidden" id="campanaId">
+      <div class="field">
+        <label>Título promocional *</label>
+        <input type="text" id="campTitulo" placeholder="Ej: 🍕 2x1 en Pizzas los Martes">
+      </div>
+      <div class="field">
+        <label>Descripción</label>
+        <textarea id="campDescripcion" placeholder="Detalla tu promoción..."></textarea>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Descuento (opcional)</label>
+          <input type="text" id="campDescuento" placeholder="Ej: 50% o -$5.00">
+        </div>
+        <div class="field">
+          <label>Producto asociado</label>
+          <select id="campProductoId">
+            <option value="">Sin producto específico</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>Imagen promocional</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <div id="campImgPreview" style="width:60px;height:60px;border-radius:var(--radius);background:var(--bg);border:1px solid var(--border);display:grid;place-items:center;font-size:24px;flex-shrink:0;overflow:hidden">📷</div>
+          <button type="button" class="btn btn-outline btn-sm" id="btnSeleccionarMedia">📂 Seleccionar desde Multimedia</button>
+          <button type="button" class="btn btn-outline btn-sm hidden" id="btnQuitarMedia">✕ Quitar</button>
+        </div>
+        <input type="hidden" id="campMultimediaId">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Fecha de inicio</label>
+          <input type="datetime-local" id="campFechaInicio">
+        </div>
+        <div class="field">
+          <label>Fecha de finalización</label>
+          <input type="datetime-local" id="campFechaFin">
+        </div>
+      </div>
+      <div class="field">
+        <label>Estado inicial</label>
+        <select id="campEstado">
+          <option value="borrador">Guardar como borrador</option>
+          <option value="activa">Activar inmediatamente</option>
+          <option value="programada" id="optProgramada">Programar para fecha de inicio</option>
+        </select>
+        <span class="field-hint" id="hintProgramada" style="display:none">La programación de campañas requiere Plan Business o Premium.</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" data-close="modalCampana">Cancelar</button>
+      <button class="btn btn-primary" id="btnGuardarCampana">Crear Campaña</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL GENERAR IA ════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modalIa">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title">✨ Generar Contenido con IA</h2>
+      <button class="modal-close" data-close="modalIa">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="alertIa" class="alert"></div>
+      <div id="iaFormPanel">
+        <div class="field">
+          <label>Producto *</label>
+          <select id="iaProductoId">
+            <option value="">Seleccionar producto...</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Tipo de contenido *</label>
+          <select id="iaTipo">
+            <option value="instagram">Publicación para Instagram</option>
+            <option value="facebook">Publicación para Facebook</option>
+            <option value="whatsapp">Texto para WhatsApp</option>
+            <option value="texto_promocional">Texto promocional</option>
+            <option value="campania_temporada">Campaña de temporada</option>
+            <option value="oferta_especial">Oferta especial</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Contexto (opcional)</label>
+          <textarea id="iaContexto" placeholder="Ej: Fin de semana, festividad, evento especial..."></textarea>
+        </div>
+        <button class="btn btn-accent" style="width:100%" id="btnGenerarContenido">✨ Generar con IA</button>
+      </div>
+      <div id="iaVariantesPanel" class="hidden">
+        <div class="ai-preview">
+          <span class="ai-label">✨ Generado por IA</span>
+          <p style="font-size:var(--text-xs);color:var(--muted);margin-top:var(--space-3);margin-bottom:var(--space-4)">Selecciona la variante que prefieras o edítala antes de guardar.</p>
+          <div class="ai-variants" id="iaVariantes"></div>
+        </div>
+        <div class="field" style="margin-top:var(--space-4)">
+          <label>Contenido seleccionado (editable)</label>
+          <textarea id="iaContenidoEdit" style="min-height:140px"></textarea>
+        </div>
+        <button class="btn btn-outline btn-sm" id="btnIaVolver">← Volver a generar</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" data-close="modalIa">Cancelar</button>
+      <button class="btn btn-primary hidden" id="btnGuardarContenidoIa">Guardar como Pendiente</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL SELECTOR MULTIMEDIA ══════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modalMedia">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title">Seleccionar imagen</h2>
+      <button class="modal-close" data-close="modalMedia">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="media-grid" id="mediaGrid"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" data-close="modalMedia">Cancelar</button>
+      <button class="btn btn-primary" id="btnConfirmarMedia" disabled>Seleccionar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL STATS CAMPAÑA ════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modalStats">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title" id="modalStatsTitulo">Rendimiento</h2>
+      <button class="modal-close" data-close="modalStats">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="stats-grid">
+        <div class="stat-box"><div class="stat-box-value" id="svVistas">–</div><div class="stat-box-label">Vistas producto</div></div>
+        <div class="stat-box"><div class="stat-box-value" id="svWa">–</div><div class="stat-box-label">Clics WhatsApp</div></div>
+        <div class="stat-box"><div class="stat-box-value" id="svSesiones">–</div><div class="stat-box-label">Sesiones únicas</div></div>
+      </div>
+      <p style="font-size:var(--text-xs);color:var(--muted);margin-top:var(--space-4);text-align:center">Métricas reales del período de la campaña (via M10 · Estadísticas)</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL SELECTOR PRODUCTO ════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modalProdPicker">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title">Seleccionar producto a destacar</h2>
+      <button class="modal-close" data-close="modalProdPicker">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Etiqueta</label>
+        <select id="destEtiqueta">
+          <option value="destacado">⭐ Destacado</option>
+          <option value="popular">🔥 Popular</option>
+          <option value="recomendacion_chef">👨‍🍳 Recomendación del chef</option>
+          <option value="producto_estrella">✨ Producto estrella</option>
+          <option value="nuevo">🆕 Nuevo</option>
+          <option value="mas_vendido">🏆 Más vendido</option>
+        </select>
+      </div>
+      <div class="prod-picker-list" id="prodPickerList"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" data-close="modalProdPicker">Cancelar</button>
+      <button class="btn btn-primary" id="btnConfirmarDestacado" disabled>Destacar producto</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL EDITAR CONTENIDO ════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modalEditContenido">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title">Editar contenido</h2>
+      <button class="modal-close" data-close="modalEditContenido">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="alertEditContenido" class="alert"></div>
+      <input type="hidden" id="editContenidoId">
+      <div class="field">
+        <label>Título (opcional)</label>
+        <input type="text" id="editContenidoTitulo">
+      </div>
+      <div class="field">
+        <label>Contenido</label>
+        <textarea id="editContenidoTexto" style="min-height:160px"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" data-close="modalEditContenido">Cancelar</button>
+      <button class="btn btn-primary" id="btnGuardarEditContenido">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { getAccessToken, getUser, clearSession } from '../../shared/js/auth.js';
+import { api } from '../../shared/js/api.js';
+
+// ── Auth check ────────────────────────────────────────────────────────────────
+const token = getAccessToken();
+if (!token) { location.href = '/app/login/'; throw 0; }
+
+let me = null;
+let planData = null;
+let canSchedule = false;
+let allProductos = [];
+let allMedia = [];
+let currentStats = null;
+let selectedMediaId = null;
+let selectedMediaUrl = null;
+let selectedProdId = null;
+let iaHistorialId = null;
+let calYear  = new Date().getFullYear();
+let calMonth = new Date().getMonth() + 1;
+
+// ── Utilities ─────────────────────────────────────────────────────────────────
+function showAlert(el, msg, type = 'error') {
+  el.textContent = msg;
+  el.className = `alert show alert-${type}`;
+  setTimeout(() => { el.className = 'alert'; }, 5000);
+}
+
+function fmtDate(iso) {
+  if (!iso) return '–';
+  return new Date(iso).toLocaleDateString('es', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function fmtDatetime(iso) {
+  if (!iso) return '–';
+  return new Date(iso).toLocaleString('es', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+const ESTADO_LABELS = {
+  activa:'Activa', programada:'Programada', pausada:'Pausada',
+  finalizada:'Finalizada', borrador:'Borrador'
+};
+
+const TIPO_LABELS = {
+  instagram:'Instagram', facebook:'Facebook', whatsapp:'WhatsApp',
+  texto_promocional:'Texto promocional', campania_temporada:'Temporada', oferta_especial:'Oferta'
+};
+
+const ETIQUETA_LABELS = {
+  destacado:'⭐ Destacado', popular:'🔥 Popular', recomendacion_chef:'👨‍🍳 Recomendación',
+  producto_estrella:'✨ Estrella', nuevo:'🆕 Nuevo', mas_vendido:'🏆 Más vendido'
+};
+
+const CONTENT_ICONS = {
+  borrador:'📝', pendiente:'⏳', aprobado:'✅', publicado:'🚀', descartado:'🗑️'
+};
+
+// ── Modal helpers ─────────────────────────────────────────────────────────────
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+document.querySelectorAll('[data-close]').forEach(btn => {
+  btn.addEventListener('click', () => closeModal(btn.dataset.close));
+});
+document.querySelectorAll('.modal-overlay').forEach(ov => {
+  ov.addEventListener('click', e => { if (e.target === ov) ov.classList.remove('open'); });
+});
+
+// ── Tabs ──────────────────────────────────────────────────────────────────────
+const tabBtns   = document.querySelectorAll('.tab');
+const tabPanels = document.querySelectorAll('.tab-panel');
+
+tabBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const tabId = btn.dataset.tab;
+    tabBtns.forEach(b => b.classList.remove('active'));
+    tabPanels.forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(`tab-${tabId}`).classList.add('active');
+    if (tabId === 'calendario') renderCalendar();
+    if (tabId === 'contenido')  loadContenido();
+    if (tabId === 'destacados') loadDestacados();
+  });
+});
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+async function init() {
+  try {
+    me = await api.auth.me();
+    document.getElementById('userBadge').textContent = me.nombre || me.email;
+  } catch { clearSession(); location.href = '/app/login/'; return; }
+
+  try {
+    planData = await api.planes.miPlan();
+    canSchedule = !!planData?.features?.marketing_avanzado;
+    // Hide scheduling option if not available
+    if (!canSchedule) {
+      document.getElementById('hintProgramada').style.display = '';
+    }
+  } catch { /* no plan yet */ }
+
+  loadProductos();
+  loadStats();
+  loadCampanas();
+}
+
+// ── Stats bar ─────────────────────────────────────────────────────────────────
+async function loadStats() {
+  try {
+    const s = await api.marketing.stats();
+    currentStats = s;
+    document.getElementById('statTotal').textContent       = s.campanas_total;
+    document.getElementById('statActivas').textContent     = s.campanas_activas;
+    document.getElementById('statProgramadas').textContent = s.campanas_programadas;
+    document.getElementById('statPendContenido').textContent = s.contenido_pendiente;
+    document.getElementById('statDestacados').textContent  = `${s.destacados_activos}${s.destacados_max > 0 ? `/${s.destacados_max}` : ''}`;
+  } catch { /* non-critical */ }
+}
+
+// ── Load products (for selectors) ─────────────────────────────────────────────
+async function loadProductos() {
+  try {
+    const data = await api.catalogo.listarProductos({ estado: 'activo' });
+    allProductos = data.productos || data || [];
+    populateProductoSelect('campProductoId');
+    populateProductoSelect('iaProductoId');
+  } catch { allProductos = []; }
+}
+
+function populateProductoSelect(selectId) {
+  const sel = document.getElementById(selectId);
+  const firstOpt = sel.querySelector('option[value=""]');
+  sel.innerHTML = '';
+  if (firstOpt) sel.appendChild(firstOpt.cloneNode(true));
+  allProductos.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.id;
+    opt.textContent = p.nombre_es || p.nombre || p.id;
+    sel.appendChild(opt);
+  });
+}
+
+// ── CAMPAÑAS ──────────────────────────────────────────────────────────────────
+async function loadCampanas() {
+  const estado  = document.getElementById('filtroEstado').value;
+  const buscar  = document.getElementById('filtroBuscar').value;
+  const list    = document.getElementById('campanasList');
+  list.innerHTML = '<div style="padding:32px;text-align:center;color:var(--muted)">Cargando...</div>';
+  try {
+    const params = {};
+    if (estado) params.estado = estado;
+    if (buscar) params.buscar = buscar;
+    const campanas = await api.marketing.listarCampanas(params);
+    renderCampanas(campanas);
+  } catch (err) {
+    if (err.status === 403 && err.data?.upgrade_required) {
+      list.innerHTML = `<div class="upgrade-banner"><div style="font-size:32px">📣</div><div><h3>Marketing no disponible</h3><p>Tu plan no incluye Marketing. <a href="/app/planes/">Actualiza tu plan</a> para acceder.</p></div></div>`;
+    } else {
+      list.innerHTML = `<div class="empty-state"><div class="es-icon">⚠️</div><p>${err.message || 'Error al cargar campañas'}</p></div>`;
+    }
+  }
+}
+
+function renderCampanas(campanas) {
+  const list = document.getElementById('campanasList');
+  if (!campanas.length) {
+    list.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="es-icon">📣</div><p>No hay campañas todavía.</p><button class="btn btn-primary" id="btnEmptyCampana">➕ Crear primera campaña</button></div>`;
+    document.getElementById('btnEmptyCampana')?.addEventListener('click', () => openCampanaModal());
+    return;
+  }
+
+  list.innerHTML = campanas.map(c => {
+    const imgHTML = c.imagen_url
+      ? `<img src="${c.imagen_url}" alt="" loading="lazy">`
+      : `<span style="font-size:40px">📣</span>`;
+    const badgeClass = `badge-${c.estado}`;
+    const estadoLabel = ESTADO_LABELS[c.estado] || c.estado;
+
+    const btnToggle = c.estado === 'activa'
+      ? `<button class="icon-btn" title="Pausar" data-action="pausar" data-id="${c.id}">⏸️</button>`
+      : c.estado === 'pausada'
+        ? `<button class="icon-btn" title="Reactivar" data-action="reactivar" data-id="${c.id}">▶️</button>`
+        : '';
+
+    return `
+    <div class="card">
+      <div class="card-img">
+        ${imgHTML}
+        <span class="status-badge ${badgeClass}">${estadoLabel}</span>
+      </div>
+      <div class="card-body">
+        <div class="card-title">${c.titulo}</div>
+        <div class="card-subtitle">${c.producto_nombre || 'Sin producto asociado'}</div>
+        <div class="card-meta">
+          <div class="meta-item">
+            <span class="meta-label">Inicio</span>
+            <span class="meta-value">${fmtDate(c.fecha_inicio)}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Fin</span>
+            <span class="meta-value">${fmtDate(c.fecha_fin)}</span>
+          </div>
+          ${c.descuento ? `<div class="meta-item"><span class="meta-label">Descuento</span><span class="meta-value">${c.descuento}</span></div>` : ''}
+        </div>
+      </div>
+      <div class="card-actions">
+        <button class="icon-btn" title="Editar"      data-action="editar"    data-id="${c.id}">✏️</button>
+        ${btnToggle}
+        <button class="icon-btn" title="Duplicar"    data-action="duplicar"  data-id="${c.id}">📋</button>
+        <button class="icon-btn" title="Rendimiento" data-action="stats"     data-id="${c.id}" data-titulo="${c.titulo.replace(/"/g,'&quot;')}">📊</button>
+        <button class="icon-btn" title="Eliminar"    data-action="eliminar"  data-id="${c.id}">🗑️</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  list.querySelectorAll('[data-action]').forEach(btn => {
+    btn.addEventListener('click', () => handleCampanaAction(btn.dataset.action, btn.dataset.id, btn.dataset.titulo));
+  });
+}
+
+async function handleCampanaAction(action, id, titulo) {
+  switch (action) {
+    case 'editar':
+      openCampanaModal(id);
+      break;
+    case 'pausar':
+      if (!confirm('¿Pausar esta campaña?')) return;
+      await changeCampanaEstado(id, 'pausada');
+      break;
+    case 'reactivar':
+      await changeCampanaEstado(id, 'activa');
+      break;
+    case 'duplicar':
+      try {
+        await api.marketing.duplicarCampana(id);
+        showAlert(document.getElementById('alertMain'), 'Campaña duplicada como borrador.', 'success');
+        loadCampanas(); loadStats();
+      } catch (err) { showAlert(document.getElementById('alertMain'), err.message); }
+      break;
+    case 'stats':
+      openStatsModal(id, titulo || 'Rendimiento');
+      break;
+    case 'eliminar':
+      if (!confirm('¿Eliminar esta campaña? Esta acción no se puede deshacer.')) return;
+      try {
+        await api.marketing.eliminarCampana(id);
+        showAlert(document.getElementById('alertMain'), 'Campaña eliminada.', 'success');
+        loadCampanas(); loadStats();
+      } catch (err) { showAlert(document.getElementById('alertMain'), err.message); }
+      break;
+  }
+}
+
+async function changeCampanaEstado(id, estado) {
+  try {
+    await api.marketing.cambiarEstadoCampana(id, estado);
+    loadCampanas(); loadStats();
+  } catch (err) { showAlert(document.getElementById('alertMain'), err.message); }
+}
+
+// ── CAMPAIGN MODAL ────────────────────────────────────────────────────────────
+function openCampanaModal(id = null) {
+  const alertEl = document.getElementById('alertCampana');
+  alertEl.className = 'alert';
+  document.getElementById('campanaId').value         = id || '';
+  document.getElementById('campTitulo').value        = '';
+  document.getElementById('campDescripcion').value   = '';
+  document.getElementById('campDescuento').value     = '';
+  document.getElementById('campProductoId').value    = '';
+  document.getElementById('campMultimediaId').value  = '';
+  document.getElementById('campFechaInicio').value   = '';
+  document.getElementById('campFechaFin').value      = '';
+  document.getElementById('campEstado').value        = 'borrador';
+  document.getElementById('campImgPreview').innerHTML = '📷';
+  document.getElementById('btnQuitarMedia').classList.add('hidden');
+  selectedMediaId = null; selectedMediaUrl = null;
+
+  const titulo = id ? 'Editar Campaña' : 'Crear Campaña';
+  document.getElementById('modalCampanaTitulo').textContent = titulo;
+  document.getElementById('btnGuardarCampana').textContent  = id ? 'Guardar cambios' : 'Crear Campaña';
+
+  if (id) {
+    api.marketing.obtenerCampana(id).then(c => {
+      document.getElementById('campTitulo').value       = c.titulo;
+      document.getElementById('campDescripcion').value  = c.descripcion || '';
+      document.getElementById('campDescuento').value    = c.descuento   || '';
+      document.getElementById('campProductoId').value   = c.producto_id || '';
+      document.getElementById('campFechaInicio').value  = c.fecha_inicio ? c.fecha_inicio.replace(' ', 'T').slice(0, 16) : '';
+      document.getElementById('campFechaFin').value     = c.fecha_fin    ? c.fecha_fin.replace(' ', 'T').slice(0, 16)    : '';
+      document.getElementById('campEstado').value       = c.estado;
+      if (c.multimedia_id) {
+        document.getElementById('campMultimediaId').value = c.multimedia_id;
+        selectedMediaId = c.multimedia_id;
+        if (c.imagen_url) {
+          const el = document.getElementById('campImgPreview');
+          el.innerHTML = `<img src="${c.imagen_url}" style="width:100%;height:100%;object-fit:cover">`;
+          document.getElementById('btnQuitarMedia').classList.remove('hidden');
+        }
+      }
+    }).catch(() => {});
+  }
+
+  openModal('modalCampana');
+}
+
+document.getElementById('btnNuevaCampana').addEventListener('click', () => openCampanaModal());
+
+document.getElementById('btnGuardarCampana').addEventListener('click', async () => {
+  const alertEl = document.getElementById('alertCampana');
+  const btn = document.getElementById('btnGuardarCampana');
+  const id = document.getElementById('campanaId').value;
+
+  const body = {
+    titulo:       document.getElementById('campTitulo').value.trim(),
+    descripcion:  document.getElementById('campDescripcion').value.trim() || null,
+    descuento:    document.getElementById('campDescuento').value.trim()   || null,
+    producto_id:  document.getElementById('campProductoId').value         || null,
+    multimedia_id:document.getElementById('campMultimediaId').value       || null,
+    fecha_inicio: document.getElementById('campFechaInicio').value        || null,
+    fecha_fin:    document.getElementById('campFechaFin').value           || null,
+    estado:       document.getElementById('campEstado').value,
+  };
+
+  if (!body.titulo) { showAlert(alertEl, 'El título es obligatorio'); return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Guardando…';
+  try {
+    if (id) {
+      await api.marketing.editarCampana(id, body);
+    } else {
+      await api.marketing.crearCampana(body);
+    }
+    closeModal('modalCampana');
+    showAlert(document.getElementById('alertMain'), id ? 'Campaña actualizada.' : 'Campaña creada.', 'success');
+    loadCampanas(); loadStats();
+  } catch (err) {
+    showAlert(alertEl, err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = id ? 'Guardar cambios' : 'Crear Campaña';
+  }
+});
+
+// Filters
+let filterDebounce;
+document.getElementById('filtroEstado').addEventListener('change', () => loadCampanas());
+document.getElementById('filtroBuscar').addEventListener('input', () => {
+  clearTimeout(filterDebounce);
+  filterDebounce = setTimeout(loadCampanas, 350);
+});
+document.getElementById('btnRefreshCampanas').addEventListener('click', () => loadCampanas());
+
+// ── MEDIA PICKER ──────────────────────────────────────────────────────────────
+async function openMediaPicker() {
+  document.getElementById('btnConfirmarMedia').disabled = true;
+  selectedMediaId = null; selectedMediaUrl = null;
+  const grid = document.getElementById('mediaGrid');
+  grid.innerHTML = '<div style="padding:32px;text-align:center;color:var(--muted)">Cargando...</div>';
+  openModal('modalMedia');
+
+  try {
+    const data = await api.multimedia.listar({ tipo: 'imagen' });
+    allMedia = data.items || data || [];
+    if (!allMedia.length) {
+      grid.innerHTML = '<div style="padding:32px;text-align:center;color:var(--muted)">No hay imágenes en tu biblioteca multimedia.</div>';
+      return;
+    }
+    grid.innerHTML = allMedia.map(m => `
+      <div class="media-item" data-id="${m.id}" data-url="/uploads/multimedia/${m.filename}" title="${m.nombre}">
+        <img src="/uploads/multimedia/${m.filename}" alt="${m.nombre}" loading="lazy">
+      </div>`).join('');
+
+    grid.querySelectorAll('.media-item').forEach(item => {
+      item.addEventListener('click', () => {
+        grid.querySelectorAll('.media-item').forEach(i => i.classList.remove('selected'));
+        item.classList.add('selected');
+        selectedMediaId  = item.dataset.id;
+        selectedMediaUrl = item.dataset.url;
+        document.getElementById('btnConfirmarMedia').disabled = false;
+      });
+    });
+  } catch { grid.innerHTML = '<div style="padding:32px;text-align:center;color:var(--muted)">Error al cargar multimedia.</div>'; }
+}
+
+document.getElementById('btnSeleccionarMedia').addEventListener('click', openMediaPicker);
+
+document.getElementById('btnConfirmarMedia').addEventListener('click', () => {
+  if (!selectedMediaId) return;
+  document.getElementById('campMultimediaId').value = selectedMediaId;
+  const prev = document.getElementById('campImgPreview');
+  prev.innerHTML = `<img src="${selectedMediaUrl}" style="width:100%;height:100%;object-fit:cover">`;
+  document.getElementById('btnQuitarMedia').classList.remove('hidden');
+  closeModal('modalMedia');
+});
+
+document.getElementById('btnQuitarMedia').addEventListener('click', () => {
+  document.getElementById('campMultimediaId').value = '';
+  document.getElementById('campImgPreview').innerHTML = '📷';
+  document.getElementById('btnQuitarMedia').classList.add('hidden');
+  selectedMediaId = null; selectedMediaUrl = null;
+});
+
+// ── STATS MODAL ───────────────────────────────────────────────────────────────
+async function openStatsModal(id, titulo) {
+  document.getElementById('modalStatsTitulo').textContent = `📊 ${titulo}`;
+  document.getElementById('svVistas').textContent    = '…';
+  document.getElementById('svWa').textContent        = '…';
+  document.getElementById('svSesiones').textContent  = '…';
+  openModal('modalStats');
+  try {
+    const s = await api.marketing.statsCampana(id);
+    document.getElementById('svVistas').textContent   = s.vistas.toLocaleString();
+    document.getElementById('svWa').textContent       = s.clics_whatsapp.toLocaleString();
+    document.getElementById('svSesiones').textContent = s.sesiones.toLocaleString();
+  } catch { document.getElementById('svVistas').textContent = 'N/D'; }
+}
+
+// ── CALENDARIO ────────────────────────────────────────────────────────────────
+async function renderCalendar() {
+  const upgradeEl = document.getElementById('calUpgradeBanner');
+  const calContent = document.getElementById('calContent');
+
+  const MONTH_NAMES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  document.getElementById('calTitulo').textContent = `${MONTH_NAMES[calMonth - 1]} ${calYear}`;
+
+  try {
+    const data = await api.marketing.calendario(calYear, calMonth);
+    upgradeEl.classList.add('hidden');
+    calContent.style.display = '';
+    buildCalGrid(calYear, calMonth, data.campanas || []);
+  } catch (err) {
+    if (err.status === 403 && err.data?.upgrade_required) {
+      upgradeEl.classList.remove('hidden');
+      calContent.style.display = 'none';
+    }
+  }
+}
+
+function buildCalGrid(year, month, campanas) {
+  const grid     = document.getElementById('calGrid');
+  const dayNames = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+  const today    = new Date();
+  const firstDay = new Date(year, month - 1, 1);
+  const lastDay  = new Date(year, month, 0);
+
+  // Day of week (Mon=0..Sun=6)
+  let startDow = firstDay.getDay() - 1;
+  if (startDow < 0) startDow = 6;
+
+  let html = dayNames.map(d => `<div class="cal-day-hdr">${d}</div>`).join('');
+
+  // Prev month padding
+  const prevLastDay = new Date(year, month - 1, 0);
+  for (let i = startDow - 1; i >= 0; i--) {
+    html += `<div class="cal-day other"><div class="cal-day-num">${prevLastDay.getDate() - i}</div></div>`;
+  }
+
+  // Current month days
+  for (let d = 1; d <= lastDay.getDate(); d++) {
+    const dateStr = `${year}-${String(month).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday = today.getFullYear() === year && today.getMonth() + 1 === month && today.getDate() === d;
+
+    const dayEvents = campanas.filter(c => {
+      const start = c.fecha_inicio ? c.fecha_inicio.slice(0, 10) : null;
+      const end   = c.fecha_fin    ? c.fecha_fin.slice(0, 10)    : null;
+      if (!start) return false;
+      return dateStr >= start && (!end || dateStr <= end);
+    });
+
+    const eventsHtml = dayEvents.slice(0, 3).map(c =>
+      `<div class="cal-event cal-event-${c.estado}" title="${c.titulo}">${c.titulo.slice(0, 20)}</div>`
+    ).join('');
+
+    html += `<div class="cal-day${isToday ? ' today' : ''}"><div class="cal-day-num">${d}</div>${eventsHtml}</div>`;
+  }
+
+  // Next month padding
+  const total = startDow + lastDay.getDate();
+  const trailing = (7 - (total % 7)) % 7;
+  for (let d = 1; d <= trailing; d++) {
+    html += `<div class="cal-day other"><div class="cal-day-num">${d}</div></div>`;
+  }
+
+  grid.innerHTML = html;
+}
+
+document.getElementById('calPrev').addEventListener('click', () => {
+  calMonth--;
+  if (calMonth < 1) { calMonth = 12; calYear--; }
+  const MONTH_NAMES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  document.getElementById('calTitulo').textContent = `${MONTH_NAMES[calMonth - 1]} ${calYear}`;
+  renderCalendar();
+});
+document.getElementById('calNext').addEventListener('click', () => {
+  calMonth++;
+  if (calMonth > 12) { calMonth = 1; calYear++; }
+  const MONTH_NAMES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  document.getElementById('calTitulo').textContent = `${MONTH_NAMES[calMonth - 1]} ${calYear}`;
+  renderCalendar();
+});
+document.getElementById('calHoy').addEventListener('click', () => {
+  calYear  = new Date().getFullYear();
+  calMonth = new Date().getMonth() + 1;
+  renderCalendar();
+});
+
+// ── CONTENIDO ─────────────────────────────────────────────────────────────────
+async function loadContenido() {
+  const estado = document.getElementById('filtroContenidoEstado').value;
+  const tipo   = document.getElementById('filtroContenidoTipo').value;
+  const list   = document.getElementById('contenidoList');
+  list.innerHTML = '<div style="padding:32px;text-align:center;color:var(--muted)">Cargando...</div>';
+  try {
+    const params = {};
+    if (estado) params.estado = estado;
+    if (tipo)   params.tipo   = tipo;
+    const items = await api.marketing.listarContenido(params);
+    renderContenido(items);
+  } catch (err) {
+    list.innerHTML = `<div class="empty-state"><div class="es-icon">⚠️</div><p>${err.message}</p></div>`;
+  }
+}
+
+function renderContenido(items) {
+  const list = document.getElementById('contenidoList');
+  if (!items.length) {
+    list.innerHTML = `<div class="empty-state"><div class="es-icon">📝</div><p>No hay contenido generado aún.</p><button class="btn btn-accent" id="btnEmptyIa">✨ Generar con IA</button></div>`;
+    document.getElementById('btnEmptyIa')?.addEventListener('click', () => openIaModal());
+    return;
+  }
+
+  list.innerHTML = items.map(c => {
+    const iconClass = `content-icon-${c.estado}`;
+    const icon = CONTENT_ICONS[c.estado] || '📝';
+    const tipoLabel = TIPO_LABELS[c.tipo] || c.tipo;
+    const displayTitle = c.titulo || `${tipoLabel} · ${c.producto_nombre || 'Sin producto'}`;
+
+    let actionBtns = '';
+    if (c.estado === 'pendiente') {
+      actionBtns = `
+        <button class="btn btn-primary btn-sm" data-action="aprobar" data-id="${c.id}">✅ Aprobar</button>
+        <button class="btn btn-outline btn-sm" data-action="editar-modal" data-id="${c.id}" data-titulo="${(c.titulo || '').replace(/"/g,'&quot;')}" data-contenido="${c.contenido.replace(/"/g,'&quot;')}">✏️ Editar</button>
+        <button class="btn btn-outline btn-sm" data-action="descartar" data-id="${c.id}">❌ Descartar</button>`;
+    } else if (c.estado === 'aprobado') {
+      actionBtns = `
+        <button class="btn btn-accent btn-sm"  data-action="publicar"  data-id="${c.id}">🚀 Publicar</button>
+        <button class="btn btn-outline btn-sm" data-action="editar-modal" data-id="${c.id}" data-titulo="${(c.titulo || '').replace(/"/g,'&quot;')}" data-contenido="${c.contenido.replace(/"/g,'&quot;')}">✏️ Editar</button>
+        <button class="btn btn-outline btn-sm" data-action="copiar"    data-id="${c.id}" data-texto="${c.contenido.replace(/"/g,'&quot;')}">📋 Copiar</button>`;
+    } else if (c.estado === 'publicado') {
+      actionBtns = `
+        <button class="btn btn-outline btn-sm" data-action="copiar" data-id="${c.id}" data-texto="${c.contenido.replace(/"/g,'&quot;')}">📋 Copiar</button>`;
+    } else if (c.estado === 'borrador') {
+      actionBtns = `
+        <button class="btn btn-primary btn-sm" data-action="aprobar" data-id="${c.id}">✅ Aprobar</button>
+        <button class="btn btn-outline btn-sm" data-action="editar-modal" data-id="${c.id}" data-titulo="${(c.titulo || '').replace(/"/g,'&quot;')}" data-contenido="${c.contenido.replace(/"/g,'&quot;')}">✏️ Editar</button>
+        <button class="btn btn-outline btn-sm" data-action="eliminar-cont" data-id="${c.id}">🗑️</button>`;
+    }
+
+    return `
+    <div class="content-card">
+      <div class="content-icon ${iconClass}">${icon}</div>
+      <div class="content-body">
+        <div class="content-top">
+          <span class="content-title">${displayTitle}</span>
+          <span class="content-status cs-${c.estado}">${c.estado.replace('_',' ')}</span>
+        </div>
+        <div class="content-text">${c.contenido}</div>
+        <div class="content-meta">
+          <span>${c.fuente === 'ia' ? '🤖 IA' : '✏️ Manual'}</span>
+          <span>${tipoLabel}</span>
+          ${c.producto_nombre ? `<span>📦 ${c.producto_nombre}</span>` : ''}
+          <span>🕐 ${fmtDatetime(c.created_at)}</span>
+          ${c.autor_nombre ? `<span>👤 ${c.autor_nombre}</span>` : ''}
+        </div>
+        <div class="content-actions">${actionBtns}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  list.querySelectorAll('[data-action]').forEach(btn => {
+    btn.addEventListener('click', () => handleContenidoAction(btn));
+  });
+}
+
+async function handleContenidoAction(btn) {
+  const { action, id, texto, titulo, contenido } = btn.dataset;
+  switch (action) {
+    case 'aprobar':
+      try { await api.marketing.estadoContenido(id, 'aprobado'); loadContenido(); loadStats(); } catch (e) { showAlert(document.getElementById('alertMain'), e.message); }
+      break;
+    case 'descartar':
+      if (!confirm('¿Descartar este contenido?')) return;
+      try { await api.marketing.estadoContenido(id, 'descartado'); loadContenido(); loadStats(); } catch (e) { showAlert(document.getElementById('alertMain'), e.message); }
+      break;
+    case 'publicar':
+      if (!confirm('¿Marcar este contenido como publicado?')) return;
+      try { await api.marketing.estadoContenido(id, 'publicado'); loadContenido(); } catch (e) { showAlert(document.getElementById('alertMain'), e.message); }
+      break;
+    case 'copiar':
+      try { await navigator.clipboard.writeText(texto); showAlert(document.getElementById('alertMain'), 'Copiado al portapapeles.', 'success'); } catch { /* fallback */ }
+      break;
+    case 'editar-modal':
+      document.getElementById('editContenidoId').value      = id;
+      document.getElementById('editContenidoTitulo').value  = titulo || '';
+      document.getElementById('editContenidoTexto').value   = contenido || '';
+      document.getElementById('alertEditContenido').className = 'alert';
+      openModal('modalEditContenido');
+      break;
+    case 'eliminar-cont':
+      if (!confirm('¿Eliminar este contenido?')) return;
+      try { await api.marketing.eliminarContenido(id); loadContenido(); loadStats(); } catch (e) { showAlert(document.getElementById('alertMain'), e.message); }
+      break;
+  }
+}
+
+document.getElementById('btnGuardarEditContenido').addEventListener('click', async () => {
+  const id       = document.getElementById('editContenidoId').value;
+  const titulo   = document.getElementById('editContenidoTitulo').value.trim() || null;
+  const contenido = document.getElementById('editContenidoTexto').value.trim();
+  const alertEl  = document.getElementById('alertEditContenido');
+  if (!contenido) { showAlert(alertEl, 'El contenido no puede estar vacío'); return; }
+  try {
+    await api.marketing.editarContenido(id, { titulo, contenido });
+    closeModal('modalEditContenido');
+    loadContenido();
+    showAlert(document.getElementById('alertMain'), 'Contenido actualizado.', 'success');
+  } catch (err) { showAlert(alertEl, err.message); }
+});
+
+document.getElementById('filtroContenidoEstado').addEventListener('change', () => loadContenido());
+document.getElementById('filtroContenidoTipo').addEventListener('change', () => loadContenido());
+document.getElementById('btnRefreshContenido').addEventListener('click', () => loadContenido());
+
+// ── IA MODAL ──────────────────────────────────────────────────────────────────
+function openIaModal() {
+  document.getElementById('alertIa').className = 'alert';
+  document.getElementById('iaProductoId').value  = '';
+  document.getElementById('iaTipo').value        = 'instagram';
+  document.getElementById('iaContexto').value    = '';
+  document.getElementById('iaFormPanel').classList.remove('hidden');
+  document.getElementById('iaVariantesPanel').classList.add('hidden');
+  document.getElementById('btnGuardarContenidoIa').classList.add('hidden');
+  iaHistorialId = null;
+  openModal('modalIa');
+}
+
+document.getElementById('btnGenerarIa').addEventListener('click', openIaModal);
+
+document.getElementById('btnGenerarContenido').addEventListener('click', async () => {
+  const productoId = document.getElementById('iaProductoId').value;
+  const tipo       = document.getElementById('iaTipo').value;
+  const contexto   = document.getElementById('iaContexto').value.trim();
+  const alertEl    = document.getElementById('alertIa');
+  const btn        = document.getElementById('btnGenerarContenido');
+
+  if (!productoId) { showAlert(alertEl, 'Selecciona un producto'); return; }
+
+  btn.disabled = true; btn.textContent = 'Generando…';
+  try {
+    // Consume M09 api as-is — no duplication of IA logic
+    const result = await api.ia.generarDescripcion({
+      producto_id: productoId,
+      tono: tipo,
+      contexto: contexto || undefined,
+    });
+
+    iaHistorialId = result.historial_id || null;
+
+    const variantesEl = document.getElementById('iaVariantes');
+    const variantes = result.variantes || (result.texto_generado ? [result.texto_generado] : []);
+
+    if (!variantes.length) { showAlert(alertEl, 'No se generaron variantes'); btn.disabled = false; btn.textContent = '✨ Generar con IA'; return; }
+
+    variantesEl.innerHTML = variantes.map((v, i) =>
+      `<div class="ai-variant" data-idx="${i}">${v}</div>`
+    ).join('');
+
+    // Select first by default
+    variantesEl.querySelector('.ai-variant').classList.add('selected');
+    document.getElementById('iaContenidoEdit').value = variantes[0];
+
+    variantesEl.querySelectorAll('.ai-variant').forEach(v => {
+      v.addEventListener('click', () => {
+        variantesEl.querySelectorAll('.ai-variant').forEach(x => x.classList.remove('selected'));
+        v.classList.add('selected');
+        document.getElementById('iaContenidoEdit').value = v.textContent;
+      });
+    });
+
+    document.getElementById('iaFormPanel').classList.add('hidden');
+    document.getElementById('iaVariantesPanel').classList.remove('hidden');
+    document.getElementById('btnGuardarContenidoIa').classList.remove('hidden');
+  } catch (err) {
+    showAlert(alertEl, err.message);
+  } finally {
+    btn.disabled = false; btn.textContent = '✨ Generar con IA';
+  }
+});
+
+document.getElementById('btnIaVolver').addEventListener('click', () => {
+  document.getElementById('iaFormPanel').classList.remove('hidden');
+  document.getElementById('iaVariantesPanel').classList.add('hidden');
+  document.getElementById('btnGuardarContenidoIa').classList.add('hidden');
+});
+
+document.getElementById('btnGuardarContenidoIa').addEventListener('click', async () => {
+  const alertEl    = document.getElementById('alertIa');
+  const contenido  = document.getElementById('iaContenidoEdit').value.trim();
+  const tipo       = document.getElementById('iaTipo').value;
+  const productoId = document.getElementById('iaProductoId').value;
+  const btn        = document.getElementById('btnGuardarContenidoIa');
+
+  if (!contenido) { showAlert(alertEl, 'El contenido no puede estar vacío'); return; }
+
+  btn.disabled = true; btn.textContent = 'Guardando…';
+  try {
+    await api.marketing.crearContenido({
+      tipo,
+      contenido,
+      fuente:         'ia',
+      producto_id:    productoId || null,
+      ia_historial_id: iaHistorialId,
+    });
+    closeModal('modalIa');
+    showAlert(document.getElementById('alertMain'), 'Contenido guardado como pendiente. Revísalo en la pestaña Contenido Generado.', 'success');
+    loadStats();
+  } catch (err) {
+    showAlert(alertEl, err.message);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Guardar como Pendiente';
+  }
+});
+
+// ── DESTACADOS ────────────────────────────────────────────────────────────────
+async function loadDestacados() {
+  const list = document.getElementById('destacadosList');
+  list.innerHTML = '<div style="padding:32px;text-align:center;color:var(--muted)">Cargando...</div>';
+  try {
+    const [items, stats] = await Promise.all([
+      api.marketing.listarDestacados(),
+      api.marketing.stats(),
+    ]);
+    const maxDest = stats.destacados_max;
+    const count   = items.length;
+
+    // Plan limit bar
+    const limitText = document.getElementById('planLimitText');
+    const limitFill = document.getElementById('planLimitFill');
+    if (maxDest === 0) {
+      limitText.textContent = `${count} productos destacados (ilimitados en tu plan)`;
+      limitFill.style.width = '10%';
+    } else {
+      limitText.textContent = `${count} de ${maxDest} productos destacados`;
+      limitFill.style.width = `${Math.min(100, (count / maxDest) * 100)}%`;
+      if (count >= maxDest) {
+        limitFill.style.background = 'var(--warn)';
+        document.getElementById('btnAgregarDestacado').disabled = true;
+      }
+    }
+
+    if (!items.length) {
+      list.innerHTML = `<div class="empty-slot" style="grid-column:1/-1"><div class="empty-icon">⭐</div><div class="empty-text">No tienes productos destacados.<br>Agrega productos para que aparezcan en posiciones prioritarias de tu menú.</div><button class="btn btn-primary" id="btnEmptyDestacado">Agregar producto destacado</button></div>`;
+      document.getElementById('btnEmptyDestacado')?.addEventListener('click', openProdPicker);
+      return;
+    }
+
+    list.innerHTML = items.map(p => {
+      const imgHTML = p.imagen_url
+        ? `<img src="${p.imagen_url}" alt="" loading="lazy">`
+        : `<span style="font-size:32px">🍽️</span>`;
+      const etiqLabel = ETIQUETA_LABELS[p.etiqueta] || p.etiqueta;
+      return `
+      <div class="feat-card">
+        <div class="feat-badge">${etiqLabel}</div>
+        <div class="feat-img">${imgHTML}</div>
+        <div class="feat-body">
+          <div class="feat-name">${p.producto_nombre || p.producto_id}</div>
+          <div class="feat-cat">${p.categoria_nombre || ''}</div>
+          <div class="feat-actions">
+            <button class="icon-btn" title="Quitar destacado" data-action="quitar-dest" data-id="${p.id}" style="color:var(--danger)">⭐</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+
+    if (maxDest === 0 || count < maxDest) {
+      list.innerHTML += `<div class="empty-slot"><div class="empty-icon">⭐</div><div class="empty-text">Agrega más productos destacados</div><button class="btn btn-outline btn-sm" id="btnAddDestFromGrid">+ Agregar</button></div>`;
+      document.getElementById('btnAddDestFromGrid')?.addEventListener('click', openProdPicker);
+    }
+
+    list.querySelectorAll('[data-action="quitar-dest"]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!confirm('¿Quitar este producto de destacados?')) return;
+        try { await api.marketing.quitarDestacado(btn.dataset.id); loadDestacados(); loadStats(); }
+        catch (e) { showAlert(document.getElementById('alertMain'), e.message); }
+      });
+    });
+
+  } catch (err) {
+    list.innerHTML = `<div class="empty-state"><div class="es-icon">⚠️</div><p>${err.message}</p></div>`;
+  }
+}
+
+document.getElementById('btnAgregarDestacado').addEventListener('click', openProdPicker);
+
+async function openProdPicker() {
+  const list = document.getElementById('prodPickerList');
+  selectedProdId = null;
+  document.getElementById('btnConfirmarDestacado').disabled = true;
+  list.innerHTML = '<div style="padding:24px;text-align:center;color:var(--muted)">Cargando...</div>';
+  openModal('modalProdPicker');
+
+  try {
+    // Get currently featured product_ids to exclude
+    const [prods, featured] = await Promise.all([
+      api.catalogo.listarProductos({ estado: 'activo' }),
+      api.marketing.listarDestacados(),
+    ]);
+    const featuredIds = new Set(featured.map(f => f.producto_id));
+    const available = (prods.productos || prods).filter(p => !featuredIds.has(p.id));
+
+    if (!available.length) {
+      list.innerHTML = '<div style="padding:24px;text-align:center;color:var(--muted)">Todos los productos activos ya están destacados.</div>';
+      return;
+    }
+
+    list.innerHTML = available.map(p => {
+      const imgHTML = p.imagen_url
+        ? `<img src="${p.imagen_url}" style="width:100%;height:100%;object-fit:cover" alt="">`
+        : `🍽️`;
+      return `
+      <div class="prod-picker-item" data-id="${p.id}">
+        <div class="prod-picker-img">${imgHTML}</div>
+        <div>
+          <div class="prod-picker-name">${p.nombre_es || p.nombre || p.id}</div>
+          <div class="prod-picker-cat">${p.categoria_nombre || ''}</div>
+        </div>
+      </div>`;
+    }).join('');
+
+    list.querySelectorAll('.prod-picker-item').forEach(item => {
+      item.addEventListener('click', () => {
+        list.querySelectorAll('.prod-picker-item').forEach(i => i.classList.remove('selected'));
+        item.classList.add('selected');
+        selectedProdId = item.dataset.id;
+        document.getElementById('btnConfirmarDestacado').disabled = false;
+      });
+    });
+  } catch { list.innerHTML = '<div style="padding:24px;text-align:center;color:var(--muted)">Error al cargar productos.</div>'; }
+}
+
+document.getElementById('btnConfirmarDestacado').addEventListener('click', async () => {
+  if (!selectedProdId) return;
+  const etiqueta = document.getElementById('destEtiqueta').value;
+  const btn = document.getElementById('btnConfirmarDestacado');
+  btn.disabled = true; btn.textContent = 'Guardando…';
+  try {
+    await api.marketing.agregarDestacado({ producto_id: selectedProdId, etiqueta });
+    closeModal('modalProdPicker');
+    showAlert(document.getElementById('alertMain'), 'Producto destacado agregado.', 'success');
+    loadDestacados(); loadStats();
+  } catch (err) {
+    showAlert(document.getElementById('alertMain'), err.message);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Destacar producto';
+  }
+});
+
+// ── Start ─────────────────────────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>
