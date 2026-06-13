@@ -17,51 +17,6 @@ const db = new Database(DB_PATH);
 const schema = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8');
 db.exec(schema);
 
-// Incremental migrations — safe to run on existing databases
-const tableMigrations = {
-  sesiones: [
-    `ALTER TABLE sesiones ADD COLUMN impersonating_empresa_id TEXT`,
-  ],
-  planes: [
-    // M09: monthly AI generation quota (0 = unlimited)
-    `ALTER TABLE planes ADD COLUMN ia_generaciones_max INTEGER NOT NULL DEFAULT 100`,
-  ],
-  empresas: [
-    `ALTER TABLE empresas ADD COLUMN plan_id TEXT REFERENCES planes(id)`,
-    `ALTER TABLE empresas ADD COLUMN fecha_activacion_plan DATETIME`,
-    `ALTER TABLE empresas ADD COLUMN fecha_renovacion_plan DATETIME`,
-    `ALTER TABLE empresas ADD COLUMN estado_suscripcion TEXT DEFAULT 'activa'`,
-    // M03
-    `ALTER TABLE empresas ADD COLUMN ciudad TEXT`,
-    `ALTER TABLE empresas ADD COLUMN notas_soporte TEXT`,
-    // M04: visual identity
-    `ALTER TABLE empresas ADD COLUMN logo_url TEXT`,
-    `ALTER TABLE empresas ADD COLUMN color_principal TEXT DEFAULT '#ffd21e'`,
-    `ALTER TABLE empresas ADD COLUMN color_secundario TEXT DEFAULT '#0d1117'`,
-    `ALTER TABLE empresas ADD COLUMN color_fondo TEXT DEFAULT '#fafafa'`,
-    `ALTER TABLE empresas ADD COLUMN color_texto TEXT DEFAULT '#0d1117'`,
-    `ALTER TABLE empresas ADD COLUMN color_botones TEXT DEFAULT '#ffd21e'`,
-    `ALTER TABLE empresas ADD COLUMN color_promociones TEXT DEFAULT '#dc2626'`,
-    `ALTER TABLE empresas ADD COLUMN identidad_updated_at DATETIME`,
-    // M10: WhatsApp contact number for public menu
-    `ALTER TABLE empresas ADD COLUMN whatsapp TEXT`,
-  ],
-  users: [
-    // M04: intra-empresa role (dueno|admin|editor|visualizador)
-    `ALTER TABLE users ADD COLUMN rol_empresa TEXT DEFAULT 'visualizador'`,
-  ],
-};
-
-for (const [table, sqls] of Object.entries(tableMigrations)) {
-  const existingCols = db.prepare(`PRAGMA table_info(${table})`).all().map(c => c.name);
-  for (const sql of sqls) {
-    const match = sql.match(/ADD COLUMN (\w+)/i);
-    if (match && !existingCols.includes(match[1])) {
-      db.exec(sql);
-    }
-  }
-}
-
 // M05: create planes + historial_pagos tables if not exist
 db.exec(`
   CREATE TABLE IF NOT EXISTS planes (
@@ -119,13 +74,6 @@ db.exec(`
   );
   CREATE INDEX IF NOT EXISTS idx_tokens_inv_empresa ON tokens_invitacion(empresa_id);
 `);
-
-// M04: back-fill rol_empresa for existing users
-// admin_negocio → dueno; colaborador defaults stay as 'visualizador'
-db.prepare(`
-  UPDATE users SET rol_empresa = 'dueno'
-  WHERE role = 'admin_negocio' AND (rol_empresa IS NULL OR rol_empresa = 'visualizador')
-`).run();
 
 // Seed base plans
 const seedPlanes = db.prepare(`
@@ -347,9 +295,6 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_eventos_recurso ON menu_eventos(empresa_id, recurso_id);
 `);
 
-// M09: set unlimited generations for Premium plan
-db.prepare(`UPDATE planes SET ia_generaciones_max = 0 WHERE id = 'premium'`).run();
-
 // M09: ai history table
 db.exec(`
   CREATE TABLE IF NOT EXISTS ia_historial (
@@ -429,5 +374,56 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_alertas_dest  ON alertas_sistema(destinatario, leida);
   CREATE INDEX IF NOT EXISTS idx_alertas_emp   ON alertas_sistema(empresa_id);
 `);
+
+// Incremental migrations — must run AFTER all CREATE TABLE IF NOT EXISTS blocks
+// so they work correctly on both fresh and existing databases
+const tableMigrations = {
+  sesiones: [
+    `ALTER TABLE sesiones ADD COLUMN impersonating_empresa_id TEXT`,
+  ],
+  planes: [
+    // M09: monthly AI generation quota (0 = unlimited)
+    `ALTER TABLE planes ADD COLUMN ia_generaciones_max INTEGER NOT NULL DEFAULT 100`,
+  ],
+  empresas: [
+    `ALTER TABLE empresas ADD COLUMN plan_id TEXT REFERENCES planes(id)`,
+    `ALTER TABLE empresas ADD COLUMN fecha_activacion_plan DATETIME`,
+    `ALTER TABLE empresas ADD COLUMN fecha_renovacion_plan DATETIME`,
+    `ALTER TABLE empresas ADD COLUMN estado_suscripcion TEXT DEFAULT 'activa'`,
+    `ALTER TABLE empresas ADD COLUMN ciudad TEXT`,
+    `ALTER TABLE empresas ADD COLUMN notas_soporte TEXT`,
+    `ALTER TABLE empresas ADD COLUMN logo_url TEXT`,
+    `ALTER TABLE empresas ADD COLUMN color_principal TEXT DEFAULT '#ffd21e'`,
+    `ALTER TABLE empresas ADD COLUMN color_secundario TEXT DEFAULT '#0d1117'`,
+    `ALTER TABLE empresas ADD COLUMN color_fondo TEXT DEFAULT '#fafafa'`,
+    `ALTER TABLE empresas ADD COLUMN color_texto TEXT DEFAULT '#0d1117'`,
+    `ALTER TABLE empresas ADD COLUMN color_botones TEXT DEFAULT '#ffd21e'`,
+    `ALTER TABLE empresas ADD COLUMN color_promociones TEXT DEFAULT '#dc2626'`,
+    `ALTER TABLE empresas ADD COLUMN identidad_updated_at DATETIME`,
+    `ALTER TABLE empresas ADD COLUMN whatsapp TEXT`,
+  ],
+  users: [
+    `ALTER TABLE users ADD COLUMN rol_empresa TEXT DEFAULT 'visualizador'`,
+  ],
+};
+
+for (const [table, sqls] of Object.entries(tableMigrations)) {
+  const existingCols = db.prepare(`PRAGMA table_info(${table})`).all().map(c => c.name);
+  for (const sql of sqls) {
+    const match = sql.match(/ADD COLUMN (\w+)/i);
+    if (match && !existingCols.includes(match[1])) {
+      db.exec(sql);
+    }
+  }
+}
+
+// M09: set unlimited generations for Premium plan (after ia_generaciones_max column exists)
+db.prepare(`UPDATE planes SET ia_generaciones_max = 0 WHERE id = 'premium'`).run();
+
+// M04: back-fill rol_empresa for existing users
+db.prepare(`
+  UPDATE users SET rol_empresa = 'dueno'
+  WHERE role = 'admin_negocio' AND (rol_empresa IS NULL OR rol_empresa = 'visualizador')
+`).run();
 
 module.exports = db;
