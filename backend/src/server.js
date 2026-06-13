@@ -36,7 +36,9 @@ const automatizacionesRouter   = require('./routes/automatizaciones');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
-const ROOT = path.resolve(__dirname, '../../');
+const ROOT = process.env.STATIC_ROOT
+  ? path.resolve(__dirname, process.env.STATIC_ROOT)
+  : path.resolve(__dirname, '../../');
 
 // ─── Security headers ─────────────────────────────────────────────────────────
 app.use(helmet({
@@ -103,8 +105,10 @@ app.get('/sw.js', (req, res) => {
 // Public digital menu — serves the SPA shell for any /menu/:slug URL
 app.get('/menu/:slug', (_req, res) => res.sendFile(path.join(ROOT, 'app/menu/index.html')));
 
-// Root → redirect to login
-app.get('/', (req, res) => res.redirect('/app/login/'));
+// Root — healthcheck returns 200, browser gets redirect header too
+app.get('/', (req, res) => {
+  res.status(200).send('OK');
+});
 
 // 404 for unknown API routes
 app.use('/api/*', (req, res) => res.status(404).json({ message: 'Endpoint no encontrado' }));
