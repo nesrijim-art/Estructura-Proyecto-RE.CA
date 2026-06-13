@@ -4,8 +4,8 @@ const express = require('express');
 const { v4: uuidv4 } = require('uuid');
 const db = require('../db/database');
 const { requireAuth, requireRole } = require('../middleware/auth');
-const { requireEmpresaRole } = require('../middleware/empresaRole');
-const { requireFeature } = require('../middleware/features');
+const { requireEmpresaRole } = require('../middleware/requireEmpresaRole');
+const { requireFeature } = require('../middleware/requireFeature');
 const { logHistorial } = require('../scheduler');
 
 const router = express.Router();
